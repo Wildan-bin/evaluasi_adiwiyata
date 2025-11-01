@@ -1,17 +1,80 @@
 <script setup>
 import { Link, router } from '@inertiajs/vue3';
 import { 
-    LogOut, 
-    Settings, 
-    Home, 
-    Receipt, 
-    Wallet, 
-    BarChart3, 
-    Menu, 
-    X,
-    ChevronDown,
-    User
-} from 'lucide-vue-next';
+    // 🔹 Navigasi & Umum
+    Home,           // Halaman utama
+    Menu,           // Tombol sidebar toggle / menu navigasi
+    X,              // Tutup / hapus / close modal
+    ChevronDown,    // Panah dropdown
+    ChevronLeft,    // Navigasi kiri
+    ChevronRight,   // Navigasi kanan
+    Search,         // Pencarian
+
+    // 🔹 User & Akun
+    User,           // Profil pengguna
+    Users,          // Daftar pengguna
+    LogIn,          // Tombol masuk
+    LogOut,         // Tombol keluar
+    Settings,       // Pengaturan
+    Shield,         // Keamanan akun / proteksi
+    Key,            // Password / akses
+    UserPlus,       // Tambah pengguna
+
+    // 🔹 Notifikasi & Status
+    Bell,           // Notifikasi
+    CheckCircle,    // Status sukses
+    AlertCircle,    // Peringatan
+    Info,           // Informasi
+    XCircle,        // Error / gagal
+    Loader,         // Loading / proses
+
+    // 🔹 File & Dokumen
+    FileText,       // Dokumen teks
+    FilePlus,       // Tambah dokumen
+    Folder,         // Folder
+    ClipboardList,  // Daftar / catatan
+    Download,       // Unduh file
+    Upload,         // Unggah file
+    Printer,        // Cetak dokumen
+
+    // 🔹 Data & Visualisasi
+    BarChart3,      // Statistik / grafik batang
+    PieChart,       // Grafik lingkaran
+    LineChart,      // Grafik garis
+    Database,       // Basis data
+    Table,          // Tabel data
+
+    // 🔹 Keuangan
+    Wallet,         // Dompet / saldo
+    Receipt,        // Transaksi / struk
+    CreditCard,     // Pembayaran / kartu kredit
+    DollarSign,     // Uang / harga
+
+    // 🔹 Aksi Umum
+    Plus,           // Tambah data
+    Minus,          // Kurang / hapus data
+    Edit3,          // Edit data
+    Trash2,         // Hapus data
+    Eye,            // Lihat detail
+    EyeOff,         // Sembunyikan
+    Save,           // Simpan perubahan
+    RefreshCcw,     // Reload / muat ulang
+
+    // 🔹 Kalender & Jadwal
+    Calendar,       // Jadwal
+    Clock,          // Waktu
+    AlarmClock,     // Pengingat
+    Timer,          // Stopwatch / durasi
+
+    // 🔹 Lain-lain
+    Mail,           // Email / pesan
+    Globe,          // Web / lokasi global
+    MapPin,         // Lokasi / alamat
+    Camera,         // Kamera / gambar
+    Image,          // Gambar / foto
+    Star,           // Favorit / rating
+} from 'lucide-vue-next'
+
 import { ref, onMounted, onUnmounted } from 'vue';
 
 const isSidebarOpen = ref(false); // Default closed on mobile
@@ -102,6 +165,34 @@ const navigationItems = [
         route: 'dashboard',
         icon: Home,
         description: 'Dashboard utama',
+        color: 'text-green-400'
+    },
+    {
+        name: 'Form PPEPP',
+        route: 'form',
+        icon: FileText,
+        description: 'Form Evaluasi PPEPP',
+        color: 'text-green-400'
+    },
+    {
+        name: 'Evaluasi PPEPP',
+        route: 'evaluation',
+        icon: FileText,
+        description: 'Hasil Evaluasi PPEPP',
+        color: 'text-green-400'
+    },
+    {
+        name: 'Contoh Komponen Card',
+        route: 'component-card',
+        icon: Info,
+        description: 'Contoh Pemakaian Komponen',
+        color: 'text-green-400'
+    },
+    {
+        name: 'Contoh Komponen Header',
+        route: 'component-header',
+        icon: Info,
+        description: 'Contoh Pemakaian Komponen',
         color: 'text-green-400'
     },
     // {
@@ -473,7 +564,7 @@ const isRouteActive = (routeName, routePattern = null) => {
         <!-- Main Content -->
         <div 
             class="transition-all duration-300" 
-            :class="{ 
+            :class="{
                 'ml-80': isSidebarOpen && !isMobile, 
                 'ml-20': !isSidebarOpen && !isMobile,
                 'ml-0': isMobile,
