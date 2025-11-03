@@ -162,7 +162,14 @@ defineProps({
 const navigationItems = [
     {
         name: 'Beranda',
-        route: 'dashboard',
+        route: 'dashboardadmin',
+        icon: Home,
+        description: 'Dashboard utama',
+        color: 'text-green-400'
+    },
+    {
+        name: 'Beranda',
+        route: 'dashboarduser',
         icon: Home,
         description: 'Dashboard utama',
         color: 'text-green-400'
@@ -566,7 +573,7 @@ const isRouteActive = (routeName, routePattern = null) => {
             class="transition-all duration-300" 
             :class="{
                 'ml-80': isSidebarOpen && !isMobile, 
-                'ml-20': !isSidebarOpen && !isMobile,
+                'ml-32': !isSidebarOpen && !isMobile,
                 'ml-0': isMobile,
                 'pt-16': isMobile
             }"

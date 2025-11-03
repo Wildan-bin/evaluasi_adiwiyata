@@ -211,9 +211,9 @@ const badgeColorClasses = computed(() => {
 // Hitung kelas CSS untuk variant
 const variantClasses = computed(() => {
   const variantMap = {
-    default: `${colorClasses.value.bg} border border-gray-200`,
+    default: `${colorClasses.value.bg} `,
     gradient: `bg-gradient-to-r ${colorClasses.value.gradient} text-white`,
-    minimal: 'bg-transparent border-b-2 border-gray-200'
+    minimal: 'bg-transparent border-b-2'
   };
 
   return variantMap[props.variant];
