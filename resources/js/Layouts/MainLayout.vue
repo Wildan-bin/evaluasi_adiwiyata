@@ -566,7 +566,7 @@ const isRouteActive = (routeName, routePattern = null) => {
             class="transition-all duration-300" 
             :class="{
                 'ml-80': isSidebarOpen && !isMobile, 
-                'ml-20': !isSidebarOpen && !isMobile,
+                'ml-32': !isSidebarOpen && !isMobile,
                 'ml-0': isMobile,
                 'pt-16': isMobile
             }"

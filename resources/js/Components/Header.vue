@@ -184,7 +184,7 @@ const sizeClasses = computed(() => {
     lg: {
       container: 'px-8 py-8',
       title: 'text-4xl',
-      description: 'text-lg',
+      description: 'text-xl',
       icon: 'w-7 h-7',
       iconBg: 'w-14 h-14'
     }
@@ -211,9 +211,8 @@ const badgeColorClasses = computed(() => {
 // Hitung kelas CSS untuk variant
 const variantClasses = computed(() => {
   const variantMap = {
-    default: `${colorClasses.value.bg} border border-gray-200`,
+    default: `${colorClasses.value.bg}`,
     gradient: `bg-gradient-to-r ${colorClasses.value.gradient} text-white`,
-    minimal: 'bg-transparent border-b-2 border-gray-200'
   };
 
   return variantMap[props.variant];
