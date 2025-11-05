@@ -79,30 +79,19 @@ import {
 
 import { ref, onMounted, onUnmounted } from 'vue';
 
-const isSidebarOpen = ref(false); // Default closed on mobile
+const isNavOpen = ref(false);
 const isUserMenuOpen = ref(false);
 const isMobile = ref(false);
-const hoveredItem = ref(null);
-const showTooltip = ref(false);
+const activeDropdown = ref(null);
 
 // Check screen size
 const checkScreenSize = () => {
     isMobile.value = window.innerWidth < 1024;
-    // Auto-close sidebar on mobile when screen resizes
-    if (isMobile.value) {
-        isSidebarOpen.value = false;
-    } else {
-        isSidebarOpen.value = true;
-    }
 };
 
-const toggleSidebar = () => {
-    isSidebarOpen.value = !isSidebarOpen.value;
-    // Reset hover states when toggling
-    hoveredItem.value = null;
-    showTooltip.value = false;
-    // Close user menu when toggling sidebar
-    isUserMenuOpen.value = false;
+const toggleNav = () => {
+    isNavOpen.value = !isNavOpen.value;
+    activeDropdown.value = null;
 };
 
 const toggleUserMenu = () => {
@@ -112,34 +101,21 @@ const toggleUserMenu = () => {
 const handleLogout = async () => {
     // Refresh CSRF token sebelum logout
     await refreshCsrfToken();
-    router.post(route('logout'));
+        router.post(route('logout'));
+const toggleDropdown = (routeName) => {
+    activeDropdown.value = activeDropdown.value === routeName ? null : routeName;
 };
 
-// Handle tooltip showing in collapsed mode
-const handleMouseEnter = (item) => {
-    if (!isSidebarOpen.value && !isMobile.value) {
-        hoveredItem.value = item;
-        showTooltip.value = true;
-    }
-};
 
-const handleMouseLeave = () => {
-    hoveredItem.value = null;
-    showTooltip.value = false;
-};
-
-// Close sidebar when clicking outside on mobile - FIXED
+// Close nav when clicking outside on mobile
 const handleOutsideClick = (event) => {
-    if (isMobile.value && isSidebarOpen.value) {
-        const sidebar = document.querySelector('aside');
-        const mobileHeader = document.querySelector('.mobile-header');
-        const toggleButton = document.querySelector('[aria-label="toggle-sidebar"]');
-
-        // Jangan tutup sidebar jika klik pada tombol toggle atau sidebar itu sendiri
-        if (sidebar && !sidebar.contains(event.target) &&
-            mobileHeader && !mobileHeader.contains(event.target) &&
-            toggleButton && !toggleButton.contains(event.target)) {
-            isSidebarOpen.value = false;
+    if (isMobile.value && isNavOpen.value) {
+        const nav = document.querySelector('nav.mobile-menu');
+        const toggleBtn = document.querySelector('[aria-label="toggle-nav"]');
+        
+        if (nav && !nav.contains(event.target) && 
+            toggleBtn && !toggleBtn.contains(event.target)) {
+            isNavOpen.value = false;
         }
     }
 };
@@ -169,7 +145,6 @@ let navigationItems = [
         route: 'dashboard',
         icon: Home,
         description: 'Dashboard utama',
-        color: 'text-green-400'
     },
     {
         name: 'Administrasi',
@@ -185,14 +160,12 @@ let navigationItems = [
         route: 'form',
         icon: FileText,
         description: 'Form Evaluasi PPEPP',
-        color: 'text-green-400'
     },
     {
         name: 'Evaluasi PBLHS',
         route: 'evaluation',
-        icon: FileText,
+        icon: BarChart3,
         description: 'Hasil Evaluasi PPEPP',
-        color: 'text-green-400'
     },
     {
         name: 'Admin Test',
@@ -206,37 +179,21 @@ let navigationItems = [
         route: 'component-card',
         icon: Info,
         description: 'Contoh Pemakaian Komponen',
-        color: 'text-green-400'
-    },
-    {
-        name: 'Contoh Komponen Header',
-        route: 'component-header',
-        icon: Info,
-        description: 'Contoh Pemakaian Komponen',
-        color: 'text-green-400'
-    },
-    // {
-    //     name: 'Evaluasi',
-    //     route: 'evaluasi.index',
-    //     icon: Receipt,
-    //     description: 'Kelola evaluasi',
-    //     color: 'text-emerald-400'
-    // },
-    // {
-    //     name: 'Laporan',
-    //     route: 'reports.index',
-    //     icon: BarChart3,
-    //     description: 'Laporan Adiwiyata',
-    //     color: 'text-teal-400'
-    // },
-    // {
-    //     name: 'Pengaturan',
-    //     route: 'settings.index',
-    //     icon: Settings,
-    //     description: 'Konfigurasi sistem',
-    //     color: 'text-lime-400',
-    //     routePattern: 'settings.*'
-    // }
+        submenu: [
+            {
+                name: 'Card Component',
+                route: 'component-card',
+                icon: FileText,
+                description: 'Contoh Komponen Card',
+            },
+            {
+                name: 'Header Component',
+                route: 'component-header',
+                icon: FileText,
+                description: 'Contoh Komponen Header',
+            }
+        ]
+    }
 ];
 
 // Tambah menu khusus admin untuk melihat submissions
@@ -525,6 +482,7 @@ const isItemActive = (item) => {
                                 <User :class="isSidebarOpen ? 'w-5 h-5' : 'w-6 h-6'" class="text-white" />
                                 <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
                             </div>
+                        
 
                             <!-- User Info -->
                             <!-- <div v-if="isSidebarOpen" class="ml-3 flex-1 text-left">
@@ -539,6 +497,8 @@ const isItemActive = (item) => {
                                 :class="{ 'rotate-180': isUserMenuOpen }"
                             />
                         </button>
+                    </div>
+                </div>
 
                         <!-- Tooltip for user menu in collapsed mode -->
                         <!-- <div
@@ -571,6 +531,7 @@ const isItemActive = (item) => {
                                         <div v-if="user && user.name" class="font-medium">{{ user.name }}</div>
                                         <div v-if="user && user.email" class="text-xs text-gray-300">{{ user.email }}</div>
                                     </div>
+                                    <span>Pengaturan</span>
                                 </Link>
 
                                 <div class="border-t border-gray-100 my-1"></div>
@@ -579,20 +540,16 @@ const isItemActive = (item) => {
                                     @click="handleLogout"
                                     class="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors duration-150 group active:scale-95"
                                 >
-                                    <div class="flex items-center justify-center w-8 h-8 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors mr-3">
+                                    <div class="flex items-center justify-center w-8 h-8 bg-red-100 rounded-lg">
                                         <LogOut class="w-4 h-4 text-red-600" />
                                     </div>
-                                    <div class="text-left">
-                                        <p class="font-medium">Keluar</p>
-                                        <p class="text-xs text-red-500">Akhiri sesi Anda</p>
-                                    </div>
+                                    <span>Keluar</span>
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
             </div>
         </aside>
+        
 
         <!-- Main Content -->
         <div
@@ -612,22 +569,16 @@ const isItemActive = (item) => {
 </template>
 
 <style scoped>
-/* Custom animations */
-@keyframes slide-in-from-bottom {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Smooth transitions */
+nav {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes slide-in-from-left {
+/* Dropdown animation */
+@keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateX(-10px);
+        transform: translateY(-10px);
     }
     to {
         opacity: 1;
@@ -636,64 +587,22 @@ const isItemActive = (item) => {
 }
 
 .animate-in {
-    animation-fill-mode: both;
+    animation: fadeIn 0.2s ease-out;
 }
 
-.slide-in-from-bottom-2 {
-    animation: slide-in-from-bottom 0.2s ease-out;
+/* Fade in animation */
+.fade-in {
+    animation: fadeIn 0.2s ease-out;
 }
 
-.slide-in-from-left-2 {
-    animation: slide-in-from-left 0.2s ease-out;
+.slide-in-from-top-2 {
+    animation: fadeIn 0.2s ease-out;
 }
 
-/* Custom scrollbar - Warna scrollbar hijau */
-nav::-webkit-scrollbar {
-    width: 4px;
-}
-
-nav::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-nav::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #059669, #10b981);
-    border-radius: 10px;
-}
-
-nav::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, #047857, #059669);
-}
-
-/* Enhanced hover effects */
-.group:hover {
-    transform: translateX(2px);
-}
-
-/* Active link glow effect */
-.border-l-4 {
-    box-shadow: 0 0 0 1px rgba(5, 150, 105, 0.1);
-}
-
-/* Backdrop blur support */
-@supports (backdrop-filter: blur(16px)) {
-    .backdrop-blur-xl {
-        backdrop-filter: blur(16px);
-    }
-    .backdrop-blur-sm {
-        backdrop-filter: blur(4px);
-    }
-    .backdrop-blur-lg {
-        backdrop-filter: blur(12px);
-    }
-}
-
-/* Mobile specific styles */
+/* Responsive navbar */
 @media (max-width: 1024px) {
-    aside {
-        position: fixed;
-        height: 100vh;
-        height: 100dvh; /* For mobile browsers */
+    nav {
+        height: 4rem;
     }
 }
 
