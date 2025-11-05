@@ -3,9 +3,15 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    // Jika user sudah login, redirect ke dashboard
+    if (Auth::check()) {
+        return redirect('/dashboard');
+    }
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -14,9 +20,25 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
+// Dashboard dengan role-based logic
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', function () {
+        $user = Auth::user();
+
+        // Check role dan render sesuai role
+        if ($user->role === 'admin') {
+            return Inertia::render('Profile/DashboardAdmin');
+        }
+
+        // Default ke DashboardUser untuk role user atau mentor
+        return Inertia::render('Profile/DashboardUser');
+    })->name('dashboard');
+});
+
+// Dashboard kosong untuk user yang belum login
+Route::get('/dashboard-welcome', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->name('dashboard-welcome');
 
 Route::get('/form', function () {
     return Inertia::render('Features/Form');
@@ -27,7 +49,6 @@ Route::get('/evaluation', function () {
 })->name('evaluation');
 
 // ROUTE UNTUK CONTOH KOMPONEN
-
 Route::get('/cards', function () {
     return Inertia::render('Example/Components-cards');
 })->name('component-card');
