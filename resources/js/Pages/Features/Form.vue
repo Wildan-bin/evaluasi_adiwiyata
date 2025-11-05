@@ -66,151 +66,121 @@ const questions = {
     {
       id: 'q1',
       text: 'Apakah sekolah telah menetapkan kebijakan lingkungan yang jelas dan tertulis?',
-      hint: 'Terkait penetapan visi, misi, dan tujuan program lingkungan'
     },
     {
       id: 'q2',
       text: 'Apakah ada tim khusus yang bertanggung jawab untuk program Adiwiyata?',
-      hint: 'Tim lingkungan, komite, atau koordinator program'
     },
     {
       id: 'q3',
       text: 'Apakah target dan indikator keberhasilan program lingkungan sudah ditetapkan?',
-      hint: 'Target terukur untuk pelestarian lingkungan'
     },
     {
       id: 'q4',
       text: 'Apakah kurikulum sekolah mengintegrasikan pendidikan lingkungan hidup?',
-      hint: 'Integrasi pada semua mata pelajaran atau program khusus'
     },
     {
       id: 'q5',
       text: 'Apakah ada alokasi anggaran untuk mendukung program Adiwiyata?',
-      hint: 'Dana untuk kegiatan, sarana, dan prasarana lingkungan'
     },
-    {
-      id: 'q6',
-      text: 'Apakah ada alokasi anggaran untuk mendukung program Adiwiyata?',
-      hint: 'Dana untuk kegiatan, sarana, dan prasarana lingkungan'
-    }
   ],
   pelaksanaan: [
     {
       id: 'q1',
       text: 'Apakah sekolah secara konsisten melaksanakan kegiatan pembelajaran tentang lingkungan?',
-      hint: 'Pembelajaran aktif, proyek, dan kegiatan praktik lapangan'
     },
     {
       id: 'q2',
       text: 'Apakah sekolah memiliki fasilitas pengelolaan sampah yang baik (TPS, komposting, daur ulang)?',
-      hint: 'Tersedianya tempat sampah terpisah dan pengelolaan limbah'
     },
     {
       id: 'q3',
       text: 'Apakah program hemat air dan listrik sudah diterapkan di sekolah?',
-      hint: 'Penghematan energi dan konservasi sumber daya air'
     },
     {
       id: 'q4',
       text: 'Apakah sekolah melakukan program penghijauan dan perawatan taman sekolah?',
-      hint: 'Taman edukasi, tanaman obat, atau area hijau lainnya'
     },
     {
       id: 'q5',
       text: 'Apakah partisipasi siswa dan guru dalam kegiatan lingkungan sudah berjalan aktif?',
-      hint: 'Keterlibatan dalam program penghijauan, kebersihan, daur ulang'
     }
   ],
   evaluasi: [
     {
       id: 'q1',
       text: 'Apakah sekolah melakukan evaluasi berkala terhadap pencapaian program Adiwiyata?',
-      hint: 'Evaluasi mingguan, bulanan, atau tahunan'
     },
     {
       id: 'q2',
       text: 'Apakah terdapat data pengukuran perubahan perilaku siswa terhadap lingkungan?',
-      hint: 'Perubahan kesadaran, sikap, dan tindakan peduli lingkungan'
     },
     {
       id: 'q3',
       text: 'Apakah sekolah mendokumentasikan hasil dan dampak program lingkungan?',
-      hint: 'Dokumentasi foto, laporan, atau database program'
     },
     {
       id: 'q4',
       text: 'Apakah efektivitas pengelolaan sampah dan energi sudah diukur?',
-      hint: 'Pengukuran volume sampah, penggunaan listrik, air'
     },
     {
       id: 'q5',
       text: 'Apakah ada mekanisme umpan balik dari stakeholder tentang program?',
-      hint: 'Survei kepuasan siswa, guru, orang tua, atau komite sekolah'
     }
   ],
   pengendalian: [
     {
       id: 'q1',
       text: 'Apakah sekolah memiliki sistem monitoring rutin untuk pelaksanaan program?',
-      hint: 'Pemeriksaan harian atau mingguan oleh tim lingkungan'
     },
     {
       id: 'q2',
       text: 'Apakah ada mekanisme kontrol kualitas untuk limbah dan sampah sekolah?',
-      hint: 'Standar pengelolaan sampah dan bahan berbahaya'
     },
     {
       id: 'q3',
       text: 'Apakah terdapat SOP (Standar Operasional Prosedur) yang jelas dan dipatuhi?',
-      hint: 'Panduan tertulis untuk setiap kegiatan lingkungan'
     },
     {
       id: 'q4',
       text: 'Apakah ada sistem pelaporan dan pencatatan kegiatan lingkungan secara teratur?',
-      hint: 'Laporan mingguan atau bulanan tentang pelaksanaan program'
     },
     {
       id: 'q5',
       text: 'Apakah sekolah melakukan koreksi atas temuan atau penyimpangan program?',
-      hint: 'Tindakan perbaikan ketika ada masalah atau kurang capaian'
     }
   ],
   peningkatan: [
     {
       id: 'q1',
       text: 'Apakah sekolah melakukan upaya berkelanjutan untuk meningkatkan program Adiwiyata?',
-      hint: 'Inovasi, perbaikan proses, atau pengembangan kegiatan baru'
     },
     {
       id: 'q2',
       text: 'Apakah ada pelatihan dan pengembangan kapasitas tim lingkungan sekolah?',
-      hint: 'Workshop, seminar, atau pembelajaran dari institusi lain'
     },
     {
       id: 'q3',
       text: 'Apakah sekolah membangun kemitraan dengan komunitas atau lembaga lingkungan?',
-      hint: 'Kolaborasi dengan pemerintah, NGO, atau sekolah lain'
     },
     {
       id: 'q4',
       text: 'Apakah ada program sosialisasi dan advokasi lingkungan ke masyarakat sekitar?',
-      hint: 'Kampanye, seminar, atau kegiatan publik tentang lingkungan'
     },
     {
       id: 'q5',
       text: 'Apakah sekolah terus mengembangkan infrastruktur hijau dan ramah lingkungan?',
-      hint: 'Penambahan fasilitas green building, solar panel, atau sistem air hujan'
     }
   ]
 };
 
 // Skala penilaian
 const ratingScale = [
-  { value: 1, label: 'Very Bad', color: 'bg-red-500', textColor: 'text-red-600', bgColor: 'bg-red-50' },
-  { value: 2, label: 'Bad', color: 'bg-orange-500', textColor: 'text-orange-600', bgColor: 'bg-orange-50' },
-  { value: 3, label: 'Neutral', color: 'bg-gray-400', textColor: 'text-gray-600', bgColor: 'bg-gray-50' },
-  { value: 4, label: 'Good', color: 'bg-yellow-500', textColor: 'text-yellow-600', bgColor: 'bg-yellow-50' },
-  { value: 5, label: 'Excellent', color: 'bg-green-500', textColor: 'text-green-600', bgColor: 'bg-green-50' }
+  { value: 1, label: 'Very Bad', color: 'bg-red-500', textColor: 'text-red-600', bgColor: 'bg-red-50', circleBg: 'bg-red-300' },
+  { value: 2, label: 'Bad', color: 'bg-orange-500', textColor: 'text-orange-600', bgColor: 'bg-orange-50', circleBg: 'bg-orange-300' },
+  { value: 3, label: 'Neutral', color: 'bg-gray-400', textColor: 'text-gray-600', bgColor: 'bg-gray-50', circleBg: 'bg-gray-300' },
+  { value: 4, label: 'Good', color: 'bg-yellow-500', textColor: 'text-yellow-600', bgColor: 'bg-yellow-50', circleBg: 'bg-yellow-300' },
+  { value: 5, label: 'Excellent', color: 'bg-green-500', textColor: 'text-green-600', bgColor: 'bg-green-50', circleBg: 'bg-green-300' }
 ];
 
 // Function untuk hitung skor total tab
@@ -270,7 +240,7 @@ const handleReset = () => {
 <template>
   <MainLayout>
     <!-- Header -->
-    <div class="px-4 sm:px-6 lg:px-2 py-3">
+    <div class="px-4 sm:px-6 lg:px-8 py-6">
       <Header
         title="Form Evaluasi Adiwiyata"
         description="Kelola dan monitor program lingkungan sekolah Anda melalui penilaian PPEPP"
@@ -280,7 +250,7 @@ const handleReset = () => {
     </div>
 
     <div class="px-4 sm:px-6 lg:px-8 py-6">
-      <!-- Tab Navigation - Dark Style seperti gambar -->
+      <!-- Tab Navigation - Dark Style -->
       <div class="bg-gray-100 rounded-lg overflow-hidden mb-8">
         <div class="flex flex-col sm:flex-row overflow-x-auto">
           <button
@@ -291,31 +261,28 @@ const handleReset = () => {
               'px-6 py-4 font-semibold text-sm sm:text-base transition-all duration-300 whitespace-nowrap border-b-2 sm:border-b-0 sm:border-r',
               activeTab === tab.id
                 ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg'
-                : 'bg-gray-100 text-gray-400 hover:text-gray-300 hover:bg-gray-600'
+                : 'bg-gray-100 text-gray-600 hover:text-gray-900 hover:bg-gray-200'
             ]"
           >
-            <div class="flex items-center gap-2">
-              <span>{{ tab.icon }}</span>
-              <span>{{ tab.label }}</span>
-            </div>
+            {{ tab.label }}
           </button>
         </div>
 
         <!-- Progress Bar di bawah tabs -->
-        <div class="bg-gray-100 px-6 py-3 border-t border-gray-700">
+        <div class="bg-white px-6 py-3 border-t border-gray-200">
           <div class="flex items-center justify-between gap-4">
-            <div class="text-sm text-gray-400">
-              <span class="text-green-400 font-semibold">{{ calculateTabProgress(activeTab) }}%</span> 
+            <div class="text-sm text-gray-600">
+              <span class="text-green-600 font-semibold">{{ calculateTabProgress(activeTab) }}%</span> 
               selesai
             </div>
-            <div class="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">
+            <div class="flex-1 bg-gray-300 rounded-full h-2 overflow-hidden">
               <div 
                 class="bg-gradient-to-r from-green-500 to-emerald-500 h-full transition-all duration-300"
                 :style="{ width: calculateTabProgress(activeTab) + '%' }"
               ></div>
             </div>
-            <div class="text-sm text-gray-400">
-              Skor: <span class="text-yellow-400 font-semibold">{{ calculateTabScore(activeTab) }}/5</span>
+            <div class="text-sm text-gray-600">
+              Skor: <span class="text-green-600 font-semibold">{{ calculateTabScore(activeTab) }}/5</span>
             </div>
           </div>
         </div>
@@ -324,71 +291,58 @@ const handleReset = () => {
       <!-- Tab Content -->
       <div class="space-y-6">
         <!-- Questions Section -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
-          <!-- Header Tab Content -->
-          <div class="mb-8 pb-6 border-b border-green-100">
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+          <!-- Header dengan Rating Scale Labels -->
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
               {{ tabs.find(t => t.id === activeTab)?.label }}
             </h2>
-            <p class="text-gray-600">
-              Silakan jawab pertanyaan berikut dengan memilih skalanya.
-            </p>
+            
+            <!-- Rating Scale Header -->
+            <div class="flex items-center gap-4 mb-8">
+              <div class="flex-1"></div>
+              <div class="flex gap-4 sm:gap-6">
+                <div v-for="rating in ratingScale" :key="rating.value" class="text-center">
+                  <p class="text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">{{ rating.label }}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="border-b-2 border-gray-300"></div>
           </div>
 
           <!-- Questions List -->
-          <div class="space-y-8">
+          <div class="space-y-6">
             <template v-for="(question, index) in questions[activeTab]" :key="question.id">
-              <div class="border-b border-gray-100 pb-8 last:border-b-0 last:pb-0">
+              <div class="flex items-start gap-4 pb-6 border-b border-gray-200 last:border-b-0 last:pb-0">
                 <!-- Question Text -->
-                <div class="mb-4">
-                  <div class="flex items-start gap-3 mb-2">
-                    <span class="flex-shrink-0 w-7 h-7 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-bold text-sm">
-                      {{ index + 1 }}
-                    </span>
-                    <h3 class="font-semibold text-gray-900 text-lg">{{ question.text }}</h3>
-                  </div>
-                  <p class="text-sm text-gray-500 ml-10">{{ question.hint }}</p>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm sm:text-base text-gray-700 font-medium leading-relaxed">
+                    {{ question.text }}
+                  </p>
                 </div>
 
-                <!-- Rating Scale -->
-                <div class="ml-10 mb-6">
-                  <div class="grid grid-cols-5 gap-2 sm:gap-3 md:gap-4">
-                    <button
-                      v-for="rating in ratingScale"
-                      :key="rating.value"
-                      @click="formResponses[activeTab][question.id] = rating.value"
-                      :class="[
-                        'p-3 sm:p-4 rounded-lg border-2 transition-all duration-200 transform hover:scale-105 active:scale-95',
-                        formResponses[activeTab][question.id] === rating.value
-                          ? `${rating.color} text-white border-${rating.color} shadow-md`
-                          : `${rating.bgColor} text-gray-600 border-gray-200 hover:border-green-300`
-                      ]"
-                    >
-                      <div class="flex flex-col items-center">
-                        <span class="font-bold text-lg">{{ rating.value }}</span>
-                        <span class="text-xs mt-1 font-semibold hidden sm:inline">{{ rating.label }}</span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Selected Answer Display -->
-                <div v-if="formResponses[activeTab][question.id]" class="ml-10">
-                  <div class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 border border-green-200">
-                    <span class="text-sm font-medium text-green-700">
-                      ✓ Dipilih: 
-                      <span class="font-bold">
-                        {{ ratingScale.find(r => r.value === formResponses[activeTab][question.id])?.label }}
-                      </span>
-                    </span>
-                  </div>
+                <!-- Rating Circles -->
+                <div class="flex gap-3 sm:gap-4 flex-shrink-0">
+                  <button
+                    v-for="rating in ratingScale"
+                    :key="rating.value"
+                    @click="formResponses[activeTab][question.id] = rating.value"
+                    :class="[
+                      'w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all duration-200 transform hover:scale-110 active:scale-95 border-2',
+                      formResponses[activeTab][question.id] === rating.value
+                        ? `${rating.color} border-white shadow-lg`
+                        : `${rating.circleBg} border-gray-300 hover:border-gray-400 cursor-pointer`
+                    ]"
+                    :title="rating.label"
+                  ></button>
                 </div>
               </div>
             </template>
           </div>
 
           <!-- Summary Section -->
-          <div class="mt-8 pt-6 border-t-2 border-green-100 bg-green-50 rounded-lg p-6">
+          <div class="mt-8 pt-8 border-t-2 border-green-200 bg-green-50 rounded-lg p-6">
             <div class="flex items-center gap-3 mb-4">
               <BarChart3 class="w-6 h-6 text-green-600" />
               <h3 class="font-bold text-gray-900">Ringkasan Tab {{ tabs.find(t => t.id === activeTab)?.label }}</h3>
@@ -427,7 +381,7 @@ const handleReset = () => {
         >
           <div 
             v-if="submitMessage"
-            :class=" [
+            :class="[
               'flex items-start gap-3 p-4 rounded-lg border',
               submitMessage.includes('✅') 
                 ? 'bg-green-50 border-green-200 text-green-800'
@@ -455,7 +409,7 @@ const handleReset = () => {
               <span class="font-bold text-green-700">
                 Total Skor: 
                 <span class="text-lg">
-                  {{ (tabs.map(t => parseFloat(calculateTabScore(t.id)) || 0).reduce((a, b) => a + b, 0) / tabs.length).toFixed(2) }}/1.00  
+                  {{ (tabs.map(t => parseFloat(calculateTabScore(t.id)) || 0).reduce((a, b) => a + b, 0) / tabs.length).toFixed(2) }}/5
                 </span>
               </span>
             </div>
@@ -464,7 +418,7 @@ const handleReset = () => {
             <button
               @click="handleSave"
               :disabled="isSubmitting"
-              :class=" [
+              :class="[
                 'w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-lg transition-all duration-200 active:scale-95',
                 isSubmitting
                   ? 'bg-gray-400 text-white cursor-not-allowed'
