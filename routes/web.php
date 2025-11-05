@@ -16,7 +16,11 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('DashboardAdmin');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard-admin');
+
+Route::get('/dashboard', function () {
+    return Inertia::render('DashboardUser');
+})->middleware(['auth', 'verified'])->name('dashboard-user');
 
 Route::get('/form', function () {
     return Inertia::render('Features/Form');

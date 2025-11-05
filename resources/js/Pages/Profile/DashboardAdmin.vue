@@ -31,7 +31,7 @@ import { Head } from '@inertiajs/vue3';
     <div class="bg-white rounded-lg shadow-lg p-6">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-gray-800">Admin</h2>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+        <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
           + Tambah Admin
         </button>
       </div>
@@ -54,7 +54,7 @@ import { Head } from '@inertiajs/vue3';
     <div class="bg-white rounded-lg shadow-lg p-6">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-gray-800">User</h2>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+        <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
           + Tambah User
         </button>
       </div>
@@ -77,7 +77,7 @@ import { Head } from '@inertiajs/vue3';
     <div class="bg-white rounded-lg shadow-lg p-6">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-gray-800">Mentor</h2>
-        <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+        <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
           + Tambah Mentor
         </button>
       </div>
@@ -103,7 +103,7 @@ import { Head } from '@inertiajs/vue3';
     
     <div class="overflow-x-auto">
       <table class="w-full">
-        <thead class="bg-blue-600 text-white">
+        <thead class="bg-green-500 text-white">
           <tr>
             <th class="px-6 py-4 text-left">Nama Sekolah</th>
             <th class="px-6 py-4 text-center">Status</th>

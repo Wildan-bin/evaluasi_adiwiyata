@@ -3,6 +3,33 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Header from '@/Components/Header.vue'
 import { Head } from '@inertiajs/vue3';
+
+// Functions moved from inline script: manage dynamic activity items
+function addNewActivity() {
+  const container = document.getElementById('activities-container');
+  const newActivity = document.createElement('div');
+  newActivity.className = 'activity-item flex items-start gap-2';
+  newActivity.innerHTML = `
+    <div class="flex-grow">
+      <input type="text" placeholder="Nama Kegiatan" class="w-full rounded-md border-gray-300 shadow-sm px-4 py-2 border focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-2">
+      <textarea placeholder="Deskripsi Kegiatan" class="w-full rounded-md border-gray-300 shadow-sm px-4 py-2 border focus:border-blue-500 focus:ring-1 focus:ring-blue-500" rows="2"></textarea>
+    </div>
+    <button type="button" class="text-red-500 hover:text-red-700 mt-2 remove-activity-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  `;
+  container.appendChild(newActivity);
+  // attach event listener to the remove button
+  const btn = newActivity.querySelector('.remove-activity-btn');
+  if (btn) btn.addEventListener('click', () => removeActivity(btn));
+}
+
+function removeActivity(button) {
+  const activityItem = button.closest('.activity-item');
+  if (activityItem) activityItem.remove();
+}
 </script>
 
 <template>
@@ -47,9 +74,9 @@ import { Head } from '@inertiajs/vue3';
             <textarea class="w-full rounded-md border-gray-300 shadow-sm px-4 py-2 border focus:border-blue-500 focus:ring-1 focus:ring-blue-500" rows="3"></textarea>
           </div>
           <div>
-            <div class="flex justify-between items-center mb-2">
+              <div class="flex justify-between items-center mb-2">
               <label class="block text-sm font-medium text-gray-700">Daftar Kegiatan</label>
-              <button type="button" onclick="addNewActivity()" class="text-sm text-blue-600 hover:text-blue-700 flex items-center">
+              <button type="button" @click="addNewActivity" class="text-sm text-blue-600 hover:text-blue-700 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
                 </svg>
@@ -62,7 +89,7 @@ import { Head } from '@inertiajs/vue3';
                   <input type="text" placeholder="Nama Kegiatan" class="w-full rounded-md border-gray-300 shadow-sm px-4 py-2 border focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-2">
                   <textarea placeholder="Deskripsi Kegiatan" class="w-full rounded-md border-gray-300 shadow-sm px-4 py-2 border focus:border-blue-500 focus:ring-1 focus:ring-blue-500" rows="2"></textarea>
                 </div>
-                <button type="button" onclick="removeActivity(this)" class="text-red-500 hover:text-red-700 mt-2">
+                <button type="button" @click="removeActivity($event.currentTarget)" class="text-red-500 hover:text-red-700 mt-2">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                   </svg>
@@ -71,30 +98,7 @@ import { Head } from '@inertiajs/vue3';
             </div>
           </div>
           
-          <script>
-            function addNewActivity() {
-              const container = document.getElementById('activities-container');
-              const newActivity = document.createElement('div');
-              newActivity.className = 'activity-item flex items-start gap-2';
-              newActivity.innerHTML = `
-                <div class="flex-grow">
-                  <input type="text" placeholder="Nama Kegiatan" class="w-full rounded-md border-gray-300 shadow-sm px-4 py-2 border focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-2">
-                  <textarea placeholder="Deskripsi Kegiatan" class="w-full rounded-md border-gray-300 shadow-sm px-4 py-2 border focus:border-blue-500 focus:ring-1 focus:ring-blue-500" rows="2"></textarea>
-                </div>
-                <button type="button" onclick="removeActivity(this)" class="text-red-500 hover:text-red-700 mt-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                  </svg>
-                </button>
-              `;
-              container.appendChild(newActivity);
-            }
-
-            function removeActivity(button) {
-              const activityItem = button.closest('.activity-item');
-              activityItem.remove();
-            }
-          </script>
+          
         </div>
 
         <!-- File Upload Section -->
@@ -133,7 +137,7 @@ import { Head } from '@inertiajs/vue3';
 
       <!-- Submit Button -->
       <div class="flex justify-end">
-        <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 font-medium">
+        <button type="submit" class="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 font-medium">
           Ajukan Penilaian
         </button>
       </div>
