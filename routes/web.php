@@ -22,6 +22,10 @@ Route::get('/dashboard', function () {
     return Inertia::render('DashboardUser');
 })->middleware(['auth', 'verified'])->name('dashboard-user');
 
+Route::get('/administrasi', function () {
+    return Inertia::render('AdministrasiSekolah');
+})->middleware(['auth', 'verified'])->name('administrasi');
+
 Route::get('/form', function () {
     return Inertia::render('Features/Form');
 })->name('form');

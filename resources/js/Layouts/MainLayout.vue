@@ -1,3 +1,4 @@
+
 <script setup>
 import { Link, router } from '@inertiajs/vue3';
 import { 
@@ -162,14 +163,7 @@ defineProps({
 const navigationItems = [
     {
         name: 'Beranda',
-        route: 'dashboardadmin',
-        icon: Home,
-        description: 'Dashboard utama',
-        color: 'text-green-400'
-    },
-    {
-        name: 'Beranda',
-        route: 'dashboarduser',
+        route: 'dashboard',
         icon: Home,
         description: 'Dashboard utama',
         color: 'text-green-400'
@@ -233,7 +227,7 @@ const isRouteActive = (routeName, routePattern = null) => {
 </script>
 
 <template>
-    <div class="relative min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50">
+    <div class="relative min-h-screen bg-white">
         <!-- Background gradient dengan warna hijau tema Adiwiyata: emerald (90), green (50), teal (50) -->
         
         <!-- Mobile Header Bar - FIXED Z-INDEX -->
@@ -365,12 +359,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                 </div>
 
                 <!-- Welcome Message for Mobile & Tablet -->
-                <div v-if="isSidebarOpen" class="relative z-10 px-4 py-4">
-                    <div class="text-white/90 text-sm">
-                        <p class="font-medium">Selamat datang kembali!</p>
-                        <!-- <p class="text-xs text-white/70">{{ user.name.split(' ')[0] }}</p> -->
-                    </div>
-                </div>
+                
             </div>
 
             <!-- Navigation Section -->
@@ -418,8 +407,8 @@ const isRouteActive = (routeName, routePattern = null) => {
                                 :class=" [
                                     isSidebarOpen ? 'w-10 h-10 rounded-xl' : 'w-8 h-8 rounded-lg',
                                     isRouteActive(item.route, item.routePattern) 
-                                        ? 'bg-[#059669]/15 text-[#059669]' 
-                                        : 'bg-gray-100 group-hover:bg-white group-hover:shadow-sm'
+                                        ? ' text-[#059669]' 
+                                        : ' text-dark'
                                 ]"
                             >
                                 <component 
@@ -461,16 +450,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                     </div>
                 </template>
 
-                <!-- Divider -->
-                <div v-if="isSidebarOpen" class="my-4 border-t border-gray-200"></div>
-
-                <!-- Quick Stats (when expanded) - Warna hijau untuk stats box -->
-                <div v-if="isSidebarOpen" class="px-3 py-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl sm:rounded-2xl border border-emerald-100">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-[#059669]">🌱</div>
-                        <p class="text-xs text-gray-600 mt-1">Program Lingkungan Berkelanjutan</p>
-                    </div>
-                </div>
+                
 
                 <!-- Collapsed mode info -->
                 <div v-if="!isSidebarOpen && !isMobile" class="px-2 py-3 text-center">
@@ -573,7 +553,7 @@ const isRouteActive = (routeName, routePattern = null) => {
             class="transition-all duration-300" 
             :class="{
                 'ml-80': isSidebarOpen && !isMobile, 
-                'ml-32': !isSidebarOpen && !isMobile,
+                'ml-20': !isSidebarOpen && !isMobile,
                 'ml-0': isMobile,
                 'pt-16': isMobile
             }"
