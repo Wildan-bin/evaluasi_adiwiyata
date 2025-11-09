@@ -7,18 +7,13 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-// Jika user sudah login DAN tidak sedang logout, redirect ke dashboard
-    if (Auth::check() && !request()->has('logout')) {
-        return redirect('/dashboard');
-    }
-
-    return Inertia::render('Welcome', [
+    return Inertia::render('Dashboard', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('home');
 
 // Dashboard dengan role-based logic
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -35,10 +30,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
-// Dashboard kosong untuk user yang belum login
-Route::get('/dashboard-welcome', function () {
-    return Inertia::render('Dashboard');
-})->name('dashboard-welcome');
+// // Dashboard kosong untuk user yang belum login
+// Route::get('/dashboard-welcome', function () {
+//     return Inertia::render('Dashboard');
+// })->name('dashboard-welcome');
 
 Route::get('/form', function () {
     return Inertia::render('Features/Form');
