@@ -126,6 +126,10 @@ const questions = {
     {
       id: 'q5',
       text: 'Apakah ada mekanisme umpan balik dari stakeholder tentang program?',
+    },
+    {
+      id: 'q6',
+      text: 'Apakah ada mekanisme umpan balik dari stakeholder tentang hasil evaluasi di 1 tahun ini?',
     }
   ],
   pengendalian: [
@@ -176,11 +180,11 @@ const questions = {
 
 // Skala penilaian
 const ratingScale = [
-  { value: 1, label: 'Very Bad', color: 'bg-red-500', textColor: 'text-red-600', bgColor: 'bg-red-50', circleBg: 'bg-red-300' },
-  { value: 2, label: 'Bad', color: 'bg-orange-500', textColor: 'text-orange-600', bgColor: 'bg-orange-50', circleBg: 'bg-orange-300' },
-  { value: 3, label: 'Neutral', color: 'bg-gray-400', textColor: 'text-gray-600', bgColor: 'bg-gray-50', circleBg: 'bg-gray-300' },
-  { value: 4, label: 'Good', color: 'bg-yellow-500', textColor: 'text-yellow-600', bgColor: 'bg-yellow-50', circleBg: 'bg-yellow-300' },
-  { value: 5, label: 'Excellent', color: 'bg-green-500', textColor: 'text-green-600', bgColor: 'bg-green-50', circleBg: 'bg-green-300' }
+  { value: 1, label: 'Sangat Kurang', color: 'bg-red-500', textColor: 'text-red-600', bgColor: 'bg-red-50', circleBg: 'bg-gray-300' },
+  { value: 2, label: 'Kurang', color: 'bg-orange-500', textColor: 'text-orange-600', bgColor: 'bg-orange-50', circleBg: 'bg-gray-300' },
+  { value: 3, label: 'Cukup', color: 'bg-gray-400', textColor: 'text-gray-600', bgColor: 'bg-gray-50', circleBg: 'bg-gray-300' },
+  { value: 4, label: 'Baik', color: 'bg-yellow-500', textColor: 'text-yellow-600', bgColor: 'bg-yellow-50', circleBg: 'bg-gray-300' },
+  { value: 5, label: 'Sangat Baik', color: 'bg-green-500', textColor: 'text-green-600', bgColor: 'bg-green-50', circleBg: 'bg-gray-300' }
 ];
 
 // Function untuk hitung skor total tab
@@ -240,7 +244,7 @@ const handleReset = () => {
 <template>
   <MainLayout>
     <!-- Header -->
-    <div class="px-4 sm:px-6 lg:px-8 py-6">
+    <div>
       <Header
         title="Form Evaluasi Adiwiyata"
         description="Kelola dan monitor program lingkungan sekolah Anda melalui penilaian PPEPP"
@@ -301,7 +305,7 @@ const handleReset = () => {
             <!-- Rating Scale Header -->
             <div class="flex items-center gap-4 mb-8">
               <div class="flex-1"></div>
-              <div class="flex gap-4 sm:gap-6">
+              <div class="flex gap-3 sm:gap-6">
                 <div v-for="rating in ratingScale" :key="rating.value" class="text-center">
                   <p class="text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">{{ rating.label }}</p>
                 </div>

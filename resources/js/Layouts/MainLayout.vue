@@ -6,6 +6,7 @@ import {
     Menu,           // Tombol sidebar toggle / menu navigasi
     X,              // Tutup / hapus / close modal
     ChevronDown,    // Panah dropdown
+    Leaf as LoginIcon,
     ChevronLeft,    // Navigasi kiri
     ChevronRight,   // Navigasi kanan
     Search,         // Pencarian
@@ -226,7 +227,7 @@ const isRouteActive = (routeName, routePattern = null) => {
 </script>
 
 <template>
-    <div class="relative min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50">
+    <div class="relative min-h-screen bg-white">
         <!-- Background gradient dengan warna hijau tema Adiwiyata: emerald (90), green (50), teal (50) -->
         
         <!-- Mobile Header Bar - FIXED Z-INDEX -->
@@ -314,9 +315,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                     <div class="flex items-center gap-3">
                         <div class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl">
                             <!-- Ikon logo dengan background transparan -->
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
+                            <LoginIcon class="text-white w-5 h-5 group-hover:translate-x-1 transition"/>
                         </div>
                         <!-- Show brand name when sidebar is open (both mobile and desktop) -->
                         <div v-if="isSidebarOpen" class="transition-all duration-300">
@@ -358,12 +357,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                 </div>
 
                 <!-- Welcome Message for Mobile & Tablet -->
-                <div v-if="isSidebarOpen" class="relative z-10 px-4 py-4">
-                    <div class="text-white/90 text-sm">
-                        <p class="font-medium">Selamat datang kembali!</p>
-                        <!-- <p class="text-xs text-white/70">{{ user.name.split(' ')[0] }}</p> -->
-                    </div>
-                </div>
+                
             </div>
 
             <!-- Navigation Section -->
@@ -411,8 +405,8 @@ const isRouteActive = (routeName, routePattern = null) => {
                                 :class=" [
                                     isSidebarOpen ? 'w-10 h-10 rounded-xl' : 'w-8 h-8 rounded-lg',
                                     isRouteActive(item.route, item.routePattern) 
-                                        ? 'bg-[#059669]/15 text-[#059669]' 
-                                        : 'bg-gray-100 group-hover:bg-white group-hover:shadow-sm'
+                                        ? ' text-[#059669]' 
+                                        : ' text-dark'
                                 ]"
                             >
                                 <component 
@@ -454,16 +448,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                     </div>
                 </template>
 
-                <!-- Divider -->
-                <div v-if="isSidebarOpen" class="my-4 border-t border-gray-200"></div>
-
-                <!-- Quick Stats (when expanded) - Warna hijau untuk stats box -->
-                <div v-if="isSidebarOpen" class="px-3 py-4 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl sm:rounded-2xl border border-emerald-100">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-[#059669]">🌱</div>
-                        <p class="text-xs text-gray-600 mt-1">Program Lingkungan Berkelanjutan</p>
-                    </div>
-                </div>
+                
 
                 <!-- Collapsed mode info -->
                 <div v-if="!isSidebarOpen && !isMobile" class="px-2 py-3 text-center">
