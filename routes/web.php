@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    // Jika user sudah login, redirect ke dashboard
-    if (Auth::check()) {
+// Jika user sudah login DAN tidak sedang logout, redirect ke dashboard
+    if (Auth::check() && !request()->has('logout')) {
         return redirect('/dashboard');
     }
 
