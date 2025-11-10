@@ -1,6 +1,6 @@
 <script setup>
 import { Link, router } from '@inertiajs/vue3';
-import { 
+import {
     // 🔹 Navigasi & Umum
     Home,           // Halaman utama
     Menu,           // Tombol sidebar toggle / menu navigasi
@@ -130,9 +130,9 @@ const handleOutsideClick = (event) => {
         const sidebar = document.querySelector('aside');
         const mobileHeader = document.querySelector('.mobile-header');
         const toggleButton = document.querySelector('[aria-label="toggle-sidebar"]');
-        
+
         // Jangan tutup sidebar jika klik pada tombol toggle atau sidebar itu sendiri
-        if (sidebar && !sidebar.contains(event.target) && 
+        if (sidebar && !sidebar.contains(event.target) &&
             mobileHeader && !mobileHeader.contains(event.target) &&
             toggleButton && !toggleButton.contains(event.target)) {
             isSidebarOpen.value = false;
@@ -172,6 +172,13 @@ const navigationItems = [
         route: 'form',
         icon: FileText,
         description: 'Form Evaluasi PPEPP',
+        color: 'text-green-400'
+    },
+    {
+        name: 'Administrasi Sekolah',
+        route: 'administrasi-sekolah',
+        icon: FileText,
+        description: 'Data Administrasi Sekolah',
         color: 'text-green-400'
     },
     {
@@ -228,10 +235,10 @@ const isRouteActive = (routeName, routePattern = null) => {
 <template>
     <div class="relative min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50">
         <!-- Background gradient dengan warna hijau tema Adiwiyata: emerald (90), green (50), teal (50) -->
-        
+
         <!-- Mobile Header Bar - FIXED Z-INDEX -->
-        <div 
-            v-if="isMobile" 
+        <div
+            v-if="isMobile"
             class="mobile-header fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200/50 shadow-sm"
         >
             <div class="flex items-center justify-between px-4 py-3">
@@ -239,7 +246,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                 <div class="flex items-center gap-3">
                     <button
                         aria-label="toggle-sidebar"
-                        @click.stop="toggleSidebar" 
+                        @click.stop="toggleSidebar"
                         class="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-[#059669] to-[#10b981] rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 relative z-10"
                     >
                         <!-- Gradient hijau untuk tombol: from-emerald-600 to-green-500 -->
@@ -274,8 +281,8 @@ const isRouteActive = (routeName, routePattern = null) => {
         </div>
 
         <!-- Backdrop for mobile - FIXED Z-INDEX -->
-        <div 
-            v-if="isSidebarOpen && isMobile" 
+        <div
+            v-if="isSidebarOpen && isMobile"
             @click="toggleSidebar"
             class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
         ></div>
@@ -285,10 +292,10 @@ const isRouteActive = (routeName, routePattern = null) => {
             class="fixed inset-y-0 left-0 z-50 flex flex-col bg-white/98 backdrop-blur-xl shadow-2xl transition-all duration-500 border-r border-white/20"
             :class=" [
                 // Width classes
-                isMobile 
-                    ? (isSidebarOpen ? 'w-96' : 'w-0 overflow-hidden') 
+                isMobile
+                    ? (isSidebarOpen ? 'w-96' : 'w-0 overflow-hidden')
                     : (isSidebarOpen ? 'w-80' : 'w-32'),
-                // Border radius classes  
+                // Border radius classes
                 isMobile
                     ? 'rounded-r-none'
                     : (isSidebarOpen ? 'rounded-r-3xl' : 'rounded-r-2xl'),
@@ -301,7 +308,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                 <!-- Background Gradient - Warna hijau untuk header sidebar -->
                 <div class="absolute inset-0 bg-gradient-to-br from-[#059669] via-[#10b981] to-[#34d399]"></div>
                 <!-- Gradient hijau dari emerald-600 via green-500 ke emerald-300 -->
-                
+
                 <!-- Background Pattern -->
                 <div class="absolute inset-0 opacity-10">
                     <div class="absolute top-4 right-4 w-16 sm:w-20 h-16 sm:h-20 rounded-full border-2 border-white/30"></div>
@@ -328,11 +335,11 @@ const isRouteActive = (routeName, routePattern = null) => {
                     <!-- Toggle Button - Enhanced for all modes -->
                     <button
                         aria-label="toggle-sidebar"
-                        @click.stop="toggleSidebar" 
+                        @click.stop="toggleSidebar"
                         class="relative flex items-center justify-center transition-all duration-200 group z-10"
                         :class=" [
-                            isSidebarOpen 
-                                ? 'w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30' 
+                            isSidebarOpen
+                                ? 'w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30'
                                 : 'w-12 h-12 bg-white/30 backdrop-blur-md rounded-xl hover:bg-white/40 shadow-lg hover:shadow-xl'
                         ]"
                     >
@@ -341,16 +348,16 @@ const isRouteActive = (routeName, routePattern = null) => {
                             <Menu class="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
                             <!-- Active indicator dots for collapsed mode -->
                             <div class="absolute -top-1 -right-1 flex gap-0.5">
-                                <div 
-                                    v-for="(item, index) in navigationItems" 
+                                <div
+                                    v-for="(item, index) in navigationItems"
                                     :key="index"
                                     class="w-1.5 h-1.5 rounded-full transition-all duration-200"
                                     :class=" [
-                                        isRouteActive(item.route, item.routePattern) 
-                                            ? 'bg-lime-300 shadow-sm' 
+                                        isRouteActive(item.route, item.routePattern)
+                                            ? 'bg-lime-300 shadow-sm'
                                             : 'bg-white/40'
                                     ]"
-                                ></div> 
+                                ></div>
                             </div>
                         </div>
                         <X v-else class="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
@@ -383,10 +390,10 @@ const isRouteActive = (routeName, routePattern = null) => {
                             class="group relative flex items-center transition-all duration-200 hover:shadow-sm active:scale-95"
                             :class=" [
                                 isSidebarOpen ? 'rounded-xl sm:rounded-2xl p-3' : 'rounded-xl p-3 mx-auto w-14 h-14 justify-center',
-                                isSidebarOpen 
-                                    ? 'hover:bg-gradient-to-r hover:from-emerald-50 hover:to-green-50' 
+                                isSidebarOpen
+                                    ? 'hover:bg-gradient-to-r hover:from-emerald-50 hover:to-green-50'
                                     : 'hover:bg-gradient-to-br hover:from-emerald-50 hover:to-white hover:scale-105',
-                                isRouteActive(item.route, item.routePattern) 
+                                isRouteActive(item.route, item.routePattern)
                                     ? isSidebarOpen
                                         ? 'bg-gradient-to-r from-[#059669]/10 to-[#10b981]/10 text-[#059669] shadow-sm border-l-4 border-[#059669]'
                                         : 'bg-gradient-to-br from-[#059669]/20 to-[#10b981]/20 text-[#059669] shadow-lg scale-105 ring-2 ring-[#059669]/30'
@@ -394,30 +401,30 @@ const isRouteActive = (routeName, routePattern = null) => {
                             ]"
                         >
                             <!-- Active Indicator for expanded mode -->
-                            <div 
-                                v-if="isRouteActive(item.route, item.routePattern) && isSidebarOpen" 
+                            <div
+                                v-if="isRouteActive(item.route, item.routePattern) && isSidebarOpen"
                                 class="absolute right-3 w-2 h-2 bg-[#059669] rounded-full animate-pulse"
                             ></div>
 
                             <!-- Active Indicator for collapsed mode -->
-                            <div 
-                                v-if="isRouteActive(item.route, item.routePattern) && !isSidebarOpen" 
+                            <div
+                                v-if="isRouteActive(item.route, item.routePattern) && !isSidebarOpen"
                                 class="absolute -top-1 -right-1 w-3 h-3 bg-[#059669] rounded-full animate-pulse shadow-sm"
                             ></div>
 
                             <!-- Icon Container -->
-                            <div 
+                            <div
                                 class="relative flex items-center justify-center transition-all duration-200"
                                 :class=" [
                                     isSidebarOpen ? 'w-10 h-10 rounded-xl' : 'w-8 h-8 rounded-lg',
-                                    isRouteActive(item.route, item.routePattern) 
-                                        ? 'bg-[#059669]/15 text-[#059669]' 
+                                    isRouteActive(item.route, item.routePattern)
+                                        ? 'bg-[#059669]/15 text-[#059669]'
                                         : 'bg-gray-100 group-hover:bg-white group-hover:shadow-sm'
                                 ]"
                             >
-                                <component 
-                                    :is="item.icon" 
-                                    class="transition-transform group-hover:scale-110" 
+                                <component
+                                    :is="item.icon"
+                                    class="transition-transform group-hover:scale-110"
                                     :class="isSidebarOpen ? 'w-5 h-5' : 'w-6 h-6'"
                                 />
                             </div>
@@ -435,14 +442,14 @@ const isRouteActive = (routeName, routePattern = null) => {
                             </div>
 
                             <!-- Hover Effect -->
-                            <div 
+                            <div
                                 class="absolute inset-0 bg-gradient-to-r from-[#059669]/5 to-[#10b981]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                                 :class="isSidebarOpen ? 'rounded-xl sm:rounded-2xl' : 'rounded-xl'"
                             ></div>
                         </Link>
 
                         <!-- Tooltip for collapsed mode (desktop only) -->
-                        <div 
+                        <div
                             v-if="!isSidebarOpen && !isMobile && hoveredItem === item && showTooltip"
                             class="absolute left-full top-1/2 transform -translate-y-1/2 ml-4 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-xl z-[70] whitespace-nowrap animate-in slide-in-from-left-2 duration-200"
                         >
@@ -477,14 +484,14 @@ const isRouteActive = (routeName, routePattern = null) => {
             <div class="border-t border-gray-100 bg-white/80 backdrop-blur-sm">
                 <div class="p-3 sm:p-4">
                     <div class="relative">
-                        <button 
-                            @click.stop="toggleUserMenu" 
+                        <button
+                            @click.stop="toggleUserMenu"
                             @mouseenter="handleMouseEnter({ name: user.name, description: 'Pengaturan akun' })"
                             @mouseleave="handleMouseLeave"
                             class="group w-full flex items-center text-gray-700 transition-all duration-200 hover:shadow-sm active:scale-95 relative z-10"
                             :class=" [
-                                isSidebarOpen 
-                                    ? 'rounded-xl sm:rounded-2xl p-3 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-green-50' 
+                                isSidebarOpen
+                                    ? 'rounded-xl sm:rounded-2xl p-3 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-green-50'
                                     : 'rounded-xl p-2 justify-center hover:bg-gradient-to-br hover:from-emerald-50 hover:to-green-50 hover:scale-105'
                             ]"
                         >
@@ -502,15 +509,15 @@ const isRouteActive = (routeName, routePattern = null) => {
                             </div> -->
 
                             <!-- Chevron -->
-                            <ChevronDown 
-                                v-if="isSidebarOpen" 
+                            <ChevronDown
+                                v-if="isSidebarOpen"
                                 class="w-4 h-4 text-gray-400 transition-transform duration-200"
                                 :class="{ 'rotate-180': isUserMenuOpen }"
                             />
                         </button>
 
                         <!-- Tooltip for user menu in collapsed mode -->
-                        <!-- <div 
+                        <!-- <div
                             v-if="!isSidebarOpen && !isMobile && hoveredItem?.name === user.name && showTooltip"
                             class="absolute left-full top-1/2 transform -translate-y-1/2 ml-4 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-xl z-[70] whitespace-nowrap animate-in slide-in-from-left-2 duration-200"
                         >
@@ -520,13 +527,13 @@ const isRouteActive = (routeName, routePattern = null) => {
                         </div> -->
 
                         <!-- Dropdown Menu - FIXED Z-INDEX -->
-                        <div 
-                            v-if="isUserMenuOpen && isSidebarOpen" 
+                        <div
+                            v-if="isUserMenuOpen && isSidebarOpen"
                             class="absolute bottom-full left-0 mb-2 w-full bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-2 duration-200 z-[60]"
                         >
                             <div class="p-2 space-y-1">
-                                <Link 
-                                    :href="route('profile.edit')" 
+                                <Link
+                                    :href="route('profile.edit')"
                                     @click="isMobile && (isSidebarOpen = false)"
                                     class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-xl transition-colors duration-150 group active:scale-95"
                                 >
@@ -539,11 +546,11 @@ const isRouteActive = (routeName, routePattern = null) => {
                                         <p class="text-xs text-gray-500">Kelola profil Anda</p>
                                     </div>
                                 </Link>
-                                
+
                                 <div class="border-t border-gray-100 my-1"></div>
-                                
-                                <button 
-                                    @click="handleLogout" 
+
+                                <button
+                                    @click="handleLogout"
                                     class="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors duration-150 group active:scale-95"
                                 >
                                     <div class="flex items-center justify-center w-8 h-8 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors mr-3">
@@ -562,10 +569,10 @@ const isRouteActive = (routeName, routePattern = null) => {
         </aside>
 
         <!-- Main Content -->
-        <div 
-            class="transition-all duration-300" 
+        <div
+            class="transition-all duration-300"
             :class="{
-                'ml-80': isSidebarOpen && !isMobile, 
+                'ml-80': isSidebarOpen && !isMobile,
                 'ml-20': !isSidebarOpen && !isMobile,
                 'ml-0': isMobile,
                 'pt-16': isMobile
@@ -669,7 +676,7 @@ nav::-webkit-scrollbar-thumb:hover {
     .group:hover {
         transform: none;
     }
-    
+
     .active\:scale-95:active {
         transform: scale(0.95);
     }

@@ -25,7 +25,7 @@ defineProps({
                 <Link
                     v-if="canRegister"
                     href="/register"
-                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                    class="bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 font-medium transition"
                 >
                     Register
                 </Link>
@@ -57,7 +57,7 @@ defineProps({
                     <Link
                         v-if="canLogin"
                         href="/login"
-                        class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition"
+                        class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 font-medium transition"
                     >
                         Masuk Sekarang
                     </Link>
