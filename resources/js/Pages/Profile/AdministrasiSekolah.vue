@@ -119,6 +119,81 @@ onMounted(() => {
       form.noValidate = false;
     });
   }
+  // Counter for dynamic anggota rows
+const anggotaCounter = ref(0);
+const anggotaContainer = ref(null);
+
+function addAnggotaRow() {
+  anggotaCounter.value++;
+  const rowHtml = `
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-white rounded-lg border anggota-row" id="anggota-${anggotaCounter.value}">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+        <input type="text" name="anggota_nama[]" class="w-full rounded-lg border-gray-300 shadow-sm px-4 py-3 border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Peran/Tanggung Jawab</label>
+        <input type="text" name="anggota_peran[]" class="w-full rounded-lg border-gray-300 shadow-sm px-4 py-3 border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
+      </div>
+      <div class="flex items-end">
+        <button type="button" class="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 focus:outline-none" @click="removeAnggotaRow(${anggotaCounter.value})">
+          Hapus
+        </button>
+      </div>
+    </div>
+  `;
+  if (anggotaContainer.value) {
+    anggotaContainer.value.insertAdjacentHTML('beforeend', rowHtml);
+  }
+}
+
+function removeAnggotaRow(id) {
+  const row = document.getElementById(`anggota-${id}`);
+  if (row) {
+    row.remove();
+  }
+}
+
+const progressBar = ref(null);
+const formRef = ref(null);
+
+function updateProgress() {
+  const form = formRef.value;
+  if (!form) return;
+  const inputs = form.querySelectorAll('input[type="text"], input[type="number"], input[type="file"], select, textarea');
+  const totalInputs = inputs.length;
+  let filledInputs = 0;
+  inputs.forEach(input => {
+    if (input.type === 'file') {
+      if (input.files.length > 0) filledInputs++;
+    } else if (input.value.trim() !== '') {
+      filledInputs++;
+    }
+  });
+  const completionPercentage = totalInputs > 0 ? Math.round((filledInputs / totalInputs) * 100) : 0;
+  if (progressBar.value) {
+    progressBar.value.style.width = `${completionPercentage}%`;
+    progressBar.value.textContent = `${completionPercentage}%`;
+  }
+}
+
+function saveProgress() {
+  updateProgress();
+  const completionPercentage = parseInt(progressBar.value.textContent);
+  localStorage.setItem('ppepp_completion', completionPercentage);
+  alert('Progres administrasi berhasil disimpan!');
+  window.location.href = 'dashboard_user.html';
+}
+
+onMounted(() => {
+  updateProgress();
+  const form = formRef.value;
+  if (!form) return;
+  const inputs = form.querySelectorAll('input[type="text"], input[type="number"], input[type="file"], select, textarea');
+  inputs.forEach(input => {
+    input.addEventListener('input', updateProgress);
+    input.addEventListener('change', updateProgress);
+  });
 });
 </script>
 
@@ -139,7 +214,34 @@ onMounted(() => {
             description="Kelola dan monitor program lingkungan sekolah Anda"
             color="green"
         />
-        <main class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12">
+<!-- Progress Bar Fixed at Top -->
+<div class="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
+    <div class="container mx-auto px-4 py-2">
+        <div class="flex items-center justify-between">
+            <div class="w-full max-w-xl">
+                <div class="relative pt-1">
+                    <div class="flex mb-2 items-center justify-between">
+                        <div>
+                            <span id="completion-percentage" class="text-xs font-semibold inline-block text-green-800">
+                                0% Selesai
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-semibold inline-block text-green-600">
+                                Minimum 80%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-green-200">
+                        <div id="progress-bar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<main class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 mt-16">
   <div class="container mx-auto px-4 max-w-4xl">
     <!-- Pengajuan Penilaian Section -->
     <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
@@ -282,7 +384,7 @@ onMounted(() => {
             <input id="tautan" name="tautan" type="url" placeholder="https://..." class="w-full rounded-md border-gray-300 shadow-sm px-4 py-2 border focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
           </div>
 
-          
+
         </div>
 
         <!-- A2. Tim Adiwiyata Sekolah -->
@@ -567,23 +669,14 @@ onMounted(() => {
           </div>
         </div>
 
-        
-
-          <!-- Form actions: Save Draft & Submit -->
-          <div class="pt-6 border-t">
-            <div class="flex flex-wrap gap-3 justify-end">
-              <input type="hidden" id="save-action" name="save_action" value="submit">
-              <button type="button" id="save-draft-btn" class="px-4 py-2 rounded-lg bg-yellow-100 text-yellow-800 border border-yellow-200 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300">Simpan sebagai Draft</button>
-              <button type="submit" id="submit-btn" class="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">Ajukan Penilaian</button>
-            </div>
-          </div>
-
-        </form>
-
-        
-
+        <div class="mt-8 text-center">
+          <button type="button" id="save-progress-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-green-700 transition duration-300">
+            Simpan Administrasi
+          </button>
         </div>
-  </div>
-</main>
+      </form>
+      </div>
+    </div>
+    </main>
     </MainLayout>
 </template>

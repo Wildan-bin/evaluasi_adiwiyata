@@ -3,8 +3,46 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Header from '@/Components/Header.vue'
 import { Head } from '@inertiajs/vue3';
+import { onMounted, ref } from 'vue';
 
-// (activity add/remove handlers intentionally removed to avoid runtime errors)
+const statusMessage = ref(null);
+const ajukanBtn = ref(null);
+const administrasiBtn = ref(null);
+
+onMounted(() => {
+    const ppeppCompletion = localStorage.getItem('ppepp_completion') || 0;
+
+    if (administrasiBtn.value) {
+        if (ppeppCompletion > 0) {
+            administrasiBtn.value.textContent = 'Lanjutkan Pengisian';
+        } else {
+            administrasiBtn.value.textContent = 'Mulai Pengisian';
+        }
+    }
+
+    if (statusMessage.value) {
+        if (ppeppCompletion == 100) {
+            statusMessage.value.innerHTML = `
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert">
+                <p class="font-bold">Selesai</p>
+                <p>Pengisian administrasi sudah lengkap.</p>
+                </div>
+            `;
+            if (ajukanBtn.value) {
+                ajukanBtn.value.disabled = false;
+                ajukanBtn.value.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                ajukanBtn.value.classList.add('bg-green-600', 'hover:bg-green-700');
+            }
+        } else {
+            statusMessage.value.innerHTML = `
+                <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+                <p class="font-bold">Belum Lengkap (${ppeppCompletion}%)</p>
+                <p>Pengisian administrasi belum selesai. Silakan lanjutkan pengisian.</p>
+                </div>
+            `;
+        }
+    }
+});
 </script>
 
 <template>
@@ -81,13 +119,23 @@ import { Head } from '@inertiajs/vue3';
             </div>
         </section>
 
-        <!-- Action Button -->
-        <div class="text-center">
-            <a href="administrasi_sekolah.html" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-300">
-                Ajukan PPEPP Sekarang
+        <!-- Action Buttons -->
+        <div class="flex justify-center gap-4 mb-8">
+            <a href="administrasi_sekolah.html" id="administrasi-btn" ref="administrasiBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-300">
+            Mulai Pengisian
             </a>
+            <button id="ajukan-ppepp-btn" ref="ajukanBtn" class="bg-gray-400 text-white font-bold py-3 px-8 rounded-lg shadow-lg cursor-not-allowed" disabled>
+            Ajukan PPEPP
+            </button>
+        </div>
+
+        <!-- Administration Status -->
+        <div id="status-container" class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">Status Pengisian Administrasi</h2>
+            <div id="status-message" ref="statusMessage"></div>
         </div>
     </main>
+
 </body>
     </MainLayout>
 </template>
