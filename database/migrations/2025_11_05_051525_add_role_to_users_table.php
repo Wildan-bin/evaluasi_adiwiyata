@@ -10,7 +10,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['user', 'admin', 'mentor'])->default('user')->after('password');
+            $table->string('role', 50)->default('user')->after('password');
         });
 
         // Set role untuk user yang sudah ada

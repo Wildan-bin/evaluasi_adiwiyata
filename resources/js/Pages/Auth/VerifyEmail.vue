@@ -21,7 +21,7 @@ const verificationLinkSent = computed(
 </script>
 
 <template>
-    <Head title="Verifikasi Email - Adiwiyata" />
+    <Head title="Verifikasi Email - Greenedu" />
 
     <div class="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <!-- Background decorative elements -->
@@ -107,7 +107,7 @@ const verificationLinkSent = computed(
                 <!-- Footer -->
                 <div class="bg-gray-50 px-8 py-4 border-t border-gray-100">
                     <p class="text-xs text-gray-500 text-center">
-                        © 2024 Program Adiwiyata. Semua hak dilindungi.
+                        © 2024 Program Greenedu. Semua hak dilindungi.
                     </p>
                 </div>
             </div>

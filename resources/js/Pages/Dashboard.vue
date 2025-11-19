@@ -37,7 +37,7 @@ defineProps({
             <!-- Header Section -->
             <div class="mb-12">
                 <h1 class="text-4xl font-bold text-gray-900 mb-2">
-                    Dashboard Adiwiyata
+                    Dashboard Greenedu
                 </h1>
                 <p class="text-gray-600 text-lg">
                     Kelola dan monitor program lingkungan sekolah Anda
@@ -47,7 +47,7 @@ defineProps({
             <!-- Welcome Card -->
             <div class="bg-white rounded-lg shadow-lg p-8 text-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-800 mb-4">
-                    Selamat Datang di Evaluasi Adiwiyata
+                    Selamat Datang di Evaluasi Greenedu
                 </h2>
                 <p class="text-gray-600 mb-8 text-lg">
                     Platform evaluasi program lingkungan berkelanjutan untuk sekolah

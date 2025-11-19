@@ -1,36 +1,41 @@
 <?php
+// filepath: app/Http/Controllers/AdministrasiSekolahController.php
 
 namespace App\Http\Controllers;
 
 use App\Models\AdministrasiSekolah;
-use App\Models\AdministrasiLog;
+use App\Models\Ketua;
+use App\Models\Anggota;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class AdministrasiSekolahController extends Controller
 {
-    // Tampilkan form (untuk user)
+    // GET /administrasi-sekolah
     public function create()
     {
         abort_if(Auth::user()->role !== 'user', 403);
 
-        // Cek apakah user sudah punya data sebelumnya
-        $existingData = AdministrasiSekolah::where('user_id', Auth::id())->first();
+        $administrasi = AdministrasiSekolah::with(['ketua.anggota'])
+            ->where('user_id', Auth::id())
+            ->first();
 
         return Inertia::render('Profile/AdministrasiSekolah', [
-            'existingData' => $existingData,
+            'administrasi' => $administrasi,
+            'mode' => $administrasi ? 'view' : 'create',
         ]);
     }
 
-    // Simpan data (create atau update)
+    // POST /administrasi-sekolah
     public function store(Request $request)
     {
         abort_if(Auth::user()->role !== 'user', 403);
 
         $validated = $request->validate([
             'nama_sekolah' => 'required|string|max:255',
-            'npsn' => 'required|string|max:255|unique:administrasi_sekolah,npsn,' . Auth::id() . ',user_id',
+            'npsn' => 'required|string|max:255',
             'alamat' => 'required|string',
             'kelurahan' => 'required|string|max:255',
             'kecamatan' => 'required|string|max:255',
@@ -46,61 +51,109 @@ class AdministrasiSekolahController extends Controller
             'nama_kepala_sekolah' => 'required|string|max:255',
             'nip_kepala_sekolah' => 'nullable|string|max:255',
             'telp_kepala_sekolah' => 'nullable|string|max:20',
-            'tim_adiwiyata' => 'nullable|array',
+            'ketua.nama' => 'required|string|max:255',
+            'ketua.nip' => 'nullable|string|max:255',
+            'ketua.email' => 'nullable|email|max:255',
+            'ketua.nomor_telepon' => 'nullable|string|max:20',
+            'anggota' => 'nullable|array',
+            'anggota.*.nama' => 'required|string|max:255',
+            'anggota.*.nip' => 'nullable|string|max:255',
+            'anggota.*.email' => 'nullable|email|max:255',
+            'anggota.*.nomor_telepon' => 'nullable|string|max:20',
         ]);
 
-        // Cek apakah data sudah ada
-        $administrasi = AdministrasiSekolah::where('user_id', Auth::id())->first();
+        DB::beginTransaction();
+        try {
+            $administrasi = AdministrasiSekolah::where('user_id', Auth::id())->first();
 
-        if ($administrasi) {
-            // Update existing data
-            $oldData = $administrasi->toArray();
-            $administrasi->update($validated);
+            $administrasiData = [
+                'nama_sekolah' => $validated['nama_sekolah'],
+                'npsn' => $validated['npsn'],
+                'alamat' => $validated['alamat'],
+                'kelurahan' => $validated['kelurahan'],
+                'kecamatan' => $validated['kecamatan'],
+                'kota' => $validated['kota'],
+                'provinsi' => $validated['provinsi'],
+                'kode_pos' => $validated['kode_pos'] ?? null,
+                'telepon' => $validated['telepon'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'website' => $validated['website'] ?? null,
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
+                'google_maps_url' => $validated['google_maps_url'] ?? null,
+                'nama_kepala_sekolah' => $validated['nama_kepala_sekolah'],
+                'nip_kepala_sekolah' => $validated['nip_kepala_sekolah'] ?? null,
+                'telp_kepala_sekolah' => $validated['telp_kepala_sekolah'] ?? null,
+            ];
 
-            // Create log
-            AdministrasiLog::create([
-                'administrasi_sekolah_id' => $administrasi->id,
-                'user_id' => Auth::id(),
-                'action' => 'updated',
-                'description' => 'User memperbarui data administrasi sekolah',
-                'old_data' => $oldData,
-                'new_data' => $validated,
-                'created_at' => now(),
-            ]);
+            if ($administrasi) {
+                // ✅ Update - hanya boleh edit jika status unverified
+                if ($administrasi->status !== 'unverified') {
+                    DB::rollBack();
+                    return back()->withErrors(['status' => 'Data tidak dapat diedit. Status: ' . $administrasi->status]);
+                }
 
-            $message = 'Data berhasil diperbarui!';
-        } else {
-            // Create new data
-            $administrasi = AdministrasiSekolah::create([
-                'user_id' => Auth::id(),
-                ...$validated,
-            ]);
+                $administrasi->update([
+                    ...$administrasiData,
+                    'last_updated_by_user_at' => now(),
+                    'status' => 'pending', // ✅ Set ke pending lagi setelah update
+                ]);
 
-            // Create log
-            AdministrasiLog::create([
-                'administrasi_sekolah_id' => $administrasi->id,
-                'user_id' => Auth::id(),
-                'action' => 'created',
-                'description' => 'User membuat data administrasi sekolah baru',
-                'old_data' => null,
-                'new_data' => $validated,
-                'created_at' => now(),
-            ]);
+                $message = 'Data berhasil diperbarui dan menunggu verifikasi!';
+            } else {
+                // ✅ Create - langsung pending
+                $administrasi = AdministrasiSekolah::create([
+                    'user_id' => Auth::id(),
+                    ...$administrasiData,
+                    'status' => 'pending', // ✅ Default pending
+                    'submitted_at' => now(),
+                ]);
 
-            $message = 'Data berhasil disimpan!';
+                $message = 'Data berhasil disimpan dan menunggu verifikasi!';
+            }
+
+            // Upsert Ketua
+            $ketua = Ketua::updateOrCreate(
+                ['sekolah_id' => $administrasi->id],
+                $validated['ketua']
+            );
+
+            // Sync Anggota
+            Anggota::where('sekolah_id', $administrasi->id)->delete();
+
+            if (isset($validated['anggota']) && is_array($validated['anggota']) && count($validated['anggota']) > 0) {
+                foreach ($validated['anggota'] as $anggotaData) {
+                    Anggota::create([
+                        'ketua_id' => $ketua->id,
+                        'sekolah_id' => $administrasi->id,
+                        'nama' => $anggotaData['nama'],
+                        'nip' => $anggotaData['nip'] ?? null,
+                        'email' => $anggotaData['email'] ?? null,
+                        'nomor_telepon' => $anggotaData['nomor_telepon'] ?? null,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('administrasi-sekolah')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()
+                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])
+                ->withInput();
         }
-
-        // Redirect ke preview
-        return redirect()->route('administrasi-preview', $administrasi->id)
-            ->with('success', $message);
     }
 
-    // Preview data
+    // GET /administrasi-sekolah/preview/{id}
     public function preview($id)
     {
-        $administrasi = AdministrasiSekolah::with('user')->findOrFail($id);
+        $administrasi = AdministrasiSekolah::with(['user', 'ketua.anggota', 'verifiedByAdmin'])
+            ->findOrFail($id);
 
-        // Pastikan user hanya bisa lihat data miliknya sendiri (kecuali admin)
         if (Auth::user()->role !== 'admin' && $administrasi->user_id !== Auth::id()) {
             abort(403);
         }
@@ -110,54 +163,108 @@ class AdministrasiSekolahController extends Controller
         ]);
     }
 
-    // Submit untuk review admin
-    public function submit($id)
+    // POST /administrasi-sekolah/request-edit (deprecated - tidak perlu lagi)
+    public function requestEdit(Request $request)
     {
+        return back()->withErrors(['deprecated' => 'Fitur ini tidak digunakan lagi']);
+    }
+
+    // ==================== ADMIN ENDPOINTS ====================
+
+    // GET /administrasi-sekolah/submissions
+    public function submissions(Request $request)
+    {
+        abort_if(Auth::user()->role !== 'admin', 403);
+
+        $query = AdministrasiSekolah::with(['user', 'ketua.anggota'])
+            ->orderBy('submitted_at', 'desc');
+
+        // ✅ Filter by status
+        if ($request->status && in_array($request->status, ['pending', 'unverified', 'verified'])) {
+            $query->where('status', $request->status);
+        }
+
+        // Search
+        if ($request->q) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama_sekolah', 'like', "%{$request->q}%")
+                  ->orWhere('npsn', 'like', "%{$request->q}%")
+                  ->orWhereHas('user', function ($q) use ($request) {
+                      $q->where('name', 'like', "%{$request->q}%");
+                  });
+            });
+        }
+
+        $submissions = $query->paginate(12);
+
+        return Inertia::render('Admin/AdministrasiSubmissions', [
+            'submissions' => $submissions,
+            'filters' => $request->only(['status', 'q']),
+        ]);
+    }
+
+    // PATCH /administrasi-sekolah/{id}/verify
+    public function verify(Request $request, $id)
+    {
+        abort_if(Auth::user()->role !== 'admin', 403);
+
+        $request->validate([
+            'status' => 'required|in:pending,unverified,verified',
+        ]);
+
         $administrasi = AdministrasiSekolah::findOrFail($id);
 
-        abort_if($administrasi->user_id !== Auth::id(), 403);
-        abort_if($administrasi->status !== 'draft', 400, 'Data sudah disubmit sebelumnya');
+        $updateData = [
+            'status' => $request->status,
+        ];
 
-        $administrasi->update(['status' => 'submitted']);
+        if ($request->status === 'verified') {
+            $updateData['verified_at'] = now();
+            $updateData['verified_by_admin_id'] = Auth::id();
+        } else {
+            $updateData['verified_at'] = null;
+            $updateData['verified_by_admin_id'] = null;
+        }
 
-        // Create log
-        AdministrasiLog::create([
-            'administrasi_sekolah_id' => $administrasi->id,
-            'user_id' => Auth::id(),
-            'action' => 'submitted',
-            'description' => 'User submit data untuk review admin',
-            'old_data' => ['status' => 'draft'],
-            'new_data' => ['status' => 'submitted'],
-            'created_at' => now(),
-        ]);
+        $administrasi->update($updateData);
 
-        return redirect()->route('administrasi-preview', $id)
-            ->with('success', 'Data berhasil disubmit untuk review!');
+        $statusText = match($request->status) {
+            'pending' => 'Pending',
+            'unverified' => 'Unverified (dapat diedit user)',
+            'verified' => 'Verified',
+        };
+
+        return back()->with('success', "Status berhasil diubah menjadi: {$statusText}");
     }
 
-    // List logs (untuk admin)
-    public function logs()
+    // PATCH /administrasi-sekolah/{id}/note
+    public function updateNote(Request $request, $id)
     {
         abort_if(Auth::user()->role !== 'admin', 403);
 
-        $logs = AdministrasiLog::with(['administrasiSekolah', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-
-        return Inertia::render('Profile/AdministrasiLogs', [
-            'logs' => $logs,
+        $request->validate([
+            'admin_note' => 'nullable|string|max:5000',
         ]);
+
+        $administrasi = AdministrasiSekolah::findOrFail($id);
+        $administrasi->update(['admin_note' => $request->admin_note]);
+
+        return back()->with('success', 'Catatan admin berhasil disimpan!');
     }
 
-    // Detail log (untuk admin)
-    public function logDetail($id)
+    // PATCH /administrasi-sekolah/{id}/unlock (deprecated - pakai verify dengan status unverified)
+    public function unlockForEdit($id)
     {
         abort_if(Auth::user()->role !== 'admin', 403);
 
-        $log = AdministrasiLog::with(['administrasiSekolah', 'user'])->findOrFail($id);
+        $administrasi = AdministrasiSekolah::findOrFail($id);
 
-        return Inertia::render('Profile/AdministrasiLogDetail', [
-            'log' => $log,
+        $administrasi->update([
+            'status' => 'unverified',
+            'verified_at' => null,
+            'verified_by_admin_id' => null,
         ]);
+
+        return back()->with('success', 'Data berhasil di-unlock untuk edit!');
     }
 }

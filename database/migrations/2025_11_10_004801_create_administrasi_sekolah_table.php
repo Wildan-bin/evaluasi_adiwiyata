@@ -35,11 +35,11 @@ return new class extends Migration
             $table->string('nip_kepala_sekolah')->nullable();
             $table->string('telp_kepala_sekolah')->nullable();
 
-            // Tim Adiwiyata (JSON untuk menyimpan array anggota)
-            $table->json('tim_adiwiyata')->nullable();
+            // Tim Greenedu (JSON untuk menyimpan array anggota)
+            $table->json('tim_greenedu')->nullable();
 
             // Status
-            $table->enum('status', ['draft', 'submitted', 'approved', 'rejected'])->default('draft');
+            $table->enum('status', ['pending', 'unverified', 'verified'])->default('pending');
             $table->text('catatan_admin')->nullable();
 
             $table->timestamps();

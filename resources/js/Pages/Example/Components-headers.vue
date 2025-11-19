@@ -25,7 +25,7 @@ const breadcrumbs = [
         </h1>
 
         <Header
-            title="Dashboard Adiwiyata"
+            title="Dashboard Greenedu"
             description="Kelola dan monitor program lingkungan sekolah Anda"
             :icon="BarChart3"
             color="green"
@@ -36,7 +36,7 @@ const breadcrumbs = [
             Header dengan Badge
         </h1>
         <Header
-            title="Evaluasi Program Adiwiyata"
+            title="Evaluasi Program Greenedu"
             description="Pantau perkembangan program lingkungan dan keberlanjutan sekolah"
             subtitle="Tahun Akademik 2024/2025"
             :icon="CheckCircle"
@@ -51,7 +51,7 @@ const breadcrumbs = [
             Header dengan Custom Action Button
         </h1>
         <Header
-            title="Laporan Adiwiyata"
+            title="Laporan Greenedu"
             description="Lihat laporan komprehensif program lingkungan sekolah"
             :icon="FileText"
             color="teal"
@@ -92,7 +92,7 @@ const breadcrumbs = [
         </h1>
         <Header
             title="Pengaturan Sistem"
-            description="Konfigurasi dan kelola setting aplikasi Adiwiyata"
+            description="Konfigurasi dan kelola setting aplikasi Greenedu"
             :icon="Settings"
             color="purple"
             size="lg"

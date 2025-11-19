@@ -3,7 +3,7 @@ import { computed } from 'vue';
 
 /**
  * Header Component - Komponen header untuk menampilkan judul dan deskripsi halaman
- * 
+ *
  * Props yang tersedia:
  * - title (String): Judul halaman - REQUIRED
  * - description (String): Deskripsi halaman (opsional)
@@ -16,15 +16,15 @@ import { computed } from 'vue';
  * - variant (String): Gaya header - 'default', 'gradient', 'minimal' (default: 'default')
  * - badge (String): Badge teks di sebelah judul (opsional)
  * - badgeColor (String): Warna badge (default: 'gray')
- * 
+ *
  * Slot yang tersedia:
  * - default: Konten custom di area kanan header
  * - icon: Custom icon area
  * - badge: Custom badge area
- * 
+ *
  * Contoh penggunaan:
- * <Header 
- *   title="Dashboard Adiwiyata"
+ * <Header
+ *   title="Dashboard Greenedu"
  *   description="Kelola dan monitor program lingkungan sekolah"
  *   :icon="BarChart3"
  *   color="green"
@@ -211,7 +211,7 @@ const badgeColorClasses = computed(() => {
 // Hitung kelas CSS untuk variant
 const variantClasses = computed(() => {
   const variantMap = {
-    default: `${colorClasses.value.bg} border border-gray-200`,
+    default: `bg-white border border-gray-200`,
     gradient: `bg-gradient-to-r ${colorClasses.value.gradient} text-white`,
     minimal: 'bg-transparent border-b-2 border-gray-200'
   };
@@ -243,9 +243,9 @@ const descriptionColorClass = computed(() => {
         <template v-for="(crumb, index) in breadcrumbs" :key="index">
           <!-- Separator -->
           <span v-if="index > 0" class="text-gray-400">/</span>
-          
+
           <!-- Breadcrumb Item -->
-          <a 
+          <a
             v-if="crumb.href"
             :href="crumb.href"
             class="text-blue-600 hover:text-blue-700 hover:underline transition-colors"
@@ -260,7 +260,7 @@ const descriptionColorClass = computed(() => {
     </div>
 
     <!-- Header Main Content -->
-    <div 
+    <div
       :class="[
         'relative w-full transition-all duration-300',
         sizeClasses.container,
@@ -279,7 +279,7 @@ const descriptionColorClass = computed(() => {
         <div class="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
           <!-- Icon Area -->
           <slot name="icon">
-            <div 
+            <div
               v-if="icon"
               :class="[
                 'flex-shrink-0 rounded-lg sm:rounded-xl flex items-center justify-center transition-transform duration-300 hover:scale-110',
@@ -287,8 +287,8 @@ const descriptionColorClass = computed(() => {
                 props.variant === 'gradient' ? 'bg-white/20 backdrop-blur-sm' : colorClasses.badge
               ]"
             >
-              <component 
-                :is="icon" 
+              <component
+                :is="icon"
                 :class="[
                   sizeClasses.icon,
                   props.variant === 'gradient' ? 'text-white' : colorClasses.icon
@@ -301,7 +301,7 @@ const descriptionColorClass = computed(() => {
           <div class="flex-1 min-w-0">
             <!-- Title + Badge -->
             <div class="flex items-start gap-2 mb-1 flex-wrap">
-              <h1 
+              <h1
                 :class="[
                   'font-bold leading-tight',
                   sizeClasses.title,
@@ -310,10 +310,10 @@ const descriptionColorClass = computed(() => {
               >
                 {{ title }}
               </h1>
-              
+
               <!-- Badge (opsional) -->
               <slot name="badge">
-                <span 
+                <span
                   v-if="badge"
                   :class="[
                     'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 mt-0.5',
@@ -331,7 +331,7 @@ const descriptionColorClass = computed(() => {
             </p>
 
             <!-- Description -->
-            <p 
+            <p
               v-if="description"
               :class="[
                 'text-sm sm:text-base line-clamp-2',
@@ -342,8 +342,8 @@ const descriptionColorClass = computed(() => {
             </p>
 
             <!-- Accent Line untuk variant minimal -->
-            <div 
-              v-if="props.variant === 'minimal'" 
+            <div
+              v-if="props.variant === 'minimal'"
               class="h-1 w-16 rounded-full mt-3"
               :style="{ backgroundColor: colorClasses.line }"
             ></div>

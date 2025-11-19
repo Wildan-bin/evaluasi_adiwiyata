@@ -6,7 +6,7 @@ import { Head } from '@inertiajs/vue3';
 </script>
 
 <template>
-    
+
     <MainLayout>
         <Head title="Dashboard" />
         <template #header>
@@ -18,7 +18,7 @@ import { Head } from '@inertiajs/vue3';
         </template>
 
         <Header
-            title="Dashboard Adiwiyata"
+            title="Dashboard Greenedu"
             description="Kelola dan monitor program lingkungan sekolah Anda"
             color="green"
         />
@@ -100,7 +100,7 @@ import { Head } from '@inertiajs/vue3';
   <!-- Pengajuan List Section -->
   <div class="bg-white rounded-lg shadow-lg p-6">
     <h2 class="text-2xl font-bold mb-6">Daftar Sekolah</h2>
-    
+
     <div class="overflow-x-auto">
       <table class="w-full">
         <thead class="bg-green-500 text-white">

@@ -213,7 +213,7 @@ const navigationItems = [
     //     name: 'Laporan',
     //     route: 'reports.index',
     //     icon: BarChart3,
-    //     description: 'Laporan Adiwiyata',
+    //     description: 'Laporan Greenedu',
     //     color: 'text-teal-400'
     // },
     // {
@@ -233,8 +233,8 @@ const isRouteActive = (routeName, routePattern = null) => {
 </script>
 
 <template>
-    <div class="relative min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50">
-        <!-- Background gradient dengan warna hijau tema Adiwiyata: emerald (90), green (50), teal (50) -->
+    <div class="relative min-h-screen bg-white">
+        <!-- Background gradient dengan warna hijau tema Greenedu: emerald (90), green (50), teal (50) -->
 
         <!-- Mobile Header Bar - FIXED Z-INDEX -->
         <div
@@ -262,7 +262,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                         </div>
                         <div>
                             <h1 class="text-sm font-bold text-gray-900">
-                                <a :href="route('dashboard')">Evaluasi Adiwiyata</a></h1>
+                                <a :href="route('dashboard')">Evaluasi Greenedu</a></h1>
                         </div>
                     </div>
                 </div>
@@ -327,7 +327,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                         </div>
                         <!-- Show brand name when sidebar is open (both mobile and desktop) -->
                         <div v-if="isSidebarOpen" class="transition-all duration-300">
-                            <h1 class="text-lg sm:text-xl font-bold text-white leading-tight">Evaluasi Adiwiyata</h1>
+                            <h1 class="text-lg sm:text-xl font-bold text-white leading-tight">Evaluasi Greenedu</h1>
                             <p class="text-xs text-white/70 hidden sm:block">Program Lingkungan</p>
                         </div>
                     </div>

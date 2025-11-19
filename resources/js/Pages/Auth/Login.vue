@@ -33,7 +33,7 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Masuk - Adiwiyata" />
+    <Head title="Masuk - Greenedu" />
 
     <div class="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <!-- Background decorative elements -->
@@ -52,7 +52,7 @@ const submit = () => {
                             <Leaf class="w-8 h-8 text-white" />
                         </div>
                     </div>
-                    <h1 class="text-3xl font-bold text-white text-center">Adiwiyata</h1>
+                    <h1 class="text-3xl font-bold text-white text-center">Greenedu</h1>
                     <p class="text-green-100 text-center text-sm mt-2">Program Evaluasi Lingkungan Sekolah</p>
                 </div>
 
@@ -173,7 +173,7 @@ const submit = () => {
                 <!-- Footer -->
                 <div class="bg-gray-50 px-8 py-4 border-t border-gray-100">
                     <p class="text-xs text-gray-500 text-center">
-                        © 2024 Program Adiwiyata. Semua hak dilindungi.
+                        © 2024 Program Greenedu. Semua hak dilindungi.
                     </p>
                 </div>
             </div>
