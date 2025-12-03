@@ -3,6 +3,66 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Header from '@/Components/Header.vue'
 import { Head } from '@inertiajs/vue3';
+
+function getMentorListFromContainer() {
+  const mentorNodes = document.querySelectorAll('.bg-white.rounded-lg.shadow-lg .space-y-3 .font-medium');
+  let mentors = [];
+  // Ambil hanya mentor dari container Pembimbing
+  document.querySelectorAll('.bg-white.rounded-lg.shadow-lg').forEach(container => {
+    const title = container.querySelector('h2');
+    if (title && title.textContent.trim().toLowerCase().includes('mentor')) {
+      container.querySelectorAll('.space-y-3 .font-medium').forEach(node => {
+        mentors.push(node.textContent.trim());
+      });
+    }
+  });
+  return mentors;
+}
+let assignedMentors = {};
+
+function renderMentorDropdown(rowId, mentorList) {
+  const select = document.createElement('select');
+  select.className = "border rounded px-2 py-1 w-32";
+  select.innerHTML = '<option value="">Pilih Mentor</option>' + mentorList.map(m => `<option value="${m}">${m}</option>`).join('');
+  select.onchange = function() {
+    assignedMentors[rowId] = select.value;
+  };
+  return select;
+}
+
+function saveMentor(rowId, selectElem) {
+  const mentor = selectElem.value;
+  if (mentor) {
+    selectElem.disabled = true;
+    document.getElementById('save-btn-' + rowId).disabled = true;
+    alert('Mentor berhasil disimpan!');
+    // Refresh dropdown di baris lain
+    document.querySelectorAll('.mentor-dropdown').forEach((drop, idx) => {
+      if (idx !== rowId) {
+        const mentorList = getMentorListFromContainer().filter(m => !Object.values(assignedMentors).includes(m));
+        const currentValue = drop.value;
+        drop.innerHTML = '<option value="">Pilih Mentor</option>' + mentorList.map(m => `<option value="${m}">${m}</option>`).join('');
+        drop.value = currentValue;
+      }
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Ambil mentor dari container
+  let mentorList = getMentorListFromContainer();
+  document.querySelectorAll('.mentor-cell').forEach((cell, idx) => {
+    const select = renderMentorDropdown(idx, mentorList.filter(m => !Object.values(assignedMentors).includes(m)));
+    select.classList.add('mentor-dropdown');
+    cell.innerHTML = '';
+    cell.appendChild(select);
+    // Simpan mentor
+    const saveBtn = document.getElementById('save-btn-' + idx);
+    if (saveBtn) {
+      saveBtn.onclick = function() { saveMentor(idx, select); };
+    }
+  });
+});
 </script>
 
 <template>
@@ -98,32 +158,153 @@ import { Head } from '@inertiajs/vue3';
   </div>
 
   <!-- Pengajuan List Section -->
-  <div class="bg-white rounded-lg shadow-lg p-6">
-    <h2 class="text-2xl font-bold mb-6">Daftar Sekolah</h2>
+  <div class="bg-white rounded-lg shadow-lg p-6 mb-12">
+    <h2 class="text-2xl font-bold mb-6">Daftar Sekolah Pengajuan PPEPP</h2>
     
     <div class="overflow-x-auto">
       <table class="w-full">
         <thead class="bg-green-500 text-white">
           <tr>
             <th class="px-6 py-4 text-left">Nama Sekolah</th>
+            <th class="px-6 py-4 text-center">Mentor</th>
+            <th class="px-6 py-4 text-center">Status</th>
+            <th class="px-6 py-4 text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-4">SDN Example 1</td>
+            <td class="px-6 py-4 text-center mentor-cell"></td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">
+                Belum Dievaluasi
+              </span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <button id="save-btn-0" class="bg-blue-500 text-white px-3 py-1 rounded">Simpan Mentor</button>
+            </td>
+          </tr>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-4">SMP Example 1</td>
+            <td class="px-6 py-4 text-center mentor-cell"></td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">
+                Belum Dievaluasi
+              </span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <button id="save-btn-1" class="bg-blue-500 text-white px-3 py-1 rounded">Simpan Mentor</button>
+            </td>
+          </tr>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-4">SMP Example 1</td>
+            <td class="px-6 py-4 text-center mentor-cell"></td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">
+                Belum Dievaluasi
+              </span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <button id="save-btn-2" class="bg-blue-500 text-white px-3 py-1 rounded">Simpan Mentor</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+   <!-- Pengajuan List Section -->
+  <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+    <h2 class="text-2xl font-bold mb-6">Daftar Sekolah Sudah Evaluasi PPEPP</h2>
+    
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-green-500 text-white">
+          <tr>
+            <th class="px-6 py-4 text-left">Nama Sekolah</th>
+            <th class="px-6 py-4 text-center">Mentor</th>
+            <th class="px-6 py-4 text-center">File Bukti</th>
             <th class="px-6 py-4 text-center">Status</th>
           </tr>
         </thead>
         <tbody>
           <tr class="border-b hover:bg-gray-50">
             <td class="px-6 py-4">SDN Example 1</td>
+            <td class="px-6 py-4 text-center">Mentor A</td>
             <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">
-                Belum Dievaluasi
+              <a href="#" class="bg-green-500 text-white px-3 py-1 rounded" id="download-bukti-0">Download Bukti</a>
+              <span class="block text-xs text-gray-500 mt-1" id="bukti-status-0">Belum ada file bukti</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">
+                Sudah Dievaluasi
               </span>
             </td>
           </tr>
           <tr class="border-b hover:bg-gray-50">
             <td class="px-6 py-4">SMP Example 1</td>
+            <td class="px-6 py-4 text-center">Mentor B</td>
+            <td class="px-6 py-4 text-center">
+              <a href="#" class="bg-green-500 text-white px-3 py-1 rounded" id="download-bukti-1">Download Bukti</a>
+              <span class="block text-xs text-gray-500 mt-1" id="bukti-status-1">Belum ada file bukti</span>
+            </td>
             <td class="px-6 py-4 text-center">
               <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">
                 Sudah Dievaluasi
               </span>
+            </td>
+          </tr>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-4">SMP Example 1</td>
+            <td class="px-6 py-4 text-center">Mentor C</td>
+            <td class="px-6 py-4 text-center">
+              <a href="#" class="bg-green-500 text-white px-3 py-1 rounded" id="download-bukti-2">Download Bukti</a>
+              <span class="block text-xs text-gray-500 mt-1" id="bukti-status-2">Belum ada file bukti</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">
+                Sudah Dievaluasi
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+   <!-- Pemantauan Administrasi Sekolah Section -->
+  <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
+    <h2 class="text-2xl font-bold mb-6">Pemantauan Pengisian Administrasi Sekolah</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-green-500 text-white">
+          <tr>
+            <th class="px-6 py-4 text-left">Nama Sekolah</th>
+            <th class="px-6 py-4 text-center">Jenjang</th>
+            <th class="px-6 py-4 text-center">Status Pengisian</th>
+            <th class="px-6 py-4 text-center">Progress (%)</th>
+            <th class="px-6 py-4 text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-4">SDN Example 1</td>
+            <td class="px-6 py-4 text-center">SD/MI</td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Belum Lengkap</span>
+            </td>
+            <td class="px-6 py-4 text-center">60%</td>
+            <td class="px-6 py-4 text-center">
+              <a href="#" class="bg-blue-500 text-white px-3 py-1 rounded">Detail</a>
+            </td>
+          </tr>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-4">SMP Example 1</td>
+            <td class="px-6 py-4 text-center">SMP/MTs</td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Sudah Lengkap</span>
+            </td>
+            <td class="px-6 py-4 text-center">100%</td>
+            <td class="px-6 py-4 text-center">
+              <a href="#" class="bg-blue-500 text-white px-3 py-1 rounded">Detail</a>
             </td>
           </tr>
         </tbody>
