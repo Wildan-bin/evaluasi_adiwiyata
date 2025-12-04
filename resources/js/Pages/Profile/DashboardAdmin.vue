@@ -4,6 +4,67 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 import Header from '@/Components/Header.vue'
 import { Head } from '@inertiajs/vue3';
 
+    // Data user
+    let admins = [
+      { name: "Admin 1", email: "admin@example.com" }
+    ];
+    let users = [
+      { name: "User 1", email: "user@example.com" }
+    ];
+    let mentors = [
+      { name: "Pembimbing 1", email: "pembimbing@example.com" }
+    ];
+
+    function renderUserList(containerId, data, type) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = "";
+      data.forEach((user, idx) => {
+        const div = document.createElement("div");
+        div.className = "flex items-center justify-between p-3 bg-gray-50 rounded-md mb-2";
+        div.innerHTML = `
+          <div>
+            <p class="font-medium">${user.name}</p>
+            <p class="text-sm text-gray-500">${user.email}</p>
+          </div>
+          <button class="text-red-600 hover:text-red-800" onclick="deleteUser('${type}', ${idx})">
+            <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' /></svg>
+          </button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function deleteUser(type, idx) {
+      if (type === "admin") admins.splice(idx, 1);
+      if (type === "user") users.splice(idx, 1);
+      if (type === "mentor") mentors.splice(idx, 1);
+      renderAll();
+    }
+
+    function addUser(type) {
+      const name = prompt("Masukkan nama " + type);
+      const email = prompt("Masukkan email " + type);
+      if (name && email) {
+        if (type === "admin") admins.push({ name, email });
+        if (type === "user") users.push({ name, email });
+        if (type === "mentor") mentors.push({ name, email });
+        renderAll();
+      }
+    }
+
+    function renderAll() {
+      renderUserList("admin-list", admins, "admin");
+      renderUserList("user-list", users, "user");
+      renderUserList("mentor-list", mentors, "mentor");
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("add-admin-btn").onclick = function() { addUser("admin"); };
+      document.getElementById("add-user-btn").onclick = function() { addUser("user"); };
+      document.getElementById("add-mentor-btn").onclick = function() { addUser("mentor"); };
+      renderAll();
+    });
+
 function getMentorListFromContainer() {
   const mentorNodes = document.querySelectorAll('.bg-white.rounded-lg.shadow-lg .space-y-3 .font-medium');
   let mentors = [];
@@ -288,16 +349,16 @@ document.addEventListener('DOMContentLoaded', function() {
           <tr class="border-b hover:bg-gray-50">
             <td class="px-6 py-4">SMP Example 1</td>
             <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</span>
+              <button class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</button>
             </td>
             <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</span>
+              <button class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</button>
             </td>
             <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</span>
+              <button class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</button>
             </td>
             <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Belum diisi</span>
+              <button class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Belum diisi</button>
             </td>
           </tr>
         </tbody>
@@ -305,16 +366,16 @@ document.addEventListener('DOMContentLoaded', function() {
           <tr class="border-b hover:bg-gray-50">
             <td class="px-6 py-4">SMP Example 1</td>
             <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</span>
+              <button class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</button>
             </td>
             <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Belum diisi</span>
+              <button class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Belum diisi</button>
             </td>
             <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</span>
+              <button class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</button>
             </td>
             <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Belum diisi</span>
+              <button class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Belum diisi</button>
             </td>
           </tr>
         </tbody>
