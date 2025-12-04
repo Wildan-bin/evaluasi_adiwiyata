@@ -272,39 +272,49 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
    <!-- Pemantauan Administrasi Sekolah Section -->
   <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
-    <h2 class="text-2xl font-bold mb-6">Pemantauan Pengisian Administrasi Sekolah</h2>
+    <h2 class="text-2xl font-bold mb-6">Pemantauan Administrasi Sekolah</h2>
     <div class="overflow-x-auto">
       <table class="w-full">
         <thead class="bg-green-500 text-white">
           <tr>
             <th class="px-6 py-4 text-left">Nama Sekolah</th>
-            <th class="px-6 py-4 text-center">Jenjang</th>
-            <th class="px-6 py-4 text-center">Status Pengisian</th>
-            <th class="px-6 py-4 text-center">Progress (%)</th>
-            <th class="px-6 py-4 text-center">Aksi</th>
+            <th class="px-6 py-4 text-center">Rencana & Evaluasi PBLHS</th>
+            <th class="px-6 py-4 text-center">Self Assessment</th>
+            <th class="px-6 py-4 text-center">Kebutuhan Pendampingan</th>
+            <th class="px-6 py-4 text-center">Pernyataan & Persetujuan</th>
           </tr>
         </thead>
         <tbody>
           <tr class="border-b hover:bg-gray-50">
-            <td class="px-6 py-4">SDN Example 1</td>
-            <td class="px-6 py-4 text-center">SD/MI</td>
+            <td class="px-6 py-4">SMP Example 1</td>
             <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Belum Lengkap</span>
+              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</span>
             </td>
-            <td class="px-6 py-4 text-center">60%</td>
             <td class="px-6 py-4 text-center">
-              <a href="#" class="bg-blue-500 text-white px-3 py-1 rounded">Detail</a>
+              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Belum diisi</span>
             </td>
           </tr>
+        </tbody>
+        <tbody>
           <tr class="border-b hover:bg-gray-50">
             <td class="px-6 py-4">SMP Example 1</td>
-            <td class="px-6 py-4 text-center">SMP/MTs</td>
             <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Sudah Lengkap</span>
+              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</span>
             </td>
-            <td class="px-6 py-4 text-center">100%</td>
             <td class="px-6 py-4 text-center">
-              <a href="#" class="bg-blue-500 text-white px-3 py-1 rounded">Detail</a>
+              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Belum diisi</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Diisi</span>
+            </td>
+            <td class="px-6 py-4 text-center">
+              <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Belum diisi</span>
             </td>
           </tr>
         </tbody>
