@@ -46,7 +46,7 @@ onMounted(() => {
 </script>
 
 <template>
-
+    
     <MainLayout>
         <Head title="Dashboard" />
         <template #header>
@@ -58,7 +58,7 @@ onMounted(() => {
         </template>
 
         <Header
-            title="Dashboard Greenedu"
+            title="Dashboard Adiwiyata"
             description="Kelola dan monitor program lingkungan sekolah Anda"
             color="green"
         />
