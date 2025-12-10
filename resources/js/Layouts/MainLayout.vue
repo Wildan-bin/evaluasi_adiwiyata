@@ -1,3 +1,4 @@
+
 <script setup>
 import { Link, router } from '@inertiajs/vue3';
 import {
@@ -6,7 +7,6 @@ import {
     Menu,           // Tombol sidebar toggle / menu navigasi
     X,              // Tutup / hapus / close modal
     ChevronDown,    // Panah dropdown
-    Leaf as LoginIcon,
     ChevronLeft,    // Navigasi kiri
     ChevronRight,   // Navigasi kanan
     Search,         // Pencarian
@@ -176,13 +176,6 @@ const navigationItems = [
         color: 'text-green-400'
     },
     {
-        name: 'Administrasi Sekolah',
-        route: 'administrasi-sekolah',
-        icon: FileText,
-        description: 'Data Administrasi Sekolah',
-        color: 'text-green-400'
-    },
-    {
         name: 'Evaluasi PPEPP',
         route: 'evaluation',
         icon: FileText,
@@ -214,7 +207,7 @@ const navigationItems = [
     //     name: 'Laporan',
     //     route: 'reports.index',
     //     icon: BarChart3,
-    //     description: 'Laporan Greenedu',
+    //     description: 'Laporan Adiwiyata',
     //     color: 'text-teal-400'
     // },
     // {
@@ -234,7 +227,7 @@ const isRouteActive = (routeName, routePattern = null) => {
 </script>
 
 <template>
-    <div class="relative min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50">
+    <div class="relative min-h-screen bg-white">
         <!-- Background gradient dengan warna hijau tema Adiwiyata: emerald (90), green (50), teal (50) -->
 
         <!-- Mobile Header Bar - FIXED Z-INDEX -->
@@ -263,7 +256,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                         </div>
                         <div>
                             <h1 class="text-sm font-bold text-gray-900">
-                                <a :href="route('dashboard')">Evaluasi Greenedu</a></h1>
+                                <a :href="route('dashboard')">Evaluasi Adiwiyata</a></h1>
                         </div>
                     </div>
                 </div>
@@ -322,11 +315,13 @@ const isRouteActive = (routeName, routePattern = null) => {
                     <div class="flex items-center gap-3">
                         <div class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl">
                             <!-- Ikon logo dengan background transparan -->
-                            <LoginIcon class="text-white w-5 h-5 group-hover:translate-x-1 transition"/>
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
                         </div>
                         <!-- Show brand name when sidebar is open (both mobile and desktop) -->
                         <div v-if="isSidebarOpen" class="transition-all duration-300">
-                            <h1 class="text-lg sm:text-xl font-bold text-white leading-tight">Evaluasi Greenedu</h1>
+                            <h1 class="text-lg sm:text-xl font-bold text-white leading-tight">Evaluasi Adiwiyata</h1>
                             <p class="text-xs text-white/70 hidden sm:block">Program Lingkungan</p>
                         </div>
                     </div>
@@ -412,8 +407,8 @@ const isRouteActive = (routeName, routePattern = null) => {
                                 :class=" [
                                     isSidebarOpen ? 'w-10 h-10 rounded-xl' : 'w-8 h-8 rounded-lg',
                                     isRouteActive(item.route, item.routePattern)
-                                        ? 'bg-[#059669]/15 text-[#059669]'
-                                        : 'bg-gray-100 group-hover:bg-white group-hover:shadow-sm'
+                                        ? ' text-[#059669]'
+                                        : ' text-dark'
                                 ]"
                             >
                                 <component

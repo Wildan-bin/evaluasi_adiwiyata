@@ -46,7 +46,7 @@ onMounted(() => {
 </script>
 
 <template>
-    
+
     <MainLayout>
         <Head title="Dashboard" />
         <template #header>

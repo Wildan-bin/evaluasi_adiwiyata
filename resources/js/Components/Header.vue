@@ -24,7 +24,6 @@ import { computed } from 'vue';
  *
  * Contoh penggunaan:
  * <Header
- *   title="Dashboard Greenedu"
  *   description="Kelola dan monitor program lingkungan sekolah"
  *   :icon="BarChart3"
  *   color="green"
@@ -379,6 +378,7 @@ const descriptionColorClass = computed(() => {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
