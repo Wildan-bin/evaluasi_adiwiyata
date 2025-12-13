@@ -21,7 +21,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'csrf_token' => csrf_token(), // Pass token via Inertia props
+            // CSRF token di-share ke Inertia props supaya bisa diakses di JS
+            // Interceptor di bootstrap.js akan ambil token dari sini untuk setiap request
+            'csrf_token' => csrf_token(),
         ];
     }
 }

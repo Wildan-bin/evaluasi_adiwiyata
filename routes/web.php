@@ -61,6 +61,14 @@ Route::get('/evaluation', function () {
     return Inertia::render('Features/Evaluation');
 })->name('evaluation');
 
+Route::get('/administration', function () {
+    return Inertia::render('Features/Administration');
+})->middleware(['auth'])->name('administration');
+
+Route::get('/admin-test', function () {
+    return Inertia::render('Features/Admin/AdminTest');
+})->middleware(['auth'])->name('admin.test');
+
 // ROUTE UNTUK CONTOH KOMPONEN
 
 Route::get('/cards', function () {
