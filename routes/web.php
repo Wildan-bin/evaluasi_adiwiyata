@@ -1,10 +1,12 @@
 <?php
 
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -54,24 +56,6 @@ Route::get('/dashboard', function () {
     return Inertia::render('Profile/DashboardUser');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/administrasi-sekolah', function () {
-    return Inertia::render('Profile/AdministrasiSekolah', [
-        'previewMode' => false,
-        'administrasiData' => null
-    ]);
-})->middleware(['auth', 'verified'])->name('administrasi-sekolah');
-
-// Preview route untuk admin
-Route::get('/administrasi-sekolah/{userId}/preview', function ($userId) {
-    // Get administrasi data by user_id
-    $administrasi = \App\Models\AdministrasiSekolah::where('user_id', $userId)->first();
-
-    return Inertia::render('Profile/AdministrasiSekolah', [
-        'previewMode' => true,
-        'administrasiData' => $administrasi
-    ]);
-})->middleware(['auth', 'verified'])->name('administrasi-preview');
-
 Route::get('/form', function () {
     return Inertia::render('Features/Form');
 })->name('form');
@@ -90,17 +74,21 @@ Route::get('/headers', function () {
     return Inertia::render('Example/Components-headers');
 })->name('component-header');
 
+// Route::post('/upload-file', [\App\Http\Controllers\Example\UploadController::class, 'store']);
+Route::get('/upload', fn() => Inertia::render('Example/UploadFile'));
+
+Route::post('/submission/draft', function () {
+    return response()->json(['success' => true, 'message' => 'Draft saved']);
+})->name('submission.draft');
+
+Route::post('/submission/submit', function () {
+    return response()->json(['success' => true, 'message' => 'Submission saved']);
+})->name('submission.submit');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // Admin routes for user management
-    Route::middleware('can:admin')->group(function () {
-        Route::post('/users', [UserController::class, 'store'])->name('users.store');
-        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    });
 });
 
 require __DIR__.'/auth.php';

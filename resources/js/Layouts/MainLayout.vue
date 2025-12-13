@@ -152,11 +152,11 @@ onUnmounted(() => {
     document.removeEventListener('click', handleOutsideClick);
 });
 
-defineProps({
-    user: {
-        type: Object,
-        required: true,
-    },
+const props = defineProps({
+  user: {
+    type: Object,
+    default: null
+  }
 });
 
 // Navigation items with icons and metadata
@@ -169,17 +169,31 @@ const navigationItems = [
         color: 'text-green-400'
     },
     {
-        name: 'Form PPEPP',
+        name: 'Administrasi',
+        route: 'administration',
+        icon: Upload,
+        description: 'Unggah Bukti Administrasi',
+        color: 'text-green-400'
+    },
+    {
+        name: 'Self Assessment',
         route: 'form',
         icon: FileText,
         description: 'Form Evaluasi PPEPP',
         color: 'text-green-400'
     },
     {
-        name: 'Evaluasi PPEPP',
+        name: 'Evaluasi PBLHS',
         route: 'evaluation',
         icon: FileText,
         description: 'Hasil Evaluasi PPEPP',
+        color: 'text-green-400'
+    },
+    {
+        name: 'Admin Test',
+        route: 'admin.test',
+        icon: FileText,
+        description: 'File Preview PDF',
         color: 'text-green-400'
     },
     {
@@ -227,7 +241,7 @@ const isRouteActive = (routeName, routePattern = null) => {
 </script>
 
 <template>
-    <div class="relative min-h-screen bg-white">
+    <div class="relative min-h-screen bg-[FAF9F6]">
         <!-- Background gradient dengan warna hijau tema Adiwiyata: emerald (90), green (50), teal (50) -->
 
         <!-- Mobile Header Bar - FIXED Z-INDEX -->
@@ -321,7 +335,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                         </div>
                         <!-- Show brand name when sidebar is open (both mobile and desktop) -->
                         <div v-if="isSidebarOpen" class="transition-all duration-300">
-                            <h1 class="text-lg sm:text-xl font-bold text-white leading-tight">Evaluasi Adiwiyata</h1>
+                            <h1 class="text-lg sm:text-xl font-bold text-white leading-tight">Greenedu</h1>
                             <p class="text-xs text-white/70 hidden sm:block">Program Lingkungan</p>
                         </div>
                     </div>
@@ -372,7 +386,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                 <template v-for="item in navigationItems" :key="item.route">
                     <div class="relative">
                         <Link
-                            :href="route(item.route)"
+                            add :href="route(item.route)"
                             @mouseenter="handleMouseEnter(item)"
                             @mouseleave="handleMouseLeave"
                             @click="isMobile && (isSidebarOpen = false)"
