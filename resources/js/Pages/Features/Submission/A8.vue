@@ -29,8 +29,8 @@ const formData = reactive({
 // COMPUTED
 // ============================================================================
 const isFormValid = computed(() => {
-  return formData.pernyataan_data && 
-         formData.persetujuan_publikasi && 
+  return formData.pernyataan_data &&
+         formData.persetujuan_publikasi &&
          formData.bukti_persetujuan;
 });
 
@@ -74,7 +74,7 @@ const saveA8 = async () => {
     const formDataObj = new FormData();
     formDataObj.append('pernyataan_data', formData.pernyataan_data);
     formDataObj.append('persetujuan_publikasi', formData.persetujuan_publikasi);
-    
+
     if (formData.bukti_persetujuan instanceof File) {
       formDataObj.append('bukti_persetujuan', formData.bukti_persetujuan);
     }
@@ -90,11 +90,11 @@ const saveA8 = async () => {
 
   } catch (error) {
     console.error('Save A8 error:', error.response);
-    
+
     if (error.response?.status === 422 && error.response?.data?.data_exists) {
       dataExists.value = true;
       draftSaveMessage.value = '✓ A8 berhasil disimpan!';
-      
+
       setTimeout(() => {
         emit('final-submit');
       }, 1000);

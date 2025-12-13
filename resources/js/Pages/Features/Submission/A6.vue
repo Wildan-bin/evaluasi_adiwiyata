@@ -118,11 +118,11 @@ const saveA6 = async () => {
 
   } catch (error) {
     console.error('Save A6 error:', error.response);
-    
+
     if (error.response?.status === 422 && error.response?.data?.data_exists) {
       dataExists.value = true;
       draftSaveMessage.value = '✓ A6 berhasil disimpan!';
-      
+
       setTimeout(() => {
         emit('save-and-continue');
       }, 1000);
@@ -167,7 +167,7 @@ const saveA6 = async () => {
           <span class="text-sm font-semibold text-green-600">{{ Math.round((completedCount / indicators.length) * 100) }}%</span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-          <div 
+          <div
             class="bg-gradient-to-r from-green-500 to-emerald-500 h-full transition-all duration-500"
             :style="{ width: Math.round((completedCount / indicators.length) * 100) + '%' }"
           ></div>

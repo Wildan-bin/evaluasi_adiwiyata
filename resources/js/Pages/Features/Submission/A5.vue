@@ -106,11 +106,11 @@ const saveA5 = async () => {
 
   } catch (error) {
     console.error('Save A5 error:', error.response);
-    
+
     if (error.response?.status === 422 && error.response?.data?.data_exists) {
       dataExists.value = true;
       draftSaveMessage.value = '✓ A5 berhasil disimpan!';
-      
+
       setTimeout(() => {
         emit('save-and-continue');
       }, 1000);

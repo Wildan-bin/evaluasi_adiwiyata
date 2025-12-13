@@ -11,6 +11,7 @@ use App\Models\Kemajuan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class FormSubmissionController extends Controller
@@ -465,33 +466,33 @@ class FormSubmissionController extends Controller
      */
     public function showA5()
     {
-        \Log::info('========== SHOW A5 METHOD CALLED ==========');
-        
+        Log::info('========== SHOW A5 METHOD CALLED ==========');
+
         $user = Auth::user();
-        \Log::info('User:', ['id' => $user?->id, 'name' => $user?->name]);
-        
+        Log::info('User:', ['id' => $user?->id, 'name' => $user?->name]);
+
         if (!$user) {
-            \Log::error('NO USER FOUND');
+            Log::error('NO USER FOUND');
             return Inertia::render('Features/Submission/A5', [
                 'dataExists' => false,
                 'existingData' => [],
                 'debugInfo' => ['error' => 'User not authenticated']
             ]);
         }
-        
+
         $userId = $user->id;
-        
+
         // Direct query
         $rencanaData = Rencana::where('user_id', $userId)->get();
-        
-        \Log::info('Rencana Data:', [
+
+        Log::info('Rencana Data:', [
             'count' => $rencanaData->count(),
             'sql' => Rencana::where('user_id', $userId)->toSql(),
             'data' => $rencanaData->toArray()
         ]);
 
         $dataExists = $rencanaData->count() > 0;
-        
+
         $debugInfo = [
             'methodCalled' => true,
             'userId' => $userId,
@@ -500,9 +501,9 @@ class FormSubmissionController extends Controller
             'dataExists' => $dataExists,
             'timestamp' => now()->toDateTimeString()
         ];
-        
-        \Log::info('========== DEBUG INFO ==========', $debugInfo);
-        
+
+        Log::info('========== DEBUG INFO ==========', $debugInfo);
+
         return Inertia::render('Features/Submission/A5', [
             'dataExists' => $dataExists,
             'existingData' => $rencanaData,
@@ -517,7 +518,7 @@ class FormSubmissionController extends Controller
     {
         $user = Auth::user();
         $userId = $user->id;
-        
+
         // Check if user already has Bukti Self Assessment data
         $buktiData = BuktiSelfAssessment::where('user_id', $userId)->get();
         $dataExists = $buktiData->count() > 0;
@@ -535,7 +536,7 @@ class FormSubmissionController extends Controller
     {
         $user = Auth::user();
         $userId = $user->id;
-        
+
         // Check if user already has Pendampingan data
         $pendampinganData = Pendampingan::where('user_id', $userId)->get();
         $dataExists = $pendampinganData->count() > 0;
@@ -553,7 +554,7 @@ class FormSubmissionController extends Controller
     {
         $user = Auth::user();
         $userId = $user->id;
-        
+
         // Check if user already has Pernyataan data
         $pernyataanData = Pernyataan::where('user_id', $userId)->first();
         $dataExists = !!$pernyataanData;

@@ -37,8 +37,8 @@ const formData = reactive({
 // COMPUTED
 // ============================================================================
 const isFormValid = computed(() => {
-  return formData.kebutuhan_pendampingan.length > 0 && 
-         formData.permintaan_tim.trim() && 
+  return formData.kebutuhan_pendampingan.length > 0 &&
+         formData.permintaan_tim.trim() &&
          formData.waktu_pendampingan;
 });
 
@@ -105,11 +105,11 @@ const saveA7 = async () => {
 
   } catch (error) {
     console.error('Save A7 error:', error.response);
-    
+
     if (error.response?.status === 422 && error.response?.data?.data_exists) {
       dataExists.value = true;
       draftSaveMessage.value = '✓ A7 berhasil disimpan!';
-      
+
       setTimeout(() => {
         emit('save-and-continue');
       }, 1000);
