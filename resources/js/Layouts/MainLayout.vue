@@ -1,5 +1,6 @@
 <script setup>
 import { Link, router } from '@inertiajs/vue3';
+import { refreshCsrfToken } from '@/Composables/useCsrf';
 import { 
     // 🔹 Navigasi & Umum
     Home,           // Halaman utama
@@ -108,7 +109,9 @@ const toggleUserMenu = () => {
     isUserMenuOpen.value = !isUserMenuOpen.value;
 };
 
-const handleLogout = () => {
+const handleLogout = async () => {
+    // Refresh CSRF token sebelum logout
+    await refreshCsrfToken();
     router.post(route('logout'));
 };
 

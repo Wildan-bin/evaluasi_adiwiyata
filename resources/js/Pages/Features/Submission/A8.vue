@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, ref, onMounted } from 'vue';
 import axios from 'axios';
+import { secureUpload } from '@/Composables/useCsrf';
 import FileUploadCard from '@/Components/FileUploadCard.vue';
 import { CheckCircle, Loader, AlertCircle } from 'lucide-vue-next';
 
@@ -79,7 +80,8 @@ const saveA8 = async () => {
       formDataObj.append('bukti_persetujuan', formData.bukti_persetujuan);
     }
 
-    const response = await axios.post(route('form.save-a8'), formDataObj);
+    // Gunakan secureUpload untuk refresh CSRF sebelum upload
+    const response = await secureUpload(route('form.save-a8'), formDataObj);
 
     draftSaveMessage.value = '✓ A8 berhasil disimpan!';
     dataExists.value = true;

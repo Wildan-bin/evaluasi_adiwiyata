@@ -9,6 +9,11 @@ use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\FileEvidenceController;
 use App\Http\Controllers\FormSubmissionController;
 
+// CSRF Token Refresh Route (untuk SPA)
+Route::get('/csrf-token', function () {
+    return response()->json(['csrf_token' => csrf_token()]);
+})->name('csrf.token');
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
