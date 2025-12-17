@@ -4,7 +4,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { Leaf, Mail, Lock, User as UserIcon, UserPlus, Eye, EyeOff } from 'lucide-vue-next';
+import { refreshCsrfToken } from '@/Composables/useCsrf';
 
 const showPassword = ref(false);
 const showPasswordConfirm = ref(false);
@@ -16,7 +16,10 @@ const form = useForm({
     password_confirmation: '',
 });
 
-const submit = () => {
+const submit = async () => {
+    // Refresh CSRF token sebelum register
+    await refreshCsrfToken();
+
     form.post(route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });

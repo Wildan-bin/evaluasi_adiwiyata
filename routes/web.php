@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
 
+// CSRF Token Refresh Route (untuk SPA)
+Route::get('/csrf-token', function () {
+    return response()->json(['csrf_token' => csrf_token()]);
+})->name('csrf.token');
+
 Route::get('/', function () {
     // Redirect ke dashboard jika sudah login
     if (Auth::check()) {

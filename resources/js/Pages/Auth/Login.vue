@@ -6,7 +6,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { Leaf, Mail, Lock, LogIn as LoginIcon, Eye, EyeOff } from 'lucide-vue-next';
+import { refreshCsrfToken } from '@/Composables/useCsrf';
 
 defineProps({
     canResetPassword: {
@@ -25,7 +25,10 @@ const form = useForm({
     remember: false,
 });
 
-const submit = () => {
+const submit = async () => {
+    // Refresh CSRF token sebelum login
+    await refreshCsrfToken();
+
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
     });

@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,6 +19,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): Response
     {
+        Log::info('Login page accessed', ['user' => Auth::user()?->id]);
+
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
@@ -29,9 +32,13 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        Log::info('Login attempt', ['email' => $request->email]);
+
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        Log::info('Login successful', ['user' => Auth::user()->id]);
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
@@ -42,12 +49,9 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        // Redirect ke login page, bukan homepage
-        return redirect('/login');
+        return redirect('/');
     }
 }
