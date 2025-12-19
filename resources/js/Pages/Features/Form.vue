@@ -75,6 +75,9 @@ const handleSaveAndContinue = async () => {
 // ============================================================================
 
 const handleFinalSubmit = async () => {
+  // Mark A8 as completed first so the check includes it
+  completedSteps.a8 = true;
+
   if (!allStepsCompleted.value) {
     submitError.value = '⚠️ Harap selesaikan semua step sebelum pengiriman!';
     return;
@@ -84,8 +87,6 @@ const handleFinalSubmit = async () => {
   submitError.value = '';
 
   try {
-    // Mark A8 as completed
-    completedSteps.a8 = true;
 
     // Optional: Call backend to finalize submission
     // await axios.post(route('form.submit-all'));

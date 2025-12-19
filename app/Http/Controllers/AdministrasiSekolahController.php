@@ -8,6 +8,7 @@ use App\Models\Ketua;
 use App\Models\Anggota;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -151,15 +152,93 @@ class AdministrasiSekolahController extends Controller
     // GET /administrasi-sekolah/preview/{id}
     public function preview($id)
     {
+        // $id dikirim dari UI sebagai user_id; cari AdministrasiSekolah berdasarkan user_id
         $administrasi = AdministrasiSekolah::with(['user', 'ketua.anggota', 'verifiedByAdmin'])
-            ->findOrFail($id);
+            ->where('user_id', $id)
+            ->firstOrFail();
 
         if (Auth::user()->role !== 'admin' && $administrasi->user_id !== Auth::id()) {
             abort(403);
         }
 
+        // Jika request dari AJAX/modal, return JSON dengan dokumen spesifik
+        if (request()->wantsJson() || request()->header('X-Requested-With') === 'XMLHttpRequest') {
+            $docType = request()->query('docType', 'rencana');
+            $documents = [];
+            $schoolName = $administrasi->nama_sekolah ?? '-';
+
+            // Normalisasi path_file agar tidak double "storage/" atau "public/"
+            $normalizePath = function ($path) {
+                if (!$path) {
+                    return null;
+                }
+
+                $path = ltrim($path, '/');
+
+                if (str_starts_with($path, 'public/')) {
+                    $path = substr($path, 7);
+                }
+
+                if (str_starts_with($path, 'storage/')) {
+                    $path = substr($path, 8);
+                }
+
+                return ltrim($path, '/');
+            };
+
+            // Fetch dokumen berdasarkan tipe
+            switch ($docType) {
+                case 'rencana':
+                    $documents = \App\Models\Rencana::where('user_id', $administrasi->user_id)
+                        ->select('id', 'indikator as title', 'path_file', 'created_at')
+                        ->get()
+                        ->map(function ($item) use ($normalizePath) {
+                            $item['path_file'] = $normalizePath($item['path_file']);
+                            return $item;
+                        })
+                        ->toArray();
+                    break;
+                case 'self_assessment':
+                    $documents = \App\Models\BuktiSelfAssessment::where('user_id', $administrasi->user_id)
+                        ->select('id', 'kriteria as title', 'path_file', 'created_at')
+                        ->get()
+                        ->map(function ($item) use ($normalizePath) {
+                            $item['path_file'] = $normalizePath($item['path_file']);
+                            return $item;
+                        })
+                        ->toArray();
+                    break;
+                case 'kebutuhan_pendampingan':
+                    $documents = \App\Models\Pendampingan::where('user_id', $administrasi->user_id)
+                        ->select('id', 'topik as title', 'path_file', 'created_at')
+                        ->get()
+                        ->map(function ($item) use ($normalizePath) {
+                            $item['path_file'] = $normalizePath($item['path_file']);
+                            return $item;
+                        })
+                        ->toArray();
+                    break;
+                case 'pernyataan':
+                    $documents = \App\Models\Pernyataan::where('user_id', $administrasi->user_id)
+                        ->select('id', 'judul as title', 'path_file', 'created_at')
+                        ->get()
+                        ->map(function ($item) use ($normalizePath) {
+                            $item['path_file'] = $normalizePath($item['path_file']);
+                            return $item;
+                        })
+                        ->toArray();
+                    break;
+            }
+
+            return response()->json([
+                'documents' => $documents,
+                'schoolName' => $schoolName,
+            ]);
+        }
+
         return Inertia::render('Profile/AdministrasiPreview', [
             'administrasi' => $administrasi,
+            'user' => Auth::user(),
         ]);
     }
 
@@ -266,5 +345,45 @@ class AdministrasiSekolahController extends Controller
         ]);
 
         return back()->with('success', 'Data berhasil di-unlock untuk edit!');
+    }
+
+    // STREAM FILES SECURELY FOR ADMIN/OWNER
+    // GET /administrasi-sekolah/{id}/file?path=path_file
+    public function streamFile(Request $request, $id)
+    {
+        $user = Auth::user();
+        abort_if(!$user, 403);
+
+        // Only admin or the owner (user id matches) can access
+        if (!($user->role === 'admin' || (int) $user->id === (int) $id)) {
+            abort(403);
+        }
+
+        $rawPath = (string) $request->query('path', '');
+        if ($rawPath === '') {
+            abort(404);
+        }
+
+        // Normalize path to avoid traversal and duplicated prefixes
+        $path = ltrim($rawPath, '/');
+        if (str_starts_with($path, 'public/')) {
+            $path = substr($path, 7);
+        }
+        if (str_starts_with($path, 'storage/')) {
+            $path = substr($path, 8);
+        }
+
+        // Prevent directory traversal
+        if (str_contains($path, '..')) {
+            abort(403);
+        }
+
+        // Ensure file exists in public disk
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+
+        // Stream inline so browser can preview PDF/images
+        return Storage::disk('public')->response($path);
     }
 }

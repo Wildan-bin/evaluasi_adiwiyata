@@ -54,7 +54,7 @@ const completedCount = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return completedCount.value === indicators.length;
+  return completedCount.value > 0; // Minimal 1 indikator
 });
 
 // ============================================================================
@@ -79,6 +79,10 @@ const checkDataExists = async () => {
   }
 };
 
+const continueToNext = () => {
+  emit('save-and-continue');
+};
+
 const handleFileUpload = (indicatorKey, file) => {
   formData.indicators[indicatorKey].file = file;
 };
@@ -89,7 +93,7 @@ const handlePenjelasan = (indicatorKey, value) => {
 
 const saveA6 = async () => {
   if (!isFormValid.value) {
-    draftSaveError.value = '⚠️ Semua indikator harus memiliki file dan penjelasan';
+    draftSaveError.value = '⚠️ Harap isi minimal 1 indikator dengan file dan penjelasan';
     return;
   }
 
@@ -153,6 +157,13 @@ const saveA6 = async () => {
         </div>
         <p class="text-sm text-green-800">Data A6 (Self Assessment) sudah tersimpan. Silakan lanjut ke tahap berikutnya.</p>
       </div>
+
+      <button
+        @click="continueToNext"
+        class="w-full px-6 py-4 bg-green-600 text-white font-bold rounded-lg transition-all hover:bg-green-700"
+      >
+        Lanjut ke Tahap Berikutnya
+      </button>
     </div>
 
     <!-- Form -->

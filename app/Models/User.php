@@ -75,4 +75,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Pernyataan::class);
     }
+
+    public function fileUploads()
+    {
+        return $this->hasMany(FileUpload::class);
+    }
+
+    public function administrasiSekolah()
+    {
+        return $this->hasOne(AdministrasiSekolah::class);
+    }
 }

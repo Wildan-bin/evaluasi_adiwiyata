@@ -58,6 +58,23 @@ const formData = ref({
 });
 const formErrors = ref({});
 
+// Preview Modal state
+const showPreviewModal = ref(false);
+const previewData = ref(null);
+const previewLoading = ref(false);
+const previewError = ref(null);
+const previewDocType = ref(''); // rencana, self_assessment, kebutuhan_pendampingan, pernyataan
+const previewDocTitle = ref('');
+const previewSchoolName = ref('');
+const previewUserId = ref(null);
+
+const docTypeConfig = {
+  rencana: { title: 'Rencana & Evaluasi PBLHS', color: 'green' },
+  self_assessment: { title: 'Self Assessment', color: 'blue' },
+  kebutuhan_pendampingan: { title: 'Kebutuhan Pendampingan', color: 'purple' },
+  pernyataan: { title: 'Pernyataan & Persetujuan', color: 'red' }
+};
+
 // Open modal untuk tambah user
 const openAddUserModal = (type) => {
   modalType.value = type;
@@ -70,6 +87,47 @@ const openAddUserModal = (type) => {
   };
   formErrors.value = {};
   showPassword.value = false;
+};
+
+// Preview Modal Functions
+const openPreviewModal = async (userId, docType) => {
+  previewUserId.value = userId;
+  previewDocType.value = docType;
+  previewDocTitle.value = docTypeConfig[docType]?.title || 'Preview';
+  showPreviewModal.value = true;
+  previewLoading.value = true;
+  previewError.value = null;
+  previewData.value = null;
+  previewSchoolName.value = '';
+
+  try {
+    const response = await fetch(`/administrasi-sekolah/${userId}/preview?docType=${docType}`, {
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Gagal memuat data dokumen');
+    }
+
+    const data = await response.json();
+    previewData.value = data.documents || [];
+    previewSchoolName.value = data.schoolName || '';
+  } catch (error) {
+    previewError.value = error.message;
+    console.error('Error fetching preview:', error);
+  } finally {
+    previewLoading.value = false;
+  }
+};
+
+const closePreviewModal = () => {
+  showPreviewModal.value = false;
+  previewData.value = null;
+  previewError.value = null;
 };
 
 // Close modal
@@ -394,61 +452,65 @@ const availableMentors = computed(() => {
 
             <!-- Rencana & Evaluasi PBLHS -->
             <td class="px-6 py-4 text-center">
-              <Link
+              <button
                 v-if="adm.rencana_evaluasi"
-                :href="`/administrasi-sekolah/${adm.user_id}/preview`"
+                @click="openPreviewModal(adm.user_id, 'rencana')"
                 class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition cursor-pointer"
               >
                 <Eye :size="14" />
                 Lihat
-              </Link>
-              <span v-else class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">
-                Belum diisi
+              </button>
+              <span v-else class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 cursor-not-allowed">
+                <X :size="14" />
+                Belum Terisi
               </span>
             </td>
 
             <!-- Self Assessment -->
             <td class="px-6 py-4 text-center">
-              <Link
+              <button
                 v-if="adm.self_assessment"
-                :href="`/administrasi-sekolah/${adm.user_id}/preview#self-assessment`"
+                @click="openPreviewModal(adm.user_id, 'self_assessment')"
                 class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition cursor-pointer"
               >
                 <Eye :size="14" />
                 Lihat
-              </Link>
-              <span v-else class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">
-                Belum diisi
+              </button>
+              <span v-else class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 cursor-not-allowed">
+                <X :size="14" />
+                Belum Terisi
               </span>
             </td>
 
             <!-- Kebutuhan Pendampingan -->
             <td class="px-6 py-4 text-center">
-              <Link
+              <button
                 v-if="adm.kebutuhan_pendampingan"
-                :href="`/administrasi-sekolah/${adm.user_id}/preview#kebutuhan`"
+                @click="openPreviewModal(adm.user_id, 'kebutuhan_pendampingan')"
                 class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition cursor-pointer"
               >
                 <Eye :size="14" />
                 Lihat
-              </Link>
-              <span v-else class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">
-                Belum diisi
+              </button>
+              <span v-else class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 cursor-not-allowed">
+                <X :size="14" />
+                Belum Terisi
               </span>
             </td>
 
             <!-- Pernyataan & Persetujuan -->
             <td class="px-6 py-4 text-center">
-              <Link
+              <button
                 v-if="adm.pernyataan"
-                :href="`/administrasi-sekolah/${adm.user_id}/preview#pernyataan`"
+                @click="openPreviewModal(adm.user_id, 'pernyataan')"
                 class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition cursor-pointer"
               >
                 <Eye :size="14" />
                 Lihat
-              </Link>
-              <span v-else class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">
-                Belum diisi
+              </button>
+              <span v-else class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 cursor-not-allowed">
+                <X :size="14" />
+                Belum Terisi
               </span>
             </td>
           </tr>
@@ -572,6 +634,98 @@ const availableMentors = computed(() => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Preview Modal -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div
+          v-if="showPreviewModal"
+          class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4"
+          @click.self="closePreviewModal"
+        >
+          <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
+              <div>
+                <h2 class="text-xl font-bold text-gray-900">{{ previewDocTitle }}</h2>
+                <p class="text-sm text-gray-600">{{ previewSchoolName }}</p>
+              </div>
+              <button
+                @click="closePreviewModal"
+                class="text-gray-400 hover:text-gray-600 transition"
+              >
+                <X :size="24" />
+              </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6">
+              <!-- Loading State -->
+              <div v-if="previewLoading" class="flex flex-col items-center justify-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+                <p class="mt-4 text-gray-600">Memuat dokumen...</p>
+              </div>
+
+              <!-- Error State -->
+              <div v-else-if="previewError" class="flex flex-col items-center justify-center py-12">
+                <div class="text-red-500 mb-4">
+                  <X :size="48" />
+                </div>
+                <p class="text-gray-900 font-semibold">{{ previewError }}</p>
+                <button
+                  @click="closePreviewModal"
+                  class="mt-4 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Tutup
+                </button>
+              </div>
+
+              <!-- Document List -->
+              <div v-else-if="Array.isArray(previewData) && previewData.length > 0" class="space-y-4">
+                <div v-for="(doc, index) in previewData" :key="index" class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-green-300 hover:bg-green-50 transition">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-gray-900">{{ doc.title || doc.indikator || `Dokumen ${index + 1}` }}</h4>
+                      <p class="text-sm text-gray-600 mt-1">{{ doc.description || 'File dokumen' }}</p>
+                      <p class="text-xs text-gray-500 mt-2">Diupload: {{ doc.created_at ? new Date(doc.created_at).toLocaleDateString('id-ID') : 'N/A' }}</p>
+                    </div>
+                    <a
+                      v-if="doc.path_file"
+                      :href="`/administrasi-sekolah/${previewUserId}/file?path=${encodeURIComponent(doc.path_file)}`"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-sm ml-4 flex-shrink-0"
+                    >
+                      <Eye :size="16" />
+                      Buka
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-else class="flex flex-col items-center justify-center py-12">
+                <div class="text-gray-400 mb-4">
+                  <X :size="48" />
+                </div>
+                <p class="text-gray-900 font-semibold">Tidak ada dokumen</p>
+                <p class="text-gray-600 text-sm mt-1">Belum ada file yang diunggah untuk bagian ini.</p>
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="sticky bottom-0 bg-gray-50 border-t px-6 py-4 flex justify-end">
+              <button
+                @click="closePreviewModal"
+                class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+              >
+                Tutup
+              </button>
             </div>
           </div>
         </div>

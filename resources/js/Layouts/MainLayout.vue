@@ -163,7 +163,7 @@ const props = defineProps({
 });
 
 // Navigation items with icons and metadata
-const navigationItems = [
+let navigationItems = [
     {
         name: 'Beranda',
         route: 'dashboard',
@@ -173,10 +173,12 @@ const navigationItems = [
     },
     {
         name: 'Administrasi',
-        route: 'administration',
+        route: 'administrasi-sekolah',
+        path: '/administrasi-sekolah',
         icon: Upload,
         description: 'Unggah Bukti Administrasi',
-        color: 'text-green-400'
+        color: 'text-green-400',
+        routePattern: 'administrasi.*'
     },
     {
         name: 'Self Assessment',
@@ -237,9 +239,28 @@ const navigationItems = [
     // }
 ];
 
+// Tambah menu khusus admin untuk melihat submissions
+if (props.user && props.user.role === 'admin') {
+    navigationItems.splice(2, 0, {
+        name: 'Administrasi (Admin)',
+        route: 'administrasi.submissions',
+        path: '/administrasi-sekolah/submissions',
+        icon: FileText,
+        description: 'Kelola pengajuan administrasi',
+        color: 'text-green-400',
+        routePattern: 'administrasi.*'
+    });
+}
+
 // Check if route is active
 const isRouteActive = (routeName, routePattern = null) => {
-    return routePattern ? route().current(routePattern) : route().current(routeName);
+    return routeName ? (routePattern ? route().current(routePattern) : route().current(routeName)) : false;
+};
+
+const isItemActive = (item) => {
+    if (item.route) return isRouteActive(item.route, item.routePattern);
+    if (item.path) return typeof window !== 'undefined' && window.location.pathname.startsWith(item.path);
+    return false;
 };
 </script>
 
@@ -255,8 +276,14 @@ const isRouteActive = (routeName, routePattern = null) => {
             <div class="flex items-center justify-between px-4 py-3">
                 <!-- Mobile Logo & Menu Button -->
                 <div class="flex items-center gap-3">
-                    <button
+                    <button>
                         aria-label="toggle-sidebar"
+                                    <div class="text-left">
+                                        <p class="font-medium">Pengaturan</p>
+                                        <p class="text-xs text-gray-500">Kelola profil Anda</p>
+                                        <div v-if="user && user.name" class="font-medium">{{ user.name }}</div>
+                                        <div v-if="user && user.email" class="text-xs text-gray-300">{{ user.email }}</div>
+                                    </div>
                         @click.stop="toggleSidebar"
                         class="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-[#059669] to-[#10b981] rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 relative z-10"
                     >
@@ -284,7 +311,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                         <!-- Avatar user dengan warna hijau -->
                         <User class="w-4 h-4 text-white" />
                     </div>
-                    <div class="hidden xs:block">
+                    <div class="hidden xs:block" v-if="user && user.name">
                         <p class="text-sm font-medium text-gray-900">{{ user.name.split(' ')[0] }}</p>
                     </div>
                 </div>
@@ -364,7 +391,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                                     :key="index"
                                     class="w-1.5 h-1.5 rounded-full transition-all duration-200"
                                     :class=" [
-                                        isRouteActive(item.route, item.routePattern)
+                                        isItemActive(item)
                                             ? 'bg-lime-300 shadow-sm'
                                             : 'bg-white/40'
                                     ]"
@@ -389,7 +416,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                 <template v-for="item in navigationItems" :key="item.route">
                     <div class="relative">
                         <Link
-                            add :href="route(item.route)"
+                            :href="item.path ?? route(item.route)"
                             @mouseenter="handleMouseEnter(item)"
                             @mouseleave="handleMouseLeave"
                             @click="isMobile && (isSidebarOpen = false)"
@@ -399,7 +426,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                                 isSidebarOpen
                                     ? 'hover:bg-gradient-to-r hover:from-emerald-50 hover:to-green-50'
                                     : 'hover:bg-gradient-to-br hover:from-emerald-50 hover:to-white hover:scale-105',
-                                isRouteActive(item.route, item.routePattern)
+                                isItemActive(item)
                                     ? isSidebarOpen
                                         ? 'bg-gradient-to-r from-[#059669]/10 to-[#10b981]/10 text-[#059669] shadow-sm border-l-4 border-[#059669]'
                                         : 'bg-gradient-to-br from-[#059669]/20 to-[#10b981]/20 text-[#059669] shadow-lg scale-105 ring-2 ring-[#059669]/30'
@@ -408,13 +435,13 @@ const isRouteActive = (routeName, routePattern = null) => {
                         >
                             <!-- Active Indicator for expanded mode -->
                             <div
-                                v-if="isRouteActive(item.route, item.routePattern) && isSidebarOpen"
+                                v-if="isItemActive(item) && isSidebarOpen"
                                 class="absolute right-3 w-2 h-2 bg-[#059669] rounded-full animate-pulse"
                             ></div>
 
                             <!-- Active Indicator for collapsed mode -->
                             <div
-                                v-if="isRouteActive(item.route, item.routePattern) && !isSidebarOpen"
+                                v-if="isItemActive(item) && !isSidebarOpen"
                                 class="absolute -top-1 -right-1 w-3 h-3 bg-[#059669] rounded-full animate-pulse shadow-sm"
                             ></div>
 
@@ -423,7 +450,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                                 class="relative flex items-center justify-center transition-all duration-200"
                                 :class=" [
                                     isSidebarOpen ? 'w-10 h-10 rounded-xl' : 'w-8 h-8 rounded-lg',
-                                    isRouteActive(item.route, item.routePattern)
+                                    isItemActive(item)
                                         ? ' text-[#059669]'
                                         : ' text-dark'
                                 ]"
@@ -483,7 +510,7 @@ const isRouteActive = (routeName, routePattern = null) => {
                     <div class="relative">
                         <button
                             @click.stop="toggleUserMenu"
-                            @mouseenter="handleMouseEnter({ name: user.name, description: 'Pengaturan akun' })"
+                            @mouseenter="user && user.name && handleMouseEnter({ name: user.name, description: 'Pengaturan akun' })"
                             @mouseleave="handleMouseLeave"
                             class="group w-full flex items-center text-gray-700 transition-all duration-200 hover:shadow-sm active:scale-95 relative z-10"
                             :class=" [
@@ -501,8 +528,8 @@ const isRouteActive = (routeName, routePattern = null) => {
 
                             <!-- User Info -->
                             <!-- <div v-if="isSidebarOpen" class="ml-3 flex-1 text-left">
-                                <p class="font-semibold text-sm text-gray-900 leading-tight">{{ user.name }}</p>
-                                <p class="text-xs text-gray-500 truncate">{{ user.email }}</p>
+                                <p v-if="user && user.name" class="font-semibold text-sm text-gray-900 leading-tight">{{ user.name }}</p>
+                                <p v-if="user && user.email" class="text-xs text-gray-500 truncate">{{ user.email }}</p>
                             </div> -->
 
                             <!-- Chevron -->
@@ -538,9 +565,11 @@ const isRouteActive = (routeName, routePattern = null) => {
                                         <!-- Icon hover dengan warna hijau -->
                                         <Settings class="w-4 h-4 text-gray-600 group-hover:text-emerald-600" />
                                     </div>
-                                    <div>
+                                    <div class="text-left">
                                         <p class="font-medium">Pengaturan</p>
                                         <p class="text-xs text-gray-500">Kelola profil Anda</p>
+                                        <div v-if="user && user.name" class="font-medium">{{ user.name }}</div>
+                                        <div v-if="user && user.email" class="text-xs text-gray-300">{{ user.email }}</div>
                                     </div>
                                 </Link>
 

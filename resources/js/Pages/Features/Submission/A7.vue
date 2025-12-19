@@ -79,7 +79,7 @@ const isSelected = (key) => {
 
 const saveA7 = async () => {
   if (!isFormValid.value) {
-    draftSaveError.value = '⚠️ Harap isi semua field dengan benar';
+    draftSaveError.value = '⚠️ Harap pilih minimal 1 kebutuhan pendampingan dan isi permintaan tim serta waktu pendampingan';
     return;
   }
 

@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,18 +17,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Truncate users table safely (handles FK constraints)
+        Schema::disableForeignKeyConstraints();
+        DB::table('users')->truncate();
+        Schema::enableForeignKeyConstraints();
 
-        // User::factory()->create([
-        //     'name' => 'Wildan Mukorrobin',
-        //     'email' => 'WildanTest@gmail.com',
-        //     'password' => bcrypt('admin123'),
-        // ]);
+        // Seed base users (admin, user, mentor) with password 12345678
+        $this->call(UserSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Robin',
-            'email' => 'robin@gmail.com',
-            'password' => bcrypt('admin123'),
-        ]);
+        // Optionally add more users via factory if needed
+        // User::factory(5)->create();
     }
 }

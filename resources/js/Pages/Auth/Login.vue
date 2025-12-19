@@ -7,6 +7,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { refreshCsrfToken } from '@/Composables/useCsrf';
+import { Mail, Lock, Eye, EyeOff, LogIn as LoginIcon, Leaf } from 'lucide-vue-next';
 
 defineProps({
     canResetPassword: {

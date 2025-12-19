@@ -57,7 +57,7 @@ onMounted(() => {
                         </p>
                     </div>
                     <div class="md:w-1/2">
-                        <img src="path/to/image1.jpg" alt="PPEPP Program" class="rounded-lg shadow-md w-full h-64 object-cover">
+                        <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80" alt="PPEPP Program" class="rounded-lg shadow-md w-full h-64 object-cover">
                     </div>
                 </div>
             </section>
@@ -66,7 +66,7 @@ onMounted(() => {
             <section class="bg-white rounded-lg shadow-md p-6 mb-8">
                 <div class="flex flex-col-reverse md:flex-row md:items-center gap-8">
                     <div class="md:w-1/2">
-                        <img src="path/to/image2.jpg" alt="School Environment" class="rounded-lg shadow-md w-full h-64 object-cover">
+                        <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80" alt="School Environment" class="rounded-lg shadow-md w-full h-64 object-cover">
                     </div>
                     <div class="md:w-1/2">
                         <h2 class="text-2xl font-bold text-gray-800 mb-4">Komitmen Lingkungan</h2>
