@@ -11,6 +11,10 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  desc: {
+    type: String,
+    default: ''
+  },
   accept: {
     type: String,
     default: 'application/pdf'
@@ -230,6 +234,9 @@ const resetFileInput = () => {
     <!-- Description -->
     <p v-if="description" class="text-xs text-gray-600 leading-relaxed">
       {{ description }}
+    </p>
+    <p v-if="desc" class="text-sm italic text-gray-600 leading-relaxed">
+      {{ desc }}
     </p>
 
     <!-- CRITICAL: Hidden file input is OUTSIDE upload zone and COMPLETELY HIDDEN -->

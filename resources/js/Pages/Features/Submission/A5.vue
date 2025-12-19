@@ -21,7 +21,7 @@ const dataExists = ref(false);
 const isLoading = ref(true);
 
 const indicators = [
-  { key: 'evaluasi_diri_sekolah', label: 'Evaluasi Diri Sekolah' },
+  { key: 'evaluasi_diri_sekolah', label: 'Evaluasi Diri Sekolah', desc: 'Kajian internal aspek lingkungan sekolah' },
   { key: 'hasil_ipmlh', label: 'Hasil IPMLH' },
   { key: 'rencana_gpblhs_4_tahunan', label: 'Rencana GPBLHS 4-tahunan' },
   { key: 'rencana_gpblhs_tahunan', label: 'Rencana GPBLHS tahunan' },
@@ -155,7 +155,8 @@ const saveA5 = async () => {
         <FileUploadCard
           v-for="indicator in indicators"
           :key="indicator.key"
-          :label="indicator.label"
+          :label="indicator.label",
+          :desc="indicator.desc"
           description="Format: PDF, Max: 10MB"
           :model-value="formData.files[indicator.key]"
           @update:model-value="handleFileUpload(indicator.key, $event)"
