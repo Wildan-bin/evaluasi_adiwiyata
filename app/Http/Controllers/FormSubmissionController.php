@@ -465,13 +465,13 @@ class FormSubmissionController extends Controller
      */
     public function showA5()
     {
-        \Log::info('========== SHOW A5 METHOD CALLED ==========');
+        // \Log::info('========== SHOW A5 METHOD CALLED ==========');
         
         $user = Auth::user();
-        \Log::info('User:', ['id' => $user?->id, 'name' => $user?->name]);
+        // \Log::info('User:', ['id' => $user?->id, 'name' => $user?->name]);
         
         if (!$user) {
-            \Log::error('NO USER FOUND');
+            // \Log::error('NO USER FOUND');
             return Inertia::render('Features/Submission/A5', [
                 'dataExists' => false,
                 'existingData' => [],
@@ -484,11 +484,11 @@ class FormSubmissionController extends Controller
         // Direct query
         $rencanaData = Rencana::where('user_id', $userId)->get();
         
-        \Log::info('Rencana Data:', [
-            'count' => $rencanaData->count(),
-            'sql' => Rencana::where('user_id', $userId)->toSql(),
-            'data' => $rencanaData->toArray()
-        ]);
+        // \Log::info('Rencana Data:', [
+        //     'count' => $rencanaData->count(),
+        //     'sql' => Rencana::where('user_id', $userId)->toSql(),
+        //     'data' => $rencanaData->toArray()
+        // ]);
 
         $dataExists = $rencanaData->count() > 0;
         
@@ -501,7 +501,7 @@ class FormSubmissionController extends Controller
             'timestamp' => now()->toDateTimeString()
         ];
         
-        \Log::info('========== DEBUG INFO ==========', $debugInfo);
+        // \Log::info('========== DEBUG INFO ==========', $debugInfo);
         
         return Inertia::render('Features/Submission/A5', [
             'dataExists' => $dataExists,
@@ -596,5 +596,58 @@ class FormSubmissionController extends Controller
     private function checkDataExists($model, $userId)
     {
         return $model::where('user_id', $userId)->first();
+    }
+
+    /**
+     * Get all users with their submission status for A5, A6, A7, A8
+     */
+    public function getUsersSubmissionStatus()
+    {
+        $users = \App\Models\User::with(['rencana', 'buktiSelfAssessment', 'pendampingan', 'pernyataan'])
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'a5_status' => $user->rencana->count() > 0,
+                    'a6_status' => $user->buktiSelfAssessment->count() > 0,
+                    'a7_status' => $user->pendampingan->count() > 0,
+                    'a8_status' => $user->pernyataan->count() > 0,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'users' => $users
+        ]);
+    }
+
+    /**
+     * Show user files for admin view
+     */
+    public function showUserFiles($userId)
+    {
+        $user = \App\Models\User::findOrFail($userId);
+        
+        // Get A5 files (Rencana)
+        $a5Files = Rencana::where('user_id', $userId)->get();
+        
+        // Get A6 files (Bukti Self Assessment)
+        $a6Files = BuktiSelfAssessment::where('user_id', $userId)->get();
+        
+        // Get A7 data (Pendampingan)
+        $a7Data = Pendampingan::where('user_id', $userId)->get();
+        
+        // Get A8 data (Pernyataan)
+        $a8Data = Pernyataan::where('user_id', $userId)->first();
+        
+        return Inertia::render('Features/Admin/Administrasi', [
+            'user' => $user,
+            'a5_files' => $a5Files,
+            'a6_files' => $a6Files,
+            'a7_data' => $a7Data,
+            'a8_data' => $a8Data
+        ]);
     }
 }

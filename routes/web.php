@@ -72,6 +72,13 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('form');
 
+    Route::get('/users/submission-status', [FormSubmissionController::class, 'getUsersSubmissionStatus'])
+        ->name('users.submission-status');
+
+    // Admin - User Files View
+    Route::get('/admin/user-files/{userId}', [FormSubmissionController::class, 'showUserFiles'])
+        ->name('admin.user-files');
+
     // Form Submission Routes - A5, A6, A7, A8
     Route::post('/form/save-a5', [FormSubmissionController::class, 'saveA5'])->name('form.save-a5');
     Route::get('/form/get-a5', [FormSubmissionController::class, 'getA5'])->name('form.get-a5');
@@ -95,9 +102,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/submission/store', [SubmissionController::class, 'store'])->name('submission.store'); // masih belum tau apakah akan digunakan
     Route::post('/submission/draft', [SubmissionController::class, 'saveDraft'])->name('submission.draft'); // masih belum tau apakah akan digunakan
 
-    // File Evidence routes - TAMBAHAN UNTUK PREVIEW
-    Route::get('/file-evidence/{id}/preview', [FileEvidenceController::class, 'preview'])->name('file-evidence.preview');
-    Route::get('/file-evidence/{id}/download', [FileEvidenceController::class, 'download'])->name('file-evidence.download');
+    // File Evidence routes - Updated untuk multiple model types
+    Route::get('/file-evidence/{type}/{id}/preview', [FileEvidenceController::class, 'preview'])
+        ->name('file-evidence.preview')
+        ->where('type', 'a5|a6|a8');
+    
+    Route::get('/file-evidence/{type}/{id}/download', [FileEvidenceController::class, 'download'])
+        ->name('file-evidence.download')
+        ->where('type', 'a5|a6|a8');
 
     // Admin test page
     Route::get('/admin/test', function () {
