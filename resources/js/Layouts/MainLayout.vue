@@ -171,13 +171,13 @@ const navigationItems = [
         description: 'Dashboard utama',
         color: 'text-green-400'
     },
-    {
-        name: 'Administrasi',
-        route: 'administration',
-        icon: Upload,
-        description: 'Unggah Bukti Administrasi',
-        color: 'text-green-400'
-    },
+    // {
+    //     name: 'Administrasi',
+    //     route: 'administration',
+    //     icon: Upload,
+    //     description: 'Unggah Bukti Administrasi',
+    //     color: 'text-green-400'
+    // },
     {
         name: 'Self Assessment',
         route: 'form',
@@ -185,13 +185,13 @@ const navigationItems = [
         description: 'Form Evaluasi PPEPP',
         color: 'text-green-400'
     },
-    {
-        name: 'Evaluasi PBLHS',
-        route: 'evaluation',
-        icon: FileText,
-        description: 'Hasil Evaluasi PPEPP',
-        color: 'text-green-400'
-    },
+    // {
+    //     name: 'Evaluasi PBLHS',
+    //     route: 'evaluation',
+    //     icon: FileText,
+    //     description: 'Hasil Evaluasi PPEPP',
+    //     color: 'text-green-400'
+    // },
     {
         name: 'Admin Test',
         route: 'admin.test',
