@@ -28,7 +28,13 @@ const currentStepIndex = computed(() => {
   return steps.findIndex(s => s.id === currentStepId.value);
 });
 
-const completedSteps = computed(() => page.props.completedSteps || {});
+// Use completedSteps from Inertia shared data (middleware)
+const completedSteps = computed(() => page.props.completedSteps || {
+  a5: false,
+  a6: false,
+  a7: false,
+  a8: false
+});
 
 // Navigation helpers
 const canGoPrevious = computed(() => currentStepIndex.value > 0);
