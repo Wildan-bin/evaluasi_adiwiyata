@@ -8,7 +8,9 @@ use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdministrasiSekolahController;
 use App\Http\Controllers\FileUploadController;
-
+use App\Http\Controllers\FormSubmissionController;
+use App\Http\Controllers\FileEvidenceController;
+use App\Models\File;
 // CSRF Token Refresh Route (untuk SPA)
 Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
@@ -303,20 +305,33 @@ Route::middleware('auth')->prefix('submission')->name('submission.')->group(func
 // ============================================================================
 Route::middleware('auth')->prefix('form')->name('form.')->group(function () {
     // A5 - Rencana (Perencanaan & Evaluasi)
-    Route::post('/save-a5', [\App\Http\Controllers\FormSubmissionController::class, 'saveA5'])->name('save-a5');
-    Route::get('/get-a5', [\App\Http\Controllers\FormSubmissionController::class, 'getA5'])->name('get-a5');
+    Route::post('/save-a5', [FormSubmissionController::class, 'saveA5'])->name('save-a5');
+    Route::get('/get-a5', [FormSubmissionController::class, 'getA5'])->name('get-a5');
 
     // A6 - Bukti Self Assessment
-    Route::post('/save-a6', [\App\Http\Controllers\FormSubmissionController::class, 'saveA6'])->name('save-a6');
-    Route::get('/get-a6', [\App\Http\Controllers\FormSubmissionController::class, 'getA6'])->name('get-a6');
+    Route::post('/save-a6', [FormSubmissionController::class, 'saveA6'])->name('save-a6');
+    Route::get('/get-a6', [FormSubmissionController::class, 'getA6'])->name('get-a6');
 
     // A7 - Pendampingan
-    Route::post('/save-a7', [\App\Http\Controllers\FormSubmissionController::class, 'saveA7'])->name('save-a7');
-    Route::get('/get-a7', [\App\Http\Controllers\FormSubmissionController::class, 'getA7'])->name('get-a7');
+    Route::post('/save-a7', [FormSubmissionController::class, 'saveA7'])->name('save-a7');
+    Route::get('/get-a7', [FormSubmissionController::class, 'getA7'])->name('get-a7');
 
     // A8 - Pernyataan & Persetujuan
-    Route::post('/save-a8', [\App\Http\Controllers\FormSubmissionController::class, 'saveA8'])->name('save-a8');
-    Route::get('/get-a8', [\App\Http\Controllers\FormSubmissionController::class, 'getA8'])->name('get-a8');
+    Route::post('/save-a8', [FormSubmissionController::class, 'saveA8'])->name('save-a8');
+    Route::get('/get-a8', [FormSubmissionController::class, 'getA8'])->name('get-a8');
+});
+
+// ============================================================================
+// FILE EVIDENCE ROUTES - Preview & Download (for A5, A6, A8)
+// ============================================================================
+Route::middleware('auth')->prefix('file-evidence')->name('file-evidence.')->group(function () {
+    Route::get('/{type}/{id}/preview', [FileEvidenceController::class, 'preview'])
+        ->name('preview')
+        ->where('type', 'a5|a6|a8');
+    
+    Route::get('/{type}/{id}/download', [FileEvidenceController::class, 'download'])
+        ->name('download')
+        ->where('type', 'a5|a6|a8');
 });
 
 // ============================================================================
@@ -367,11 +382,12 @@ Route::middleware('auth')->prefix('api/file-upload')->name('file-upload.')->grou
 
 // Admin User Files Page
 Route::middleware(['auth', 'role:admin,mentor'])->group(function () {
-    Route::get('/admin/users/{userId}/files', function ($userId) {
-        return Inertia::render('Features/Admin/UserFiles', [
-            'userId' => $userId,
-        ]);
-    })->name('admin.user-files');
+    Route::get('/admin/users/{userId}/files', [FormSubmissionController::class, 'showUserFiles'])
+        ->name('admin.user-files');
+
+    // Get users submission status for dashboard
+    Route::get('/api/users/submission-status', [FormSubmissionController::class, 'getUsersSubmissionStatus'])
+        ->name('users.submission-status');
 
     // Get all users list for dropdown
     Route::get('/api/users', function () {
@@ -389,5 +405,19 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// New route for previewing PDF files in a modal
+Route::middleware('auth')->get('/file-preview/{id}', function ($id) {
+    // Logic to fetch the file based on the ID
+    $file = File::find($id); // Now using the imported File model
+
+    if (!$file) {
+        abort(404, 'File tidak ditemukan');
+    }
+
+    return Inertia::render('Features/FilePreview', [
+        'file' => $file,
+    ]);
+})->name('file.preview');
 
 require __DIR__.'/auth.php';

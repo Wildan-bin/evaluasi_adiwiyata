@@ -8,6 +8,7 @@ use App\Models\Pendampingan;
 use App\Models\Pernyataan;
 use App\Models\Permintaan;
 use App\Models\Kemajuan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -597,5 +598,50 @@ class FormSubmissionController extends Controller
     private function checkDataExists($model, $userId)
     {
         return $model::where('user_id', $userId)->first();
+    }
+
+    /**
+     * Get users submission status - for admin dashboard
+     */
+    public function getUsersSubmissionStatus()
+    {
+        $users = User::select('id', 'name', 'email', 'role')
+            ->where('role', '!=', 'admin')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'a5_status' => Rencana::where('user_id', $user->id)->exists(),
+                    'a6_status' => BuktiSelfAssessment::where('user_id', $user->id)->exists(),
+                    'a7_status' => Pendampingan::where('user_id', $user->id)->exists() || 
+                                   Permintaan::where('user_id', $user->id)->exists(),
+                    'a8_status' => Pernyataan::where('user_id', $user->id)->exists(),
+                ];
+            });
+
+        return response()->json(['users' => $users]);
+    }
+
+    /**
+     * Show user files for admin - displays all submissions from a user
+     */
+    public function showUserFiles($userId)
+    {
+        $user = User::findOrFail($userId);
+        
+        $a5_files = Rencana::where('user_id', $userId)->get();
+        $a6_files = BuktiSelfAssessment::where('user_id', $userId)->get();
+        $a7_data = Pendampingan::where('user_id', $userId)->get();
+        $a8_data = Pernyataan::where('user_id', $userId)->first();
+
+        return Inertia::render('Features/Admin/Administrasi', [
+            'user' => $user,
+            'a5_files' => $a5_files,
+            'a6_files' => $a6_files,
+            'a7_data' => $a7_data,
+            'a8_data' => $a8_data,
+        ]);
     }
 }

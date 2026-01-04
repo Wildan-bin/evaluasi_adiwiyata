@@ -384,6 +384,6 @@ class AdministrasiSekolahController extends Controller
         }
 
         // Stream inline so browser can preview PDF/images
-        return Storage::disk('public')->response($path);
+        return response()->file(Storage::disk('public')->path($path));
     }
 }

@@ -368,19 +368,20 @@ onMounted(() => {
           <!-- SK Tim Sekolah Upload -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">SK Tim Sekolah <span class="text-red-500">*</span></label>
-            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-              <div class="space-y-2 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                <div class="flex text-sm text-gray-600">
-                  <label for="sk-file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                    <span>Upload file</span>
-                    <input id="sk-file" name="sk_file" type="file" class="sr-only" accept=".pdf" required>
-                  </label>
-                  <p class="pl-1">atau drag and drop</p>
+            <div class="relative border-2 border-dashed rounded-lg p-6 transition-all duration-200 border-gray-300 hover:border-blue-400 hover:bg-blue-50 cursor-pointer">
+              <div class="text-center py-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-gray-600">
+                    <path d="M12 3v12"></path>
+                    <path d="m17 8-5-5-5 5"></path>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  </svg>
                 </div>
-                <p class="text-xs text-gray-500">PDF maksimal 10MB</p>
+                <label for="sk-file" class="cursor-pointer">
+                  <p class="text-sm font-semibold text-gray-900 mb-1">Klik atau drag PDF di sini</p>
+                  <p class="text-xs text-gray-600">Max: 10MB</p>
+                  <input id="sk-file" name="sk_file" type="file" class="sr-only" accept=".pdf" required>
+                </label>
               </div>
             </div>
           </div>
@@ -482,14 +483,20 @@ onMounted(() => {
           <!-- SK Penetapan Adiwiyata Tingkat Sebelumnya -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">SK Penetapan Adiwiyata Tingkat Sebelumnya (jika ada)</label>
-            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-              <div class="space-y-2 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                <div class="flex text-sm text-gray-600">
-                  <label for="sk-sebelumnya-file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"><span>Upload file</span><input id="sk-sebelumnya-file" name="sk_sebelumnya_file" type="file" class="sr-only" accept=".pdf"></label>
-                  <p class="pl-1">atau drag and drop</p>
+            <div class="relative border-2 border-dashed rounded-lg p-6 transition-all duration-200 border-gray-300 hover:border-blue-400 hover:bg-blue-50 cursor-pointer">
+              <div class="text-center py-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-gray-600">
+                    <path d="M12 3v12"></path>
+                    <path d="m17 8-5-5-5 5"></path>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  </svg>
                 </div>
-                <p class="text-xs text-gray-500">PDF maksimal 10MB</p>
+                <label for="sk-sebelumnya-file" class="cursor-pointer">
+                  <p class="text-sm font-semibold text-gray-900 mb-1">Klik atau drag PDF di sini</p>
+                  <p class="text-xs text-gray-600">Max: 10MB</p>
+                  <input id="sk-sebelumnya-file" name="sk_sebelumnya_file" type="file" class="sr-only" accept=".pdf">
+                </label>
               </div>
             </div>
           </div>
@@ -497,14 +504,20 @@ onMounted(() => {
           <!-- Piagam Penghargaan Tingkat Sebelumnya -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Piagam Penghargaan Tingkat Sebelumnya (jika ada)</label>
-            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-              <div class="space-y-2 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                <div class="flex text-sm text-gray-600">
-                  <label for="piagam-sebelumnya-file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"><span>Upload file</span><input id="piagam-sebelumnya-file" name="piagam_sebelumnya_file" type="file" class="sr-only" accept=".pdf"></label>
-                  <p class="pl-1">atau drag and drop</p>
+            <div class="relative border-2 border-dashed rounded-lg p-6 transition-all duration-200 border-gray-300 hover:border-blue-400 hover:bg-blue-50 cursor-pointer">
+              <div class="text-center py-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-gray-600">
+                    <path d="M12 3v12"></path>
+                    <path d="m17 8-5-5-5 5"></path>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  </svg>
                 </div>
-                <p class="text-xs text-gray-500">PDF maksimal 10MB</p>
+                <label for="piagam-sebelumnya-file" class="cursor-pointer">
+                  <p class="text-sm font-semibold text-gray-900 mb-1">Klik atau drag PDF di sini</p>
+                  <p class="text-xs text-gray-600">Max: 10MB</p>
+                  <input id="piagam-sebelumnya-file" name="piagam_sebelumnya_file" type="file" class="sr-only" accept=".pdf">
+                </label>
               </div>
             </div>
           </div>
@@ -512,14 +525,20 @@ onMounted(() => {
           <!-- Profil Sekolah -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Profil Sekolah</label>
-            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-              <div class="space-y-2 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                <div class="flex text-sm text-gray-600">
-                  <label for="profil-sekolah-file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"><span>Upload file</span><input id="profil-sekolah-file" name="profil_sekolah_file" type="file" class="sr-only" accept=".pdf"></label>
-                  <p class="pl-1">atau drag and drop</p>
+            <div class="relative border-2 border-dashed rounded-lg p-6 transition-all duration-200 border-gray-300 hover:border-blue-400 hover:bg-blue-50 cursor-pointer">
+              <div class="text-center py-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-gray-600">
+                    <path d="M12 3v12"></path>
+                    <path d="m17 8-5-5-5 5"></path>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  </svg>
                 </div>
-                <p class="text-xs text-gray-500">PDF maksimal 10MB</p>
+                <label for="profil-sekolah-file" class="cursor-pointer">
+                  <p class="text-sm font-semibold text-gray-900 mb-1">Klik atau drag PDF di sini</p>
+                  <p class="text-xs text-gray-600">Max: 10MB</p>
+                  <input id="profil-sekolah-file" name="profil_sekolah_file" type="file" class="sr-only" accept=".pdf">
+                </label>
               </div>
             </div>
           </div>
@@ -527,14 +546,20 @@ onMounted(() => {
           <!-- Dokumen Kurikulum -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Dokumen Kurikulum (KTSP/Kurikulum Satuan Pendidikan) Terkini</label>
-            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-              <div class="space-y-2 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                <div class="flex text-sm text-gray-600">
-                  <label for="kurikulum-file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"><span>Upload file</span><input id="kurikulum-file" name="kurikulum_file" type="file" class="sr-only" accept=".pdf"></label>
-                  <p class="pl-1">atau drag and drop</p>
+            <div class="relative border-2 border-dashed rounded-lg p-6 transition-all duration-200 border-gray-300 hover:border-blue-400 hover:bg-blue-50 cursor-pointer">
+              <div class="text-center py-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-gray-600">
+                    <path d="M12 3v12"></path>
+                    <path d="m17 8-5-5-5 5"></path>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  </svg>
                 </div>
-                <p class="text-xs text-gray-500">PDF maksimal 10MB</p>
+                <label for="kurikulum-file" class="cursor-pointer">
+                  <p class="text-sm font-semibold text-gray-900 mb-1">Klik atau drag PDF di sini</p>
+                  <p class="text-xs text-gray-600">Max: 10MB</p>
+                  <input id="kurikulum-file" name="kurikulum_file" type="file" class="sr-only" accept=".pdf">
+                </label>
               </div>
             </div>
           </div>
@@ -542,14 +567,20 @@ onMounted(() => {
           <!-- RPP terintegrasi PRLH -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">RPP terintegrasi PRLH</label>
-            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-              <div class="space-y-2 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                <div class="flex text-sm text-gray-600">
-                  <label for="rpp-file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"><span>Upload file</span><input id="rpp-file" name="rpp_file" type="file" class="sr-only" accept=".pdf"></label>
-                  <p class="pl-1">atau drag and drop</p>
+            <div class="relative border-2 border-dashed rounded-lg p-6 transition-all duration-200 border-gray-300 hover:border-blue-400 hover:bg-blue-50 cursor-pointer">
+              <div class="text-center py-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-gray-600">
+                    <path d="M12 3v12"></path>
+                    <path d="m17 8-5-5-5 5"></path>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  </svg>
                 </div>
-                <p class="text-xs text-gray-500">PDF maksimal 10MB — minimal 2 mata pelajaran per jenjang</p>
+                <label for="rpp-file" class="cursor-pointer">
+                  <p class="text-sm font-semibold text-gray-900 mb-1">Klik atau drag PDF di sini</p>
+                  <p class="text-xs text-gray-600">Max: 10MB — minimal 2 mata pelajaran per jenjang</p>
+                  <input id="rpp-file" name="rpp_file" type="file" class="sr-only" accept=".pdf">
+                </label>
               </div>
             </div>
           </div>
