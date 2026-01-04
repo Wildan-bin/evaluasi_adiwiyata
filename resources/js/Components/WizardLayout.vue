@@ -118,7 +118,8 @@ const progressPercentage = computed(() => {
       </div>
     </div>
 
-    <div class="flex">
+    <!-- Tambahkan min-h-[calc(100vh-80px)] untuk memastikan flex container punya tinggi minimum -->
+    <div class="flex min-h-[calc(100vh-80px)]">
       <!-- Sidebar Progress -->
       <StepSidebar 
         :steps="steps" 
@@ -128,6 +129,7 @@ const progressPercentage = computed(() => {
       <!-- Main Content -->
       <main class="flex-1 px-6 lg:px-8 py-8 mt-20">
         <div class="max-w-4xl mx-auto">
+
           <!-- Loading State -->
           <transition
             enter-active-class="transition-all duration-300"

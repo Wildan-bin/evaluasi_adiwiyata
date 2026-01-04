@@ -61,7 +61,7 @@ const navigateToStep = (stepId) => {
 </script>
 
 <template>
-  <aside class="hidden lg:block w-72 bg-white border-r border-gray-200 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto">
+  <aside class="hidden lg:block w-72 bg-white border-r border-gray-200 fixed top-20 h-[calc(100vh-80px)] overflow-y-auto">
     <div class="p-6 space-y-4">
       <!-- Progress Overview -->
       <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
@@ -147,7 +147,7 @@ aside::-webkit-scrollbar {
 
 aside::-webkit-scrollbar-thumb {
   background: linear-gradient(to bottom, #059669, #10b981);
-  border-radius: 10px;
+  border-radius: 10px;  
 }
 
 aside::-webkit-scrollbar-track {
