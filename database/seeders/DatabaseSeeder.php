@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin Greenedu',
             'email' => 'admin@greenedu.com',
             'password' => bcrypt('12345678'),
-            // 'role' => 'admin',
+            'role' => 'admin',
             'email_verified_at' => now(),
         ]);
 
@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'User Test',
             'email' => 'user@greenedu.com',
             'password' => bcrypt('12345678'),
-            // 'role' => 'user',
+            'role' => 'user',
             'email_verified_at' => now(),
         ]);
 
@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Mentor Greenedu',
             'email' => 'mentor@greenedu.com',
             'password' => bcrypt('12345678'),
-            // 'role' => 'mentor',
+            'role' => 'mentor',
             'email_verified_at' => now(),
         ]);
     }
