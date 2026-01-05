@@ -23,10 +23,31 @@ class DatabaseSeeder extends Seeder
         //     'password' => bcrypt('admin123'),
         // ]);
 
-        User::factory()->create([
-            'name' => 'Robin',
-            'email' => 'robin@gmail.com',
-            'password' => bcrypt('admin123'),
+        // Admin account
+        \App\Models\User::create([
+            'name' => 'Admin Greenedu',
+            'email' => 'admin@greenedu.com',
+            'password' => bcrypt('12345678'),
+            // 'role' => 'admin',
+            'email_verified_at' => now(),
+        ]);
+
+        // User account
+        \App\Models\User::create([
+            'name' => 'User Test',
+            'email' => 'user@greenedu.com',
+            'password' => bcrypt('12345678'),
+            // 'role' => 'user',
+            'email_verified_at' => now(),
+        ]);
+
+        // Mentor account (optional)
+        \App\Models\User::create([
+            'name' => 'Mentor Greenedu',
+            'email' => 'mentor@greenedu.com',
+            'password' => bcrypt('12345678'),
+            // 'role' => 'mentor',
+            'email_verified_at' => now(),
         ]);
     }
 }
