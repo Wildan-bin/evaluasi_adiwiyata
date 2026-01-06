@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, ref, onMounted } from 'vue';
 import axios from 'axios';
+import { router } from '@inertiajs/vue3';
 import { secureUpload } from '@/Composables/useCsrf';
 import FileUploadCard from '@/Components/FileUploadCard.vue';
 import { CheckCircle, Loader } from 'lucide-vue-next';
@@ -101,9 +102,14 @@ const saveA5 = async () => {
     draftSaveMessage.value = '✓ A5 berhasil disimpan!';
     dataExists.value = true;
 
-    // Emit ke parent untuk navigate
+    // Emit ke parent dan reload page untuk update props dari backend
     setTimeout(() => {
       emit('save-and-continue');
+      // Reload halaman untuk fetch data terbaru dari server
+      router.reload({
+        preserveScroll: true,
+        only: ['completedSteps']
+      });
     }, 1000);
 
   } catch (error) {
@@ -115,6 +121,10 @@ const saveA5 = async () => {
       
       setTimeout(() => {
         emit('save-and-continue');
+        router.reload({
+          preserveScroll: true,
+          only: ['completedSteps']
+        });
       }, 1000);
     } else {
       draftSaveError.value = error.response?.data?.message || 'Gagal menyimpan A5';
@@ -155,9 +165,8 @@ const saveA5 = async () => {
         <FileUploadCard
           v-for="indicator in indicators"
           :key="indicator.key"
-          :label="indicator.label",
-          :desc="indicator.desc"
-          description="Format: PDF, Max: 10MB"
+          :label="indicator.label"
+          :description="indicator.desc || 'Format: PDF, Max: 10MB'"
           :model-value="formData.files[indicator.key]"
           @update:model-value="handleFileUpload(indicator.key, $event)"
           :disabled="isSavingDraft || isSaving"

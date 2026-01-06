@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, ref, onMounted } from 'vue';
 import axios from 'axios';
+import { router } from '@inertiajs/vue3';
 import { CheckCircle, Loader, Check } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -101,6 +102,10 @@ const saveA7 = async () => {
 
     setTimeout(() => {
       emit('save-and-continue');
+      router.reload({
+        preserveScroll: true,
+        only: ['completedSteps']
+      });
     }, 1000);
 
   } catch (error) {
@@ -112,6 +117,10 @@ const saveA7 = async () => {
       
       setTimeout(() => {
         emit('save-and-continue');
+        router.reload({
+          preserveScroll: true,
+          only: ['completedSteps']
+        });
       }, 1000);
     } else {
       draftSaveError.value = error.response?.data?.message || 'Gagal menyimpan A7';

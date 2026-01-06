@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, ref, onMounted } from 'vue';
 import axios from 'axios';
+import { router } from '@inertiajs/vue3';
 import { secureUpload } from '@/Composables/useCsrf';
 import FileUploadCard from '@/Components/FileUploadCard.vue';
 import { CheckCircle, Loader, AlertCircle } from 'lucide-vue-next';
@@ -88,6 +89,10 @@ const saveA8 = async () => {
 
     setTimeout(() => {
       emit('final-submit');
+      router.reload({
+        preserveScroll: true,
+        only: ['completedSteps']
+      });
     }, 1000);
 
   } catch (error) {
@@ -99,6 +104,10 @@ const saveA8 = async () => {
       
       setTimeout(() => {
         emit('final-submit');
+        router.reload({
+          preserveScroll: true,
+          only: ['completedSteps']
+        });
       }, 1000);
     } else {
       draftSaveError.value = error.response?.data?.message || 'Gagal menyimpan A8';

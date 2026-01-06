@@ -1,7 +1,8 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, watch, ref, onMounted } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { Check, Clock, Circle } from 'lucide-vue-next';
+import axios from 'axios';
 
 const props = defineProps({
   steps: {
@@ -15,28 +16,34 @@ const props = defineProps({
 });
 
 const page = usePage();
-
-// Get completedSteps from Inertia shared data (from middleware)
-const completedSteps = computed(() => {
-  // Prioritas: props.completed (jika diberikan dari parent), 
-  // fallback ke page.props.completedSteps dari middleware
-  const propsCompleted = props.completed || {};
-  const sharedCompleted = page.props.completedSteps || {};
-  
-  // Merge: jika props.completed punya nilai true, gunakan itu; 
-  // jika tidak, gunakan dari sharedCompleted
-  return {
-    a5: propsCompleted.a5 || sharedCompleted.a5 || false,
-    a6: propsCompleted.a6 || sharedCompleted.a6 || false,
-    a7: propsCompleted.a7 || sharedCompleted.a7 || false,
-    a8: propsCompleted.a8 || sharedCompleted.a8 || false,
-  };
+const isLoadingStatus = ref(false);
+const completedStepsLocal = ref({
+  a5: false,
+  a6: false,
+  a7: false,
+  a8: false
 });
+
+// Initialize dari props
+onMounted(() => {
+  if (props.completed && Object.keys(props.completed).length > 0) {
+    completedStepsLocal.value = { ...props.completed };
+  }
+});
+
+// Watch props.completed untuk reactive update real-time
+watch(() => props.completed, (newValue) => {
+  if (newValue && Object.keys(newValue).length > 0) {
+    completedStepsLocal.value = { ...newValue };
+  }
+}, { deep: true });
+
+// Get completedSteps dari local state
+const completedSteps = computed(() => completedStepsLocal.value);
 
 // Extract step ID dari component name
 const currentStepId = computed(() => {
   const componentName = page.component || '';
-  // Match A5, A6, A7, A8 dari component name
   const match = componentName.match(/A[5-8]/);
   return match ? `a${match[0].charAt(1).toLowerCase()}` : 'a5';
 });
@@ -51,12 +58,37 @@ const completedCount = computed(() => {
   return Object.values(completedSteps.value).filter(v => v).length;
 });
 
-// Navigate to step using router.visit
-const navigateToStep = (stepId) => {
-  router.visit(route(`submission.${stepId}`), {
-    preserveScroll: true,
-    preserveState: false
-  });
+// Fetch status terbaru dari backend sebelum navigate
+const fetchLatestStatus = async () => {
+  try {
+    isLoadingStatus.value = true;
+    const response = await axios.get(route('form.get-status'));
+    
+    if (response.data.completedSteps) {
+      completedStepsLocal.value = response.data.completedSteps;
+    }
+  } catch (error) {
+    console.error('Error fetching latest status:', error);
+  } finally {
+    isLoadingStatus.value = false;
+  }
+};
+
+// Navigate to step menggunakan router.visit dengan reload data
+const navigateToStep = async (stepId) => {
+  try {
+    // Fetch latest status dari backend
+    await fetchLatestStatus();
+    
+    // Visit route dengan hanya refresh props yang dibutuhkan
+    router.visit(route(`submission.${stepId}`), {
+      preserveScroll: true,
+      only: ['completedSteps'], // Hanya ambil props completedSteps dari server
+      replace: false
+    });
+  } catch (error) {
+    console.error('Error navigating to step:', error);
+  }
 };
 </script>
 
@@ -81,13 +113,13 @@ const navigateToStep = (stepId) => {
           <button
             @click="navigateToStep(step.id)"
             type="button"
+            :disabled="index > completedCount || isLoadingStatus"
             class="w-full flex items-start gap-3 p-4 rounded-lg transition-all duration-200 group"
             :class="{
               'bg-green-50 border-2 border-green-200': getStepStatus(step.id) === 'active',
               'bg-gray-50 hover:bg-gray-100': getStepStatus(step.id) !== 'active',
-              'opacity-60 cursor-not-allowed': index > completedCount
+              'opacity-60 cursor-not-allowed': index > completedCount || isLoadingStatus
             }"
-            :disabled="index > completedCount"
           >
             <!-- Status Icon -->
             <div
@@ -154,7 +186,6 @@ aside::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Pulse animation untuk active step */
 @keyframes pulse {
   0%, 100% {
     opacity: 1;

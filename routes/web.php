@@ -92,6 +92,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/form/save-a8', [FormSubmissionController::class, 'saveA8'])->name('form.save-a8');
     Route::get('/form/get-a8', [FormSubmissionController::class, 'getA8'])->name('form.get-a8');
 
+    Route::get('/form/status', [FormSubmissionController::class, 'getStatus'])->name('form.get-status');
+    Route::post('/form/save-step', [FormSubmissionController::class, 'saveStep'])->name('form.save-step');
+
     // Submission routes
     Route::post('/submission/save-draft-a5', [SubmissionController::class, 'saveDraftA5'])
         ->name('submission.save-draft-a5');
@@ -106,7 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/file-evidence/{type}/{id}/preview', [FileEvidenceController::class, 'preview'])
         ->name('file-evidence.preview')
         ->where('type', 'a5|a6|a8');
-    
+
     Route::get('/file-evidence/{type}/{id}/download', [FileEvidenceController::class, 'download'])
         ->name('file-evidence.download')
         ->where('type', 'a5|a6|a8');

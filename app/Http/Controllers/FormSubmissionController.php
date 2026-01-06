@@ -566,6 +566,63 @@ class FormSubmissionController extends Controller
 
     /**
      * ============================================================================
+     * STEP STATUS & SAVE METHODS
+     * ============================================================================
+     */
+
+    /**
+     * Get status for all steps (A5, A6, A7, A8)
+     */
+    public function getStatus(Request $request)
+    {
+        $user = Auth::user();
+        $userId = $user->id;
+
+        // Check each step completion status
+        $completedSteps = [
+            'a5' => Rencana::where('user_id', $userId)->exists(),
+            'a6' => BuktiSelfAssessment::where('user_id', $userId)->exists(),
+            'a7' => Pendampingan::where('user_id', $userId)->exists(),
+            'a8' => Pernyataan::where('user_id', $userId)->exists(),
+        ];
+
+        // Get current progress from Kemajuan table
+        $kemajuan = Kemajuan::where('user_id', $userId)->first();
+
+        return response()->json([
+            'success' => true,
+            'completedSteps' => $completedSteps,
+            'progress' => $kemajuan ? $kemajuan->progress : 0
+        ]);
+    }
+
+    /**
+     * Save step data - Generic method (optional, untuk future use)
+     */
+    public function saveStep(Request $request)
+    {
+        $step = $request->input('step');
+        
+        // Route to specific save method based on step
+        switch ($step) {
+            case 'a5':
+                return $this->saveA5($request);
+            case 'a6':
+                return $this->saveA6($request);
+            case 'a7':
+                return $this->saveA7($request);
+            case 'a8':
+                return $this->saveA8($request);
+            default:
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid step'
+                ], 400);
+        }
+    }
+
+    /**
+     * ============================================================================
      * HELPER METHODS
      * ============================================================================
      */
