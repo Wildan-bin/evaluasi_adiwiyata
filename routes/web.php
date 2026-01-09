@@ -224,47 +224,47 @@ Route::middleware('auth')->get('/api/submissions-with-files', function () {
 });
 
 // Preview/Download file evidence by encoded id
-Route::middleware('auth')->get('/file-evidence/{eid}/preview', function ($eid) {
-    $user = Auth::user();
-    abort_if(!$user || $user->role !== 'admin', 403);
+// Route::middleware('auth')->get('/file-evidence/{eid}/preview', function ($eid) {
+//     $user = Auth::user();
+//     abort_if(!$user || $user->role !== 'admin', 403);
 
-    // Decode file path from encrypted ID
-    $decoded = strtr($eid, '-_', '+/');
-    $decoded .= str_repeat('=', (4 - strlen($decoded) % 4) % 4);
-    @[$uid, $path] = explode('|', base64_decode($decoded, true), 2);
+//     // Decode file path from encrypted ID
+//     $decoded = strtr($eid, '-_', '+/');
+//     $decoded .= str_repeat('=', (4 - strlen($decoded) % 4) % 4);
+//     @[$uid, $path] = explode('|', base64_decode($decoded, true), 2);
 
-    if (!$path) abort(404);
+//     if (!$path) abort(404);
 
-    // Normalize path
-    $path = ltrim($path, '/');
-    if (str_starts_with($path, 'public/')) $path = substr($path, 7);
-    if (str_starts_with($path, 'storage/')) $path = substr($path, 8);
+//     // Normalize path
+//     $path = ltrim($path, '/');
+//     if (str_starts_with($path, 'public/')) $path = substr($path, 7);
+//     if (str_starts_with($path, 'storage/')) $path = substr($path, 8);
 
-    if (!Storage::disk('public')->exists($path)) abort(404);
+//     if (!Storage::disk('public')->exists($path)) abort(404);
 
-    return response()->file(Storage::disk('public')->path($path));
-})->name('file-evidence.preview');
+//     return response()->file(Storage::disk('public')->path($path));
+// })->name('file-evidence.preview');
 
-Route::middleware('auth')->get('/file-evidence/{eid}/download', function ($eid) {
-    $user = Auth::user();
-    abort_if(!$user || $user->role !== 'admin', 403);
+// Route::middleware('auth')->get('/file-evidence/{eid}/download', function ($eid) {
+//     $user = Auth::user();
+//     abort_if(!$user || $user->role !== 'admin', 403);
 
-    // Decode file path from encrypted ID
-    $decoded = strtr($eid, '-_', '+/');
-    $decoded .= str_repeat('=', (4 - strlen($decoded) % 4) % 4);
-    @[$uid, $path] = explode('|', base64_decode($decoded, true), 2);
+//     // Decode file path from encrypted ID
+//     $decoded = strtr($eid, '-_', '+/');
+//     $decoded .= str_repeat('=', (4 - strlen($decoded) % 4) % 4);
+//     @[$uid, $path] = explode('|', base64_decode($decoded, true), 2);
 
-    if (!$path) abort(404);
+//     if (!$path) abort(404);
 
-    // Normalize path
-    $path = ltrim($path, '/');
-    if (str_starts_with($path, 'public/')) $path = substr($path, 7);
-    if (str_starts_with($path, 'storage/')) $path = substr($path, 8);
+//     // Normalize path
+//     $path = ltrim($path, '/');
+//     if (str_starts_with($path, 'public/')) $path = substr($path, 7);
+//     if (str_starts_with($path, 'storage/')) $path = substr($path, 8);
 
-    if (!Storage::disk('public')->exists($path)) abort(404);
+//     if (!Storage::disk('public')->exists($path)) abort(404);
 
-    return response()->download(Storage::disk('public')->path($path), basename($path));
-})->name('file-evidence.download');
+//     return response()->download(Storage::disk('public')->path($path), basename($path));
+// })->name('file-evidence.download');
 
 
 Route::get('/upload', fn() => Inertia::render('Example/UploadFile'));
