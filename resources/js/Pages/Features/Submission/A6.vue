@@ -55,7 +55,7 @@ const completedCount = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return completedCount.value === indicators.length;
+  return completedCount.value > 0; // Minimal 1 indikator
 });
 
 // ============================================================================
@@ -80,6 +80,10 @@ const checkDataExists = async () => {
   }
 };
 
+const continueToNext = () => {
+  emit('save-and-continue');
+};
+
 const handleFileUpload = (indicatorKey, file) => {
   formData.indicators[indicatorKey].file = file;
 };
@@ -90,7 +94,7 @@ const handlePenjelasan = (indicatorKey, value) => {
 
 const saveA6 = async () => {
   if (!isFormValid.value) {
-    draftSaveError.value = '⚠️ Semua indikator harus memiliki file dan penjelasan';
+    draftSaveError.value = '⚠️ Harap isi minimal 1 indikator dengan file dan penjelasan';
     return;
   }
 
@@ -125,11 +129,11 @@ const saveA6 = async () => {
 
   } catch (error) {
     console.error('Save A6 error:', error.response);
-    
+
     if (error.response?.status === 422 && error.response?.data?.data_exists) {
       dataExists.value = true;
       draftSaveMessage.value = '✓ A6 berhasil disimpan!';
-      
+
       setTimeout(() => {
         emit('save-and-continue');
         router.reload({
@@ -162,6 +166,13 @@ const saveA6 = async () => {
         </div>
         <p class="text-sm text-green-800">Data A6 (Self Assessment) sudah tersimpan. Silakan lanjut ke tahap berikutnya.</p>
       </div>
+
+      <button
+        @click="continueToNext"
+        class="w-full px-6 py-4 bg-green-600 text-white font-bold rounded-lg transition-all hover:bg-green-700"
+      >
+        Lanjut ke Tahap Berikutnya
+      </button>
     </div>
 
     <!-- Form -->
@@ -178,7 +189,7 @@ const saveA6 = async () => {
           <span class="text-sm font-semibold text-green-600">{{ Math.round((completedCount / indicators.length) * 100) }}%</span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-          <div 
+          <div
             class="bg-gradient-to-r from-green-500 to-emerald-500 h-full transition-all duration-500"
             :style="{ width: Math.round((completedCount / indicators.length) * 100) + '%' }"
           ></div>

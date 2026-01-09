@@ -8,7 +8,7 @@ import { Head } from '@inertiajs/vue3';
 <template>
     <MainLayout>
         <Header
-            title="Hasil Evaluasi PPEPP Adiwiyata"
+            title="Hasil Evaluasi PPEPP Greenedu"
             description="Kelola dan monitor program lingkungan sekolah Anda"
             color="green"
         />

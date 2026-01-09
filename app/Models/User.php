@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string|null $role
+ * @property string $password
+ * @property string|null $remember_token
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -74,5 +85,15 @@ class User extends Authenticatable
     public function pernyataan()
     {
         return $this->hasMany(Pernyataan::class);
+    }
+
+    public function fileUploads()
+    {
+        return $this->hasMany(FileUpload::class);
+    }
+
+    public function administrasiSekolah()
+    {
+        return $this->hasOne(AdministrasiSekolah::class);
     }
 }

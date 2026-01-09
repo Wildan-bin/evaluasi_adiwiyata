@@ -39,7 +39,24 @@ watch(() => props.completed, (newValue) => {
 }, { deep: true });
 
 // Get completedSteps dari local state
-const completedSteps = computed(() => completedStepsLocal.value);
+// const completedSteps = computed(() => completedStepsLocal.value);
+
+// Get completedSteps from Inertia shared data (from middleware)
+const completedSteps = computed(() => {
+  // Prioritas: props.completed (jika diberikan dari parent), 
+  // fallback ke page.props.completedSteps dari middleware
+  const propsCompleted = props.completed || {};
+  const sharedCompleted = page.props.completedSteps || {};
+  
+  // Merge: jika props.completed punya nilai true, gunakan itu; 
+  // jika tidak, gunakan dari sharedCompleted
+  return {
+    a5: propsCompleted.a5 || sharedCompleted.a5 || false,
+    a6: propsCompleted.a6 || sharedCompleted.a6 || false,
+    a7: propsCompleted.a7 || sharedCompleted.a7 || false,
+    a8: propsCompleted.a8 || sharedCompleted.a8 || false,
+  };
+});
 
 // Extract step ID dari component name
 const currentStepId = computed(() => {

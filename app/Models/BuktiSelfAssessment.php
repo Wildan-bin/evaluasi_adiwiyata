@@ -17,6 +17,7 @@ class BuktiSelfAssessment extends Model
         'indikator',
         'path_file',
         'penjelasan',
+        'file_upload_id',
     ];
 
     protected $dates = [
@@ -31,5 +32,13 @@ class BuktiSelfAssessment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the file upload record.
+     */
+    public function fileUpload(): BelongsTo
+    {
+        return $this->belongsTo(FileUpload::class);
     }
 }

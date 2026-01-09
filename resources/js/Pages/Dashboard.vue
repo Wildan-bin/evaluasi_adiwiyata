@@ -1,7 +1,7 @@
 <script setup>
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Header from '@/Components/Header.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, Link } from '@inertiajs/vue3';
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { CheckCircle, XCircle, Loader, Users, Eye, EyeOff, UserCheck, UserMinus, UsersRound } from 'lucide-vue-next';
@@ -62,259 +62,131 @@ const fetchUsersStatus = async () => {
 onMounted(() => {
     fetchUsersStatus();
 });
+
+defineProps({
+    canLogin: Boolean,
+    canRegister: Boolean,
+});
 </script>
 
 <template>
-    <MainLayout>
-        <Head title="Dashboard" />
-        <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Dashboard
-            </h2>
-        </template>
-
-        <Header
-            title="Dashboard Adiwiyata"
-            description="Kelola dan monitor program lingkungan sekolah Anda"
-            color="green"
-        />
-
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-3 lg:px-5">
-                
-                <!-- ============================================================== -->
-                <!-- STATISTICS CARDS -->
-                <!-- ============================================================== -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <!-- Card 1: Total Users -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="p-6">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Pengguna</p>
-                                    <p class="mt-2 text-3xl font-bold text-gray-900">
-                                        <span v-if="isLoading" class="inline-block w-12 h-8 bg-gray-200 rounded animate-pulse"></span>
-                                        <span v-else>{{ totalUsers }}</span>
-                                    </p>
-                                </div>
-                                <div class="p-3 bg-blue-100 rounded-full">
-                                    <UsersRound class="w-8 h-8 text-blue-600" />
-                                </div>
-                            </div>
-                            <p class="mt-4 text-sm text-gray-600">
-                                Jumlah seluruh pengguna terdaftar
-                            </p>
+    
+                <div
+                    class="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50"
+                >
+                    <!-- Header dengan Login & Register Button -->
+                    <div class="absolute top-0 right-0 p-6 z-50">
+                        <div class="flex gap-4">
+                            <Link
+                                v-if="canLogin"
+                                href="/login"
+                                class="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium"
+                            >
+                                Log in
+                            </Link>
+                            <Link
+                                v-if="canRegister"
+                                href="/register"
+                                class="bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 font-medium transition"
+                            >
+                                Register
+                            </Link>
                         </div>
-                        <div class="h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
                     </div>
 
-                    <!-- Card 2: Partial Submit Users -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="p-6">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Submit Sebagian</p>
-                                    <p class="mt-2 text-3xl font-bold text-gray-900">
-                                        <span v-if="isLoading" class="inline-block w-12 h-8 bg-gray-200 rounded animate-pulse"></span>
-                                        <span v-else>{{ partialSubmitUsers }}</span>
-                                    </p>
-                                </div>
-                                <div class="p-3 bg-amber-100 rounded-full">
-                                    <UserMinus class="w-8 h-8 text-amber-600" />
-                                </div>
-                            </div>
-                            <p class="mt-4 text-sm text-gray-600">
-                                Pengguna yang belum lengkap submit
+                    <!-- Main Content -->
+                    <main class="container mx-auto px-4 pt-24 pb-8">
+                        <!-- Header Section -->
+                        <div class="mb-12">
+                            <h1 class="text-4xl font-bold text-gray-900 mb-2">
+                                Dashboard Greenedu
+                            </h1>
+                            <p class="text-gray-600 text-lg">
+                                Kelola dan monitor program lingkungan sekolah
+                                Anda
                             </p>
                         </div>
-                        <div class="h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
-                    </div>
 
-                    <!-- Card 3: Complete Submit Users -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="p-6">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Submit Lengkap</p>
-                                    <p class="mt-2 text-3xl font-bold text-gray-900">
-                                        <span v-if="isLoading" class="inline-block w-12 h-8 bg-gray-200 rounded animate-pulse"></span>
-                                        <span v-else>{{ completeSubmitUsers }}</span>
-                                    </p>
-                                </div>
-                                <div class="p-3 bg-green-100 rounded-full">
-                                    <UserCheck class="w-8 h-8 text-green-600" />
-                                </div>
-                            </div>
-                            <p class="mt-4 text-sm text-gray-600">
-                                Pengguna yang sudah submit A5-A8
+                        <!-- Welcome Card -->
+                        <div
+                            class="bg-white rounded-lg shadow-lg p-8 text-center mb-12"
+                        >
+                            <h2 class="text-3xl font-bold text-gray-800 mb-4">
+                                Selamat Datang di Evaluasi Greenedu
+                            </h2>
+                            <p class="text-gray-600 mb-8 text-lg">
+                                Platform evaluasi program lingkungan
+                                berkelanjutan untuk sekolah
                             </p>
+
+                            <div class="flex gap-4 justify-center">
+                                <Link
+                                    v-if="canLogin"
+                                    href="/login"
+                                    class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 font-medium transition"
+                                >
+                                    Masuk Sekarang
+                                </Link>
+                                <Link
+                                    v-if="canRegister"
+                                    href="/register"
+                                    class="px-6 py-3 border-2 border-green-600 text-green-600 rounded-lg hover:bg-green-50 font-semibold transition"
+                                >
+                                    Daftar Baru
+                                </Link>
+                            </div>
                         </div>
-                        <div class="h-1 bg-gradient-to-r from-green-500 to-emerald-500"></div>
-                    </div>
+
+                        <!-- Features Section -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div
+                                class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"
+                            >
+                                <div class="text-4xl mb-3">📋</div>
+                                <h3
+                                    class="text-xl font-bold text-gray-800 mb-2"
+                                >
+                                    Evaluasi Komprehensif
+                                </h3>
+                                <p class="text-gray-600">
+                                    Evaluasi menyeluruh program lingkungan
+                                    sekolah Anda
+                                </p>
+                            </div>
+
+                            <div
+                                class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"
+                            >
+                                <div class="text-4xl mb-3">📊</div>
+                                <h3
+                                    class="text-xl font-bold text-gray-800 mb-2"
+                                >
+                                    Analisis Data
+                                </h3>
+                                <p class="text-gray-600">
+                                    Lihat hasil evaluasi dan rekomendasi
+                                    perbaikan
+                                </p>
+                            </div>
+
+                            <div
+                                class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition"
+                            >
+                                <div class="text-4xl mb-3">🌱</div>
+                                <h3
+                                    class="text-xl font-bold text-gray-800 mb-2"
+                                >
+                                    Program Berkelanjutan
+                                </h3>
+                                <p class="text-gray-600">
+                                    Kelola program lingkungan berkelanjutan di
+                                    sekolah
+                                </p>
+                            </div>
+                        </div>
+                    </main>
                 </div>
 
-                <!-- ============================================================== -->
-                <!-- USER SUBMISSION STATUS TABLE -->
-                <!-- ============================================================== -->
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <!-- Header -->
-                        <div class="flex items-center gap-3 mb-6">
-                            <Users class="w-6 h-6 text-green-600" />
-                            <h3 class="text-xl font-bold text-gray-900">Status Pengisian Form</h3>
-                        </div>
-
-                        <!-- Loading State -->
-                        <div v-if="isLoading" class="flex items-center justify-center py-12">
-                            <Loader class="w-8 h-8 animate-spin text-green-600" />
-                            <span class="ml-3 text-gray-600">Memuat data...</span>
-                        </div>
-
-                        <!-- Error State -->
-                        <div v-else-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                            {{ error }}
-                        </div>
-
-                        <!-- Table -->
-                        <div v-else class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            No
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Nama
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Email
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            A5
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            A6
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            A7
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            A8
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Lihat File
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-for="(user, index) in users" :key="user.id" class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ index + 1 }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-500">{{ user.email }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            <span v-if="user.a5_status" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                <CheckCircle class="w-3.5 h-3.5" />
-                                                Submitted
-                                            </span>
-                                            <span v-else class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                <XCircle class="w-3.5 h-3.5" />
-                                                Not Submitted
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            <span v-if="user.a6_status" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                <CheckCircle class="w-3.5 h-3.5" />
-                                                Submitted
-                                            </span>
-                                            <span v-else class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                <XCircle class="w-3.5 h-3.5" />
-                                                Not Submitted
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            <span v-if="user.a7_status" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                <CheckCircle class="w-3.5 h-3.5" />
-                                                Submitted
-                                            </span>
-                                            <span v-else class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                <XCircle class="w-3.5 h-3.5" />
-                                                Not Submitted
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            <span v-if="user.a8_status" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                <CheckCircle class="w-3.5 h-3.5" />
-                                                Submitted
-                                            </span>
-                                            <span v-else class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                <XCircle class="w-3.5 h-3.5" />
-                                                Not Submitted
-                                            </span>
-                                        </td>
-                                        <!-- Kolom Lihat File -->
-                                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            <button
-                                                v-if="hasAnySubmission(user)"
-                                                @click="viewUserFiles(user)"
-                                                class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
-                                                title="Lihat File"
-                                            >
-                                                <Eye class="w-5 h-5" />
-                                            </button>
-                                            <span
-                                                v-else
-                                                class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-400 cursor-not-allowed"
-                                                title="Belum ada file yang disubmit"
-                                            >
-                                                <EyeOff class="w-5 h-5" />
-                                            </span>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Empty State -->
-                                    <tr v-if="users.length === 0">
-                                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
-                                            Tidak ada data pengguna
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Legend -->
-                        <div class="mt-6 flex flex-wrap items-center gap-6 text-sm text-gray-600">
-                            <div class="flex items-center gap-2">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <CheckCircle class="w-3.5 h-3.5" />
-                                    Submitted
-                                </span>
-                                <span>= Sudah mengisi</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                    <XCircle class="w-3.5 h-3.5" />
-                                    Not Submitted
-                                </span>
-                                <span>= Belum mengisi</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-600">
-                                    <Eye class="w-4 h-4" />
-                                </span>
-                                <span>= Lihat file submission</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </MainLayout>
 </template>
 
 <style scoped>
@@ -329,7 +201,8 @@ onMounted(() => {
 }
 
 @keyframes pulse {
-    0%, 100% {
+    0%,
+    100% {
         opacity: 1;
     }
     50% {

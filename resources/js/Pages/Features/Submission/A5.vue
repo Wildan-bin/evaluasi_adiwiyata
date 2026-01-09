@@ -47,7 +47,7 @@ const fileCount = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return fileCount.value === indicators.length;
+  return fileCount.value > 0; // Minimal 1 file saja
 });
 
 // ============================================================================
@@ -72,13 +72,17 @@ const checkDataExists = async () => {
   }
 };
 
+const continueToNext = () => {
+  emit('save-and-continue');
+};
+
 const handleFileUpload = (fieldName, file) => {
   formData.files[fieldName] = file;
 };
 
 const saveA5 = async () => {
   if (!isFormValid.value) {
-    draftSaveError.value = '⚠️ Semua file harus diupload';
+    draftSaveError.value = '⚠️ Harap upload minimal 1 file';
     return;
   }
 
@@ -114,11 +118,11 @@ const saveA5 = async () => {
 
   } catch (error) {
     console.error('Save A5 error:', error.response);
-    
+
     if (error.response?.status === 422 && error.response?.data?.data_exists) {
       dataExists.value = true;
       draftSaveMessage.value = '✓ A5 berhasil disimpan!';
-      
+
       setTimeout(() => {
         emit('save-and-continue');
         router.reload({
@@ -151,6 +155,13 @@ const saveA5 = async () => {
         </div>
         <p class="text-sm text-green-800">Data A5 (Rencana & Evaluasi PBLHS) sudah tersimpan. Silakan lanjut ke tahap berikutnya.</p>
       </div>
+
+      <button
+        @click="continueToNext"
+        class="w-full px-6 py-4 bg-green-600 text-white font-bold rounded-lg transition-all hover:bg-green-700"
+      >
+        Lanjut ke Tahap Berikutnya
+      </button>
     </div>
 
     <!-- Form -->

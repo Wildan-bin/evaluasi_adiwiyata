@@ -20,7 +20,6 @@ class AuthenticatedSessionController extends Controller
     public function create(): Response
     {
         Log::info('Login page accessed', ['user' => Auth::user()?->id]);
-        
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
@@ -33,11 +32,12 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         Log::info('Login attempt', ['email' => $request->email]);
-        
         $request->authenticate();
 
         $request->session()->regenerate();
         
+        Log::info('Login successful', ['user' => Auth::user()->id]);
+
         Log::info('Login successful', ['user' => Auth::user()->id]);
 
         return redirect()->intended(route('dashboard', absolute: false));

@@ -28,7 +28,7 @@ const handleCardClick = (action) => {
             <!-- Card Clickable -->
             <Card
                 title="Laporan"
-                description="Buat laporan Adiwiyata"
+                description="Buat laporan Greenedu"
                 color="emerald"
                 :icon="BarChart3"
                 :clickable="true"

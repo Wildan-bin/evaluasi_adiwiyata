@@ -58,7 +58,6 @@ window.axios.interceptors.response.use(
         const originalRequest = error.config;
 
         if (error.response?.status === 419 && !originalRequest._retry) {
-            
             if (isRefreshingToken) {
                 return new Promise((resolve, reject) => {
                     failedQueue.push({ resolve, reject });
@@ -101,7 +100,7 @@ window.axios.interceptors.response.use(
                 console.error('CSRF refresh failed:', refreshError);
                 
                 // Last resort: reload page
-                window.location.reload();
+                window.location.reload();s
                 return Promise.reject(refreshError);
                 
             } finally {

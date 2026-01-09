@@ -137,7 +137,7 @@ const handleFinalSubmit = async () => {
     
     alert('✓ Proposal berhasil dikirim! Terima kasih.');
     window.location.href = route('dashboard');
-    
+
   } catch (error) {
     console.error('Final submission error:', error);
     submitError.value = 'Gagal mengirim proposal. Silakan coba lagi.';

@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Anggota extends Model
+{
+    use HasFactory;
+
+    protected $table = 'anggota';
+
+    protected $fillable = [
+        'ketua_id',
+        'sekolah_id',
+        'nama',
+        'nip',
+        'email',
+        'nomor_telepon',
+    ];
+
+    public function ketua()
+    {
+        return $this->belongsTo(Ketua::class);
+    }
+
+    public function sekolah()
+    {
+        return $this->belongsTo(AdministrasiSekolah::class, 'sekolah_id');
+    }
+}

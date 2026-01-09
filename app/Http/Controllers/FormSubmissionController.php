@@ -8,9 +8,11 @@ use App\Models\Pendampingan;
 use App\Models\Pernyataan;
 use App\Models\Permintaan;
 use App\Models\Kemajuan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class FormSubmissionController extends Controller
@@ -69,9 +71,9 @@ class FormSubmissionController extends Controller
                     // Rename file: NamaUser_indikator_A5.pdf
                     $fileName = $this->renameFile($user->name, $indicatorName, 'A5', $file);
 
-                    // Store file
-                    $storagePath = Storage::disk('local')->putFileAs(
-                        'storage/input_A5',
+                    // Store file ke public folder
+                    $storagePath = Storage::disk('public')->putFileAs(
+                        'input_A5',
                         $file,
                         $fileName
                     );
@@ -189,8 +191,8 @@ class FormSubmissionController extends Controller
                     $fileName = $this->renameFile($user->name, $indicatorName, 'A6', $file);
 
                     // Store file
-                    $storagePath = Storage::disk('local')->putFileAs(
-                        'storage/input_A6',
+                    $storagePath = Storage::disk('public')->putFileAs(
+                        'input_A6',
                         $file,
                         $fileName
                     );
@@ -403,8 +405,8 @@ class FormSubmissionController extends Controller
                 $fileName = $this->renameFile($user->name, 'bukti_persetujuan', 'A8', $file);
 
                 // Store file
-                $buktiPath = Storage::disk('local')->putFileAs(
-                    'storage/input_A8',
+                $buktiPath = Storage::disk('public')->putFileAs(
+                    'input_A8',
                     $file,
                     $fileName
                 );
@@ -465,33 +467,33 @@ class FormSubmissionController extends Controller
      */
     public function showA5()
     {
-        // \Log::info('========== SHOW A5 METHOD CALLED ==========');
-        
+        Log::info('========== SHOW A5 METHOD CALLED ==========');
+
         $user = Auth::user();
-        // \Log::info('User:', ['id' => $user?->id, 'name' => $user?->name]);
-        
+        Log::info('User:', ['id' => $user?->id, 'name' => $user?->name]);
+
         if (!$user) {
-            // \Log::error('NO USER FOUND');
+            Log::error('NO USER FOUND');
             return Inertia::render('Features/Submission/A5', [
                 'dataExists' => false,
                 'existingData' => [],
                 'debugInfo' => ['error' => 'User not authenticated']
             ]);
         }
-        
+
         $userId = $user->id;
-        
+
         // Direct query
         $rencanaData = Rencana::where('user_id', $userId)->get();
-        
-        // \Log::info('Rencana Data:', [
-        //     'count' => $rencanaData->count(),
-        //     'sql' => Rencana::where('user_id', $userId)->toSql(),
-        //     'data' => $rencanaData->toArray()
-        // ]);
+
+        Log::info('Rencana Data:', [
+            'count' => $rencanaData->count(),
+            'sql' => Rencana::where('user_id', $userId)->toSql(),
+            'data' => $rencanaData->toArray()
+        ]);
 
         $dataExists = $rencanaData->count() > 0;
-        
+
         $debugInfo = [
             'methodCalled' => true,
             'userId' => $userId,
@@ -500,9 +502,9 @@ class FormSubmissionController extends Controller
             'dataExists' => $dataExists,
             'timestamp' => now()->toDateTimeString()
         ];
-        
-        // \Log::info('========== DEBUG INFO ==========', $debugInfo);
-        
+
+        Log::info('========== DEBUG INFO ==========', $debugInfo);
+
         return Inertia::render('Features/Submission/A5', [
             'dataExists' => $dataExists,
             'existingData' => $rencanaData,
@@ -517,7 +519,7 @@ class FormSubmissionController extends Controller
     {
         $user = Auth::user();
         $userId = $user->id;
-        
+
         // Check if user already has Bukti Self Assessment data
         $buktiData = BuktiSelfAssessment::where('user_id', $userId)->get();
         $dataExists = $buktiData->count() > 0;
@@ -535,7 +537,7 @@ class FormSubmissionController extends Controller
     {
         $user = Auth::user();
         $userId = $user->id;
-        
+
         // Check if user already has Pendampingan data
         $pendampinganData = Pendampingan::where('user_id', $userId)->get();
         $dataExists = $pendampinganData->count() > 0;
@@ -553,7 +555,7 @@ class FormSubmissionController extends Controller
     {
         $user = Auth::user();
         $userId = $user->id;
-        
+
         // Check if user already has Pernyataan data
         $pernyataanData = Pernyataan::where('user_id', $userId)->first();
         $dataExists = !!$pernyataanData;
@@ -656,55 +658,47 @@ class FormSubmissionController extends Controller
     }
 
     /**
-     * Get all users with their submission status for A5, A6, A7, A8
+     * Get users submission status - for admin dashboard
      */
     public function getUsersSubmissionStatus()
     {
-        $users = \App\Models\User::with(['rencana', 'buktiSelfAssessment', 'pendampingan', 'pernyataan'])
+        $users = User::select('id', 'name', 'email', 'role')
+            ->where('role', '!=', 'admin')
             ->get()
             ->map(function ($user) {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'a5_status' => $user->rencana->count() > 0,
-                    'a6_status' => $user->buktiSelfAssessment->count() > 0,
-                    'a7_status' => $user->pendampingan->count() > 0,
-                    'a8_status' => $user->pernyataan->count() > 0,
+                    'a5_status' => Rencana::where('user_id', $user->id)->exists(),
+                    'a6_status' => BuktiSelfAssessment::where('user_id', $user->id)->exists(),
+                    'a7_status' => Pendampingan::where('user_id', $user->id)->exists() || 
+                                   Permintaan::where('user_id', $user->id)->exists(),
+                    'a8_status' => Pernyataan::where('user_id', $user->id)->exists(),
                 ];
             });
 
-        return response()->json([
-            'success' => true,
-            'users' => $users
-        ]);
+        return response()->json(['users' => $users]);
     }
 
     /**
-     * Show user files for admin view
+     * Show user files for admin - displays all submissions from a user
      */
     public function showUserFiles($userId)
     {
-        $user = \App\Models\User::findOrFail($userId);
+        $user = User::findOrFail($userId);
         
-        // Get A5 files (Rencana)
-        $a5Files = Rencana::where('user_id', $userId)->get();
-        
-        // Get A6 files (Bukti Self Assessment)
-        $a6Files = BuktiSelfAssessment::where('user_id', $userId)->get();
-        
-        // Get A7 data (Pendampingan)
-        $a7Data = Pendampingan::where('user_id', $userId)->get();
-        
-        // Get A8 data (Pernyataan)
-        $a8Data = Pernyataan::where('user_id', $userId)->first();
-        
+        $a5_files = Rencana::where('user_id', $userId)->get();
+        $a6_files = BuktiSelfAssessment::where('user_id', $userId)->get();
+        $a7_data = Pendampingan::where('user_id', $userId)->get();
+        $a8_data = Pernyataan::where('user_id', $userId)->first();
+
         return Inertia::render('Features/Admin/Administrasi', [
             'user' => $user,
-            'a5_files' => $a5Files,
-            'a6_files' => $a6Files,
-            'a7_data' => $a7Data,
-            'a8_data' => $a8Data
+            'a5_files' => $a5_files,
+            'a6_files' => $a6_files,
+            'a7_data' => $a7_data,
+            'a8_data' => $a8_data,
         ]);
     }
 }

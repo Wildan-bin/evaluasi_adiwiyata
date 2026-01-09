@@ -2,18 +2,24 @@
 
 namespace App\Providers;
 
-use App\Models\FileEvidence;
-use App\Policies\FileEvidencePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
+    /**
+     * The policy mappings for the application.
+     *
+     * @var array
+     */
     protected $policies = [
-        FileEvidence::class => FileEvidencePolicy::class,
+        //
     ];
 
-    public function boot()
+    /**
+     * Register any authentication / authorization services.
+     */
+    public function boot(): void
     {
-        $this->registerPolicies();
+        //
     }
 }

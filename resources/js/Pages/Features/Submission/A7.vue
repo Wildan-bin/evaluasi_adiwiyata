@@ -38,8 +38,8 @@ const formData = reactive({
 // COMPUTED
 // ============================================================================
 const isFormValid = computed(() => {
-  return formData.kebutuhan_pendampingan.length > 0 && 
-         formData.permintaan_tim.trim() && 
+  return formData.kebutuhan_pendampingan.length > 0 &&
+         formData.permintaan_tim.trim() &&
          formData.waktu_pendampingan;
 });
 
@@ -80,7 +80,7 @@ const isSelected = (key) => {
 
 const saveA7 = async () => {
   if (!isFormValid.value) {
-    draftSaveError.value = '⚠️ Harap isi semua field dengan benar';
+    draftSaveError.value = '⚠️ Harap pilih minimal 1 kebutuhan pendampingan dan isi permintaan tim serta waktu pendampingan';
     return;
   }
 
@@ -110,11 +110,11 @@ const saveA7 = async () => {
 
   } catch (error) {
     console.error('Save A7 error:', error.response);
-    
+
     if (error.response?.status === 422 && error.response?.data?.data_exists) {
       dataExists.value = true;
       draftSaveMessage.value = '✓ A7 berhasil disimpan!';
-      
+
       setTimeout(() => {
         emit('save-and-continue');
         router.reload({

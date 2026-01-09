@@ -16,6 +16,7 @@ class Rencana extends Model
         'user_id',
         'indikator',
         'path_file',
+        'file_upload_id',
     ];
 
     protected $dates = [
@@ -30,5 +31,13 @@ class Rencana extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the file upload record.
+     */
+    public function fileUpload(): BelongsTo
+    {
+        return $this->belongsTo(FileUpload::class);
     }
 }
