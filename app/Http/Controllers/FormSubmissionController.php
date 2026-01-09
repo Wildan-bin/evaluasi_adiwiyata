@@ -686,19 +686,26 @@ class FormSubmissionController extends Controller
      */
     public function showUserFiles($userId)
     {
-        $user = User::findOrFail($userId);
+        $user = \App\Models\User::findOrFail($userId);
         
-        $a5_files = Rencana::where('user_id', $userId)->get();
-        $a6_files = BuktiSelfAssessment::where('user_id', $userId)->get();
-        $a7_data = Pendampingan::where('user_id', $userId)->get();
-        $a8_data = Pernyataan::where('user_id', $userId)->first();
-
+        // Get A5 files (Rencana)
+        $a5Files = Rencana::where('user_id', $userId)->get();
+        
+        // Get A6 files (Bukti Self Assessment)
+        $a6Files = BuktiSelfAssessment::where('user_id', $userId)->get();
+        
+        // Get A7 data (Pendampingan)
+        $a7Data = Pendampingan::where('user_id', $userId)->get();
+        
+        // Get A8 data (Pernyataan)
+        $a8Data = Pernyataan::where('user_id', $userId)->first();
+        
         return Inertia::render('Features/Admin/Administrasi', [
             'user' => $user,
-            'a5_files' => $a5_files,
-            'a6_files' => $a6_files,
-            'a7_data' => $a7_data,
-            'a8_data' => $a8_data,
+            'a5_files' => $a5Files,
+            'a6_files' => $a6Files,
+            'a7_data' => $a7Data,
+            'a8_data' => $a8Data
         ]);
     }
 }

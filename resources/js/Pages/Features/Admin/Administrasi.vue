@@ -1,7 +1,6 @@
 <script setup>
 import MainLayout from '@/Layouts/MainLayout.vue';
 import Header from '@/Components/Header.vue';
-import FileUploadDragDrop from '@/Components/FileUploadDragDrop.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { 
@@ -17,8 +16,7 @@ import {
     Users as UsersIcon,
     FileCheck,
     ExternalLink,
-    X,
-    Upload
+    X
 } from 'lucide-vue-next';
 
 // Props dari controller
@@ -38,11 +36,6 @@ const showPreview = ref(false);
 const previewUrl = ref('');
 const downloadUrl = ref('');
 const isLoading = ref(false);
-const showUploadModal = ref(false);
-const uploadCategory = ref('');
-const uploadIndikator = ref('');
-const selectedIndicators = ref([]);
-const refreshKey = ref(0);
 
 // Helper untuk mendapatkan nama file dari path
 const getFileName = (path) => {
@@ -131,63 +124,6 @@ const handleKeydown = (event) => {
         closePreview();
     }
 };
-
-/**
- * Open upload modal
- */
-const openUploadModal = (category, section) => {
-    uploadCategory.value = category;
-    
-    // Set indicators based on category
-    if (category === 'rencana') {
-        selectedIndicators.value = [
-            'Evaluasi Diri Sekolah',
-            'Hasil IPMLH',
-            'Rencana GPBLHS 4-tahunan',
-            'Rencana GPBLHS tahunan',
-            'Dokumentasi Penyusunan',
-            'SK Tim Sekolah'
-        ];
-    } else if (category === 'self_assessment') {
-        selectedIndicators.value = [
-            'Bukti Kebijakan Berwawasan Lingkungan',
-            'Bukti Pelaksanaan Kurikulum',
-            'Bukti Kegiatan Berbasis Lingkungan',
-        ];
-    } else if (category === 'pernyataan') {
-        selectedIndicators.value = ['Bukti Persetujuan'];
-    }
-    
-    uploadIndikator.value = '';
-    showUploadModal.value = true;
-};
-
-/**
- * Close upload modal
- */
-const closeUploadModal = () => {
-    showUploadModal.value = false;
-    uploadCategory.value = '';
-    uploadIndikator.value = '';
-    selectedIndicators.value = [];
-};
-
-/**
- * Handle upload success
- */
-const handleUploadSuccess = (data) => {
-    alert(`File berhasil diupload: ${data.original_filename}`);
-    refreshKey.value++;
-    // Refresh page data
-    router.reload({ only: ['a5_files', 'a6_files', 'a8_data'] });
-};
-
-/**
- * Handle upload error
- */
-const handleUploadError = (error) => {
-    alert(`Upload gagal: ${error}`);
-};
 </script>
 
 <template>
@@ -206,7 +142,7 @@ const handleUploadError = (error) => {
                 <div class="mb-6">
                     <button
                         @click="goBack"
-                        class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                         <ArrowLeft class="w-4 h-4" />
                         Kembali ke Dashboard
@@ -228,159 +164,198 @@ const handleUploadError = (error) => {
 
                 <!-- Cards Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- A5 - Rencana -->
-                    <div v-if="hasA5" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="bg-blue-50 border-b border-gray-200 p-4">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <ClipboardList class="w-5 h-5 text-blue-600" />
-                                    <h3 class="font-bold text-lg text-gray-900">A5 - Rencana & Evaluasi PBLHS</h3>
-                                </div>
-                                <button
-                                    @click="openUploadModal('rencana', 'A5')"
-                                    class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
-                                >
-                                    <Upload class="w-4 h-4" />
-                                    Upload
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-4 space-y-2 max-h-80 overflow-y-auto">
-                            <div v-for="file in a5_files" :key="file.id" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
-                                <div class="flex items-center gap-2 flex-1 min-w-0">
-                                    <FileText class="w-4 h-4 text-gray-600 flex-shrink-0" />
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 truncate">{{ file.indikator }}</p>
-                                        <p class="text-xs text-gray-500 truncate">{{ getFileName(file.path_file) }}</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2 flex-shrink-0">
-                                    <button
-                                        @click="openPreview(file, 'a5')"
-                                        class="p-2 hover:bg-blue-100 rounded transition"
-                                        title="Preview"
-                                    >
-                                        <Eye class="w-4 h-4 text-blue-600" />
-                                    </button>
-                                    <button
-                                        @click="downloadFileFromCard(file.id, 'a5')"
-                                        class="p-2 hover:bg-green-100 rounded transition"
-                                        title="Download"
-                                    >
-                                        <Download class="w-4 h-4 text-green-600" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- A6 - Bukti Self Assessment -->
-                    <div v-if="hasA6" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="bg-green-50 border-b border-gray-200 p-4">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <CheckCircle class="w-5 h-5 text-green-600" />
-                                    <h3 class="font-bold text-lg text-gray-900">A6 - Self Assessment</h3>
-                                </div>
-                                <button
-                                    @click="openUploadModal('self_assessment', 'A6')"
-                                    class="flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition"
-                                >
-                                    <Upload class="w-4 h-4" />
-                                    Upload
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-4 space-y-2 max-h-80 overflow-y-auto">
-                            <div v-for="file in a6_files" :key="file.id" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
-                                <div class="flex items-center gap-2 flex-1 min-w-0">
-                                    <FileText class="w-4 h-4 text-gray-600 flex-shrink-0" />
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 truncate">{{ file.indikator }}</p>
-                                        <p class="text-xs text-gray-500 truncate">{{ getFileName(file.path_file) }}</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2 flex-shrink-0">
-                                    <button
-                                        @click="openPreview(file, 'a6')"
-                                        class="p-2 hover:bg-blue-100 rounded transition"
-                                        title="Preview"
-                                    >
-                                        <Eye class="w-4 h-4 text-blue-600" />
-                                    </button>
-                                    <button
-                                        @click="downloadFileFromCard(file.id, 'a6')"
-                                        class="p-2 hover:bg-green-100 rounded transition"
-                                        title="Download"
-                                    >
-                                        <Download class="w-4 h-4 text-green-600" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- A7 - Kebutuhan Pendampingan -->
-                    <div v-if="hasA7" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="bg-amber-50 border-b border-gray-200 p-4">
-                            <div class="flex items-center gap-2">
-                                <UsersIcon class="w-5 h-5 text-amber-600" />
-                                <h3 class="font-bold text-lg text-gray-900">A7 - Kebutuhan Pendampingan</h3>
-                            </div>
-                        </div>
-                        <div class="p-4 space-y-2 max-h-80 overflow-y-auto">
-                            <div v-for="item in a7_data" :key="item.id" class="p-3 bg-gray-50 rounded-lg">
-                                <p class="text-sm font-medium text-gray-900">{{ item.kebutuhan }}</p>
-                                <p class="text-xs text-gray-500 mt-1">Prioritas: <span class="font-semibold">{{ item.prioritas }}</span></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- A8 - Pernyataan & Persetujuan -->
-                    <div v-if="hasA8" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="bg-purple-50 border-b border-gray-200 p-4">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <FileCheck class="w-5 h-5 text-purple-600" />
-                                    <h3 class="font-bold text-lg text-gray-900">A8 - Pernyataan & Persetujuan</h3>
-                                </div>
-                                <button
-                                    @click="openUploadModal('pernyataan', 'A8')"
-                                    class="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition"
-                                >
-                                    <Upload class="w-4 h-4" />
-                                    Upload
-                                </button>
+                    
+                    <!-- A5 Card - Rencana & Evaluasi PBLHS -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="p-4 bg-gradient-to-r from-emerald-500 to-green-600">
+                            <div class="flex items-center gap-3">
+                                <ClipboardList class="w-6 h-6 text-white" />
+                                <h3 class="text-lg font-bold text-white">A5 - Rencana & Evaluasi PBLHS</h3>
                             </div>
                         </div>
                         <div class="p-4">
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <div class="flex items-center gap-2 flex-1 min-w-0">
-                                    <FileText class="w-4 h-4 text-gray-600 flex-shrink-0" />
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-medium text-gray-900">Bukti Persetujuan</p>
-                                        <p class="text-xs text-gray-500">{{ getFileName(a8_data?.bukti_persetujuan) }}</p>
+                            <div v-if="hasA5" class="space-y-3">
+                                <div 
+                                    v-for="file in a5_files" 
+                                    :key="file.id"
+                                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                >
+                                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                                        <FileText class="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 truncate">{{ file.indikator }}</p>
+                                            <p class="text-xs text-gray-500 truncate">{{ getFileName(file.path_file) }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 flex-shrink-0">
+                                        <button
+                                            @click="openPreview(file, 'a5')"
+                                            class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                            title="Preview"
+                                        >
+                                            <Eye class="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            @click="downloadFileFromCard(file.id, 'a5')"
+                                            class="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                            title="Download"
+                                        >
+                                            <Download class="w-4 h-4" />
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="flex gap-2 flex-shrink-0">
-                                    <button
-                                        @click="openPreview(a8_data, 'a8')"
-                                        class="p-2 hover:bg-blue-100 rounded transition"
-                                        title="Preview"
-                                    >
-                                        <Eye class="w-4 h-4 text-blue-600" />
-                                    </button>
-                                    <button
-                                        @click="downloadFileFromCard(a8_data.id, 'a8')"
-                                        class="p-2 hover:bg-green-100 rounded transition"
-                                        title="Download"
-                                    >
-                                        <Download class="w-4 h-4 text-green-600" />
-                                    </button>
-                                </div>
+                            </div>
+                            <div v-else class="flex flex-col items-center justify-center py-8 text-gray-400">
+                                <XCircle class="w-12 h-12 mb-2" />
+                                <p class="text-sm">Belum ada data</p>
                             </div>
                         </div>
                     </div>
+
+                    <!-- A6 Card - Bukti Self Assessment -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="p-4 bg-gradient-to-r from-blue-500 to-indigo-600">
+                            <div class="flex items-center gap-3">
+                                <ClipboardCheck class="w-6 h-6 text-white" />
+                                <h3 class="text-lg font-bold text-white">A6 - Bukti Self Assessment</h3>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div v-if="hasA6" class="space-y-3 max-h-80 overflow-y-auto">
+                                <div 
+                                    v-for="file in a6_files" 
+                                    :key="file.id"
+                                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                >
+                                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                                        <FileText class="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 truncate">{{ file.indikator }}</p>
+                                            <p class="text-xs text-gray-500 truncate">{{ getFileName(file.path_file) }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 flex-shrink-0">
+                                        <button
+                                            @click="openPreview(file, 'a6')"
+                                            class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                            title="Preview"
+                                        >
+                                            <Eye class="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            @click="downloadFileFromCard(file.id, 'a6')"
+                                            class="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                            title="Download"
+                                        >
+                                            <Download class="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="flex flex-col items-center justify-center py-8 text-gray-400">
+                                <XCircle class="w-12 h-12 mb-2" />
+                                <p class="text-sm">Belum ada data</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- A7 Card - Kebutuhan Pendampingan -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="p-4 bg-gradient-to-r from-amber-500 to-orange-600">
+                            <div class="flex items-center gap-3">
+                                <UsersIcon class="w-6 h-6 text-white" />
+                                <h3 class="text-lg font-bold text-white">A7 - Kebutuhan Pendampingan</h3>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div v-if="hasA7" class="space-y-3">
+                                <div 
+                                    v-for="item in a7_data" 
+                                    :key="item.id"
+                                    class="p-3 bg-gray-50 rounded-lg"
+                                >
+                                    <div class="flex items-start gap-3">
+                                        <CheckCircle class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">{{ item.kebutuhan }}</p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                Waktu: {{ item.waktu_pendampingan || '-' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="flex flex-col items-center justify-center py-8 text-gray-400">
+                                <XCircle class="w-12 h-12 mb-2" />
+                                <p class="text-sm">Belum ada data</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- A8 Card - Pernyataan & Persetujuan -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="p-4 bg-gradient-to-r from-purple-500 to-violet-600">
+                            <div class="flex items-center gap-3">
+                                <FileCheck class="w-6 h-6 text-white" />
+                                <h3 class="text-lg font-bold text-white">A8 - Pernyataan & Persetujuan</h3>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div v-if="hasA8" class="space-y-4">
+                                <!-- Pernyataan Data -->
+                                <div class="p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-xs font-medium text-gray-500 uppercase mb-1">Pernyataan Data</p>
+                                    <div class="flex items-center gap-2">
+                                        <CheckCircle v-if="a8_data.pernyataan_data === 'benar'" class="w-4 h-4 text-green-600" />
+                                        <XCircle v-else class="w-4 h-4 text-red-600" />
+                                        <span class="text-sm font-medium text-gray-900 capitalize">{{ a8_data.pernyataan_data }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Persetujuan Publikasi -->
+                                <div class="p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-xs font-medium text-gray-500 uppercase mb-1">Persetujuan Publikasi</p>
+                                    <div class="flex items-center gap-2">
+                                        <CheckCircle v-if="a8_data.persetujuan_publikasi === 'setuju'" class="w-4 h-4 text-green-600" />
+                                        <XCircle v-else class="w-4 h-4 text-red-600" />
+                                        <span class="text-sm font-medium text-gray-900 capitalize">{{ a8_data.persetujuan_publikasi }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Bukti Persetujuan File -->
+                                <div v-if="a8_data.bukti_persetujuan" class="p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-xs font-medium text-gray-500 uppercase mb-2">Bukti Persetujuan</p>
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <FileText class="w-4 h-4 text-purple-600" />
+                                            <span class="text-sm text-gray-700 truncate">{{ getFileName(a8_data.bukti_persetujuan) }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button
+                                                @click="openPreview(a8_data, 'a8')"
+                                                class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                                title="Preview"
+                                            >
+                                                <Eye class="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                @click="downloadFileFromCard(a8_data.id, 'a8')"
+                                                class="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                                title="Download"
+                                            >
+                                                <Download class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="flex flex-col items-center justify-center py-8 text-gray-400">
+                                <XCircle class="w-12 h-12 mb-2" />
+                                <p class="text-sm">Belum ada data</p>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -400,134 +375,85 @@ const handleUploadError = (error) => {
                 v-if="showPreview"
                 @click="closePreview"
                 @keydown="handleKeydown"
-                class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+                class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 md:p-6"
+                role="dialog"
+                aria-modal="true"
                 aria-label="PDF Preview"
             >
                 <div
                     @click.stop
-                    class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
+                    class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden"
                 >
-                    <!-- Header -->
-                    <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-900">{{ selectedFile?.name }}</h3>
-                            <p class="text-sm text-gray-500">{{ selectedFile?.indikator }}</p>
+                    <!-- HEADER -->
+                    <div class="flex-shrink-0 bg-gradient-to-r from-blue-600 to-blue-700 px-6 md:px-8 py-4 flex items-center justify-between border-b border-blue-800">
+                        <div class="flex-1 min-w-0">
+                            <h2 class="text-lg md:text-xl font-bold text-white truncate">
+                                {{ selectedFile?.indikator }}
+                            </h2>
+                            <p class="text-blue-100 text-xs md:text-sm mt-1 truncate">
+                                {{ selectedFile?.name }}
+                            </p>
                         </div>
                         <button
                             @click="closePreview"
-                            class="p-2 hover:bg-gray-200 rounded transition"
-                            title="Close"
+                            class="flex-shrink-0 ml-4 p-2 hover:bg-blue-500 rounded-lg transition-colors duration-200"
+                            aria-label="Close preview"
+                            title="Close (Esc)"
                         >
-                            <X class="w-5 h-5 text-gray-600" />
+                            <X class="w-6 h-6 text-white" />
                         </button>
                     </div>
 
-                    <!-- Content -->
-                    <div class="flex-1 overflow-hidden flex flex-col">
-                        <div v-if="isLoading" class="flex items-center justify-center h-full">
-                            <Loader class="w-8 h-8 animate-spin text-blue-600" />
+                    <!-- CONTENT -->
+                    <div class="flex-1 overflow-auto bg-gray-900 relative flex items-center justify-center">
+                        <div
+                            v-if="isLoading"
+                            class="absolute inset-0 flex items-center justify-center bg-gray-900/80 z-10"
+                        >
+                            <div class="text-center">
+                                <Loader class="w-12 h-12 text-blue-500 animate-spin mx-auto mb-3" />
+                                <p class="text-white font-semibold">Memuat preview...</p>
+                            </div>
                         </div>
                         <iframe
-                            v-else
+                            v-if="previewUrl"
                             :src="previewUrl"
                             class="w-full h-full border-0"
+                            title="PDF Preview"
+                            @load="isLoading = false"
                         ></iframe>
                     </div>
 
-                    <!-- Footer -->
-                    <div class="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
-                        <p class="text-sm text-gray-600">
-                            <kbd class="px-2 py-1 bg-white border border-gray-300 rounded text-xs font-mono">ESC</kbd>
-                            untuk tutup
+                    <!-- FOOTER -->
+                    <div class="flex-shrink-0 bg-gray-50 px-6 md:px-8 py-4 border-t border-gray-200 flex items-center justify-between gap-3">
+                        <p class="text-sm text-gray-600 hidden sm:block">
+                            Press <kbd class="px-2 py-1 bg-gray-200 rounded text-gray-800 font-mono text-xs">Esc</kbd> to close
                         </p>
-                        <div class="flex gap-3">
+                        <div class="flex items-center gap-3">
                             <button
                                 @click="openInNewTab"
-                                class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition-all duration-200"
+                                title="Open in new tab"
                             >
                                 <ExternalLink class="w-4 h-4" />
-                                Buka di Tab Baru
+                                <span class="hidden sm:inline">Open in Tab</span>
                             </button>
                             <button
                                 @click="downloadFile"
-                                class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                                title="Download file"
                             >
                                 <Download class="w-4 h-4" />
-                                Download
+                                <span class="hidden sm:inline">Download</span>
                             </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </transition>
-
-        <!-- ================================================================== -->
-        <!-- UPLOAD MODAL -->
-        <!-- ================================================================== -->
-        <transition
-            enter-active-class="transition-all duration-300"
-            enter-from-class="opacity-0 scale-95"
-            enter-to-class="opacity-100 scale-100"
-            leave-active-class="transition-all duration-300"
-            leave-from-class="opacity-100 scale-100"
-            leave-to-class="opacity-0 scale-95"
-        >
-            <div
-                v-if="showUploadModal"
-                @click="closeUploadModal"
-                class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            >
-                <div
-                    @click.stop
-                    class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden"
-                >
-                    <!-- Header -->
-                    <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-900">Upload File</h3>
-                            <p class="text-sm text-gray-500">Pilih indikator dan upload file PDF</p>
-                        </div>
-                        <button
-                            @click="closeUploadModal"
-                            class="p-2 hover:bg-gray-200 rounded transition"
-                        >
-                            <X class="w-5 h-5 text-gray-600" />
-                        </button>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="flex-1 overflow-y-auto p-6">
-                        <!-- Indicator Selection -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Pilih Indikator
-                            </label>
-                            <select
-                                v-model="uploadIndikator"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+                            <button
+                                @click="closePreview"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 text-red-700 font-semibold hover:bg-red-200 transition-all duration-200"
+                                title="Close preview"
                             >
-                                <option value="">-- Pilih Indikator --</option>
-                                <option v-for="(indicator, idx) in selectedIndicators" :key="idx" :value="indicator">
-                                    {{ indicator }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <!-- Upload Component -->
-                        <FileUploadDragDrop
-                            v-if="uploadIndikator"
-                            :key="uploadIndikator + refreshKey"
-                            :category="uploadCategory"
-                            :indikator="uploadIndikator"
-                            :onUploadSuccess="handleUploadSuccess"
-                            :onUploadError="handleUploadError"
-                        />
-
-                        <div v-else class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                            <Upload class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                            <p class="text-sm text-gray-500">
-                                Pilih indikator terlebih dahulu untuk mulai upload
-                            </p>
+                                <X class="w-4 h-4" />
+                                <span class="hidden sm:inline">Close</span>
+                            </button>
                         </div>
                     </div>
                 </div>
