@@ -3,12 +3,46 @@ import MainLayout from "@/Layouts/MainLayout.vue";
 import Header from "@/Components/Header.vue";
 import { Head, router, Link } from "@inertiajs/vue3";
 import { ref, computed, onMounted } from "vue";
-import { Trash2, X, UserPlus, Eye, EyeOff } from "lucide-vue-next";
+import {
+    Trash2,
+    X,
+    UserPlus,
+    Eye,
+    EyeOff,
+    UserCheck,
+    UserMinus,
+    UsersRound,
+} from "lucide-vue-next";
 
 // State
 // const users = ref([]);
 const isLoading = ref(true);
-const error = ref('');
+const error = ref("");
+
+// Total jumlah user
+const totalUsers = computed(() => users.value.length);
+
+// Jumlah user yang sudah submit sebagian (minimal 1 tapi belum semua)
+const partialSubmitUsers = computed(() => {
+    return users.value.filter((user) => {
+        const submittedCount = [
+            user.a5_status,
+            user.a6_status,
+            user.a7_status,
+            user.a8_status,
+        ].filter(Boolean).length;
+        return submittedCount > 0 && submittedCount < 4;
+    }).length;
+});
+
+// Jumlah user yang sudah submit semua (A5, A6, A7, A8)
+const completeSubmitUsers = computed(() => {
+    return users.value.filter((user) => {
+        return (
+            user.a5_status && user.a6_status && user.a7_status && user.a8_status
+        );
+    }).length;
+});
 
 // Props dari backend
 const props = defineProps({
@@ -274,7 +308,7 @@ const hasAnySubmission = (user) => {
 // Navigate to administration page
 const viewUserFiles = (user) => {
     if (hasAnySubmission(user)) {
-        router.visit(route('admin.user-files', { userId: user.id }));
+        router.visit(route("admin.user-files", { userId: user.id }));
     }
 };
 
@@ -282,11 +316,11 @@ const viewUserFiles = (user) => {
 const fetchUsersStatus = async () => {
     try {
         isLoading.value = true;
-        const response = await axios.get(route('users.submission-status'));
+        const response = await axios.get(route("users.submission-status"));
         users.value = response.data.users;
     } catch (err) {
-        console.error('Error fetching users status:', err);
-        error.value = 'Gagal memuat data pengguna';
+        console.error("Error fetching users status:", err);
+        error.value = "Gagal memuat data pengguna";
     } finally {
         isLoading.value = false;
     }
@@ -739,7 +773,7 @@ onMounted(() => {
                 </div>
             </div>
             <div class="py-12">
-                <div class="mx-auto max-w-7xl sm:px-3 lg:px-5">
+                <div class="mx-auto sm:px-3 lg:px-5">
                     <!-- ============================================================== -->
                     <!-- STATISTICS CARDS -->
                     <!-- ============================================================== -->
