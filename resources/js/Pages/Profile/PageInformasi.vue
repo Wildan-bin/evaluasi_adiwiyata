@@ -5,11 +5,18 @@ import Header from '@/Components/Header.vue'
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-const programTambahanVisible = ref(false);
-
-function toggleProgram() {
-    programTambahanVisible.value = !programTambahanVisible.value;
-}
+    function toggleProgram() {
+        const programTambahan = document.getElementById('programTambahan');
+        const button = event.target;
+        
+        if (programTambahan.classList.contains('hidden')) {
+            programTambahan.classList.remove('hidden');
+            button.textContent = 'Sembunyikan Program Tambahan';
+        } else {
+            programTambahan.classList.add('hidden');
+            button.textContent = 'Lihat Semua Program';
+        }
+    }
 </script>
 
 <template>
@@ -169,9 +176,9 @@ function toggleProgram() {
         </div>
     </section>
 
-   <!-- PROGRAM GREENEDU UM -->
-<section class="py-20 bg-gray-200">
-    <div class="container mx-auto px-6">
+    <!-- PROGRAM GREENEDU UM -->
+        <section class="py-20 bg-gray-200">
+        <div class="container mx-auto px-6">
 
         <!-- HEADER -->
         <div class="text-center mb-12">
@@ -188,213 +195,189 @@ function toggleProgram() {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
             <!-- Program 1 -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
                 <img src="https://images.unsplash.com/photo-1617957743580-0c5a0f9c55c2"
                      class="w-full h-48 object-cover">
-                <div class="p-6">
-                    <h3 class="font-bold text-xl mb-2">Bank Sampah</h3>
-                    <p class="text-gray-600">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Bank Sampah</h3>
+                    <p class="text-gray-600 text-sm flex-grow">
                         Menabung sampah anorganik yang memiliki nilai ekonomi.
                     </p>
-                     <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">
+                        📥 Download
                     </a>
                 </div>
             </div>
 
             <!-- Program 2 -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
                 <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c"
                      class="w-full h-48 object-cover">
-                <div class="p-6">
-                    <h3 class="font-bold text-xl mb-2">Komposting</h3>
-                    <p class="text-gray-600">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Komposting</h3>
+                    <p class="text-gray-600 text-sm flex-grow">
                         Mengolah sampah organik menjadi pupuk alami.
                     </p>
-                     <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                    </a>
-                </div>
-            </div>
-
-            <!-- Program 2 -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c"
-                     class="w-full h-48 object-cover">
-                <div class="p-6">
-                    <h3 class="font-bold text-xl mb-2">Komposting</h3>
-                    <p class="text-gray-600">
-                        Mengolah sampah organik menjadi pupuk alami.
-                    </p>
-                     <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">
+                        📥 Download
                     </a>
                 </div>
             </div>
 
             <!-- Program 3 -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1567699333395-a03c1fe3a395"
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c"
                      class="w-full h-48 object-cover">
-                <div class="p-6">
-                    <h3 class="font-bold text-xl mb-2">3-Daur Ulang</h3>
-                    <p class="text-gray-600">
-                        Mengubah sampah menjadi produk baru yang bermanfaat.
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Ecobrick</h3>
+                    <p class="text-gray-600 text-sm flex-grow">
+                        Pemanfaatan plastik bekas menjadi bahan bangunan ramah lingkungan.
                     </p>
-                     <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">
+                        📥 Download
                     </a>
                 </div>
             </div>
 
         </div>
 
+        </div>
+
+        
+
         <!-- BUTTON -->
         <div class="text-center mt-12">
-            <button @click="toggleProgram"
+            <button onclick="toggleProgram()"
                 class="bg-green-600 text-white font-bold rounded-full py-4 px-10 hover:bg-green-700 transition">
                 Lihat Semua Program
             </button>
         </div>
 
         <!-- PROGRAM TAMBAHAN (HIDDEN) -->
-        <div v-show="programTambahanVisible"
-             class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div id="programTambahan"
+             class="hidden mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
             <!-- 1 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">Eco Brick</h3>
-                <p class="text-gray-600">
-                    Pemanfaatan plastik bekas menjadi bahan bangunan ramah lingkungan.
-                </p>
-                 <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Eco Brick</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Pemanfaatan plastik bekas menjadi bahan bangunan ramah lingkungan.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
             <!-- 2 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">Pemilahan Sampah</h3>
-                <p class="text-gray-600">
-                    Edukasi pemilahan sampah sejak dari sumbernya.
-                </p>
-                 <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Pemilahan Sampah</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Edukasi pemilahan sampah sejak dari sumbernya.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
             <!-- 3 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">Green Class</h3>
-                <p class="text-gray-600">
-                    Program kelas peduli lingkungan berbasis praktik langsung.
-                </p>
-                 <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Green Class</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Program kelas peduli lingkungan berbasis praktik langsung.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
             <!-- 4 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">Hari Bebas Sampah</h3>
-                <p class="text-gray-600">
-                    Kampanye pengurangan sampah sekali pakai di sekolah.
-                </p>
-                 <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Hari Bebas Sampah</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Kampanye pengurangan sampah sekali pakai di sekolah.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
             <!-- 5 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">Kantin Hijau</h3>
-                <p class="text-gray-600">
-                    Pengurangan plastik di area kantin sekolah.
-                </p>
-                 <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Kantin Hijau</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Pengurangan plastik di area kantin sekolah.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
             <!-- 6 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">Workshop Daur Ulang</h3>
-                <p class="text-gray-600">
-                    Pelatihan pengolahan sampah kreatif bagi siswa.
-                </p>
-                 <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Workshop Daur Ulang</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Pelatihan pengolahan sampah kreatif bagi siswa.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
             <!-- 7 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">Monitoring Sampah</h3>
-                <p class="text-gray-600">
-                    Pencatatan jumlah dan jenis sampah sekolah.
-                </p>
-                <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                            Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Monitoring Sampah</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Pencatatan jumlah dan jenis sampah sekolah.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
             <!-- 8 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">Green Ambassador</h3>
-                <p class="text-gray-600">
-                    Duta lingkungan dari kalangan siswa.
-                </p>
-                 <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Green Ambassador</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Duta lingkungan dari kalangan siswa.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
             <!-- 9 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">Taman Kompos</h3>
-                <p class="text-gray-600">
-                    Pemanfaatan kompos untuk penghijauan sekolah.
-                </p>
-                 <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Taman Kompos</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Pemanfaatan kompos untuk penghijauan sekolah.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
             <!-- 10 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">Lomba Lingkungan</h3>
-                <p class="text-gray-600">
-                    Kompetisi kreatif bertema kebersihan dan lingkungan.
-                </p>
-                 <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Lomba Lingkungan</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Kompetisi kreatif bertema kebersihan dan lingkungan.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
             <!-- 11 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">No Plastic in School</h3>
-                <p class="text-gray-600">
-                    Program kreatif bertema menghilangkan plastik di sekolah.
-                </p>
-                 <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">No Plastic in School</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Program kreatif bertema menghilangkan plastik di sekolah.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
             <!-- 12 -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="font-bold text-xl mb-2">Lomba Lingkungan</h3>
-                <p class="text-gray-600">
-                    Kompetisi kreatif bertema kebersihan dan lingkungan.
-                </p>
-                 <a href="#" download class="mt-4 inline-block bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
-                        Download
-                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                <img src="https://images.unsplash.com/photo-1598514983318-2f64f8f4796c" class="w-full h-48 object-cover">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Lomba Lingkungan</h3>
+                    <p class="text-gray-600 text-sm flex-grow">Kompetisi kreatif bertema kebersihan dan lingkungan.</p>
+                    <a href="#" download class="mt-6 inline-block bg-green-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 w-full text-center">📥 Download</a>
+                </div>
             </div>
 
         </div>
-    </div>
 </section>
 
 </main>
