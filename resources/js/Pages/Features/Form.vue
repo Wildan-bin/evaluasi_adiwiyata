@@ -43,6 +43,18 @@ watch(() => page.props.completedSteps, (newValue) => {
 }, { deep: true });
 
 // ============================================================================
+// CHECK USER ROLE - REDIRECT ADMIN TO FORM ADMIN PAGE
+// ============================================================================
+onMounted(() => {
+    // If user is admin, redirect to form admin dashboard
+    if (page.props.auth?.user?.role === 'admin') {
+        router.visit(route('form-admin.index'));
+    }
+    
+    fetchStepStatus();
+});
+
+// ============================================================================
 // LIFECYCLE - FETCH INITIAL STATUS
 // ============================================================================
 onMounted(async () => {

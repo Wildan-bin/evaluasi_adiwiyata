@@ -779,7 +779,7 @@ onMounted(() => {
                     <!-- ============================================================== -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <!-- Card 1: Total Users -->
-                        <div
+                        <!-- <div
                             class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
                         >
                             <div class="p-6">
@@ -813,10 +813,10 @@ onMounted(() => {
                             <div
                                 class="h-1 bg-gradient-to-r from-blue-500 to-blue-600"
                             ></div>
-                        </div>
+                        </div> -->
 
                         <!-- Card 2: Partial Submit Users -->
-                        <div
+                        <!-- <div
                             class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
                         >
                             <div class="p-6">
@@ -852,10 +852,10 @@ onMounted(() => {
                             <div
                                 class="h-1 bg-gradient-to-r from-amber-500 to-orange-500"
                             ></div>
-                        </div>
+                        </div> -->
 
                         <!-- Card 3: Complete Submit Users -->
-                        <div
+                        <!-- <div
                             class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
                         >
                             <div class="p-6">
@@ -891,7 +891,7 @@ onMounted(() => {
                             <div
                                 class="h-1 bg-gradient-to-r from-green-500 to-emerald-500"
                             ></div>
-                        </div>
+                        </div> -->
                     </div>
 
                     <!-- ============================================================== -->

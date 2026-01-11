@@ -11,6 +11,8 @@ use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\FileEvidenceController;
 use App\Models\File;
+use App\Http\Controllers\FormAdminController;
+
 // CSRF Token Refresh Route (untuk SPA)
 Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
@@ -279,9 +281,9 @@ Route::middleware('auth')->group(function () {
     })->name('file-upload');
 
     // Admin file management page
-    Route::middleware('role:admin,mentor')->get('/admin/file-management', function () {
-        return Inertia::render('Features/Admin/AdminFileManagement');
-    })->name('admin.file-management');
+    // Route::middleware('role:admin,mentor')->get('/admin/file-management', function () {
+    //     return Inertia::render('Features/Admin/AdminFileManagement');
+    // })->name('admin.file-management');
 });
 
 // ============================================================================
@@ -403,6 +405,21 @@ Route::middleware(['auth', 'role:admin,mentor'])->group(function () {
 
         return response()->json(['data' => $users]);
     })->name('api.users');
+});
+
+// Admin Routes - Form Submission Status
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Form Admin Dashboard
+    Route::get('/admin/form-submissions', [FormAdminController::class, 'index'])
+        ->name('form-admin.index');
+    
+    // API endpoint for users status
+    Route::get('/api/form-admin/users-status', [FormAdminController::class, 'getUsersStatus'])
+        ->name('form-admin.users-status');
+    
+    // View user files
+    Route::get('/admin/user-files/{userId}', [FormAdminController::class, 'viewUserFiles'])
+        ->name('admin.user-files');
 });
 
 Route::middleware('auth')->group(function () {
