@@ -6,14 +6,14 @@ import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { refreshCsrfToken } from '@/Composables/useCsrf';
 
-const showPassword = ref(false);
-const showPasswordConfirm = ref(false);
+// const showPassword = ref(false);
+// const showPasswordConfirm = ref(false);
 
 const form = useForm({
     name: '',
     email: '',
-    password: '',
-    password_confirmation: '',
+    // password: '',
+    // password_confirmation: '',
 });
 
 const submit = async () => {
@@ -21,7 +21,7 @@ const submit = async () => {
     await refreshCsrfToken();
 
     form.post(route('register'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
+        // onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
 </script>
@@ -95,6 +95,7 @@ const submit = async () => {
                         </div>
 
                         <!-- Password Field -->
+                        <!-- 
                         <div>
                             <InputLabel for="password" value="Password" />
                             <div class="relative mt-2">
@@ -122,7 +123,7 @@ const submit = async () => {
                             <InputError class="mt-2" :message="form.errors.password" />
                         </div>
 
-                        <!-- Confirm Password Field -->
+                        Confirm Password Field
                         <div>
                             <InputLabel for="password_confirmation" value="Konfirmasi Password" />
                             <div class="relative mt-2">
@@ -149,6 +150,7 @@ const submit = async () => {
                             </div>
                             <InputError class="mt-2" :message="form.errors.password_confirmation" />
                         </div>
+                        -->
 
                         <!-- Register Button -->
                         <button
