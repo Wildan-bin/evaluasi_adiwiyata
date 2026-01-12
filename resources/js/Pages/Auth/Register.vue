@@ -19,6 +19,7 @@ const form = useForm({
 const submit = async () => {
     // Refresh CSRF token sebelum register
     await refreshCsrfToken();
+
     form.post(route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });

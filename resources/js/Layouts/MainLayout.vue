@@ -260,7 +260,7 @@ const isRouteActive = (routeName, routePattern = null) => {
 const isItemActive = (item) => {
     if (item.route) return isRouteActive(item.route, item.routePattern);
     if (item.path) return typeof window !== 'undefined' && window.location.pathname.startsWith(item.path);
-    return false;
+    return false;z
 };
 </script>
 

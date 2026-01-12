@@ -45,6 +45,11 @@ const completeSubmitUsers = computed(() => {
     }).length;
 });
 
+// 5 user terakhir untuk ditampilkan di dashboard
+const last5Users = computed(() => {
+    return users.value.slice(-5);
+});
+
 // Props dari backend
 const props = defineProps({
     admins: {
@@ -872,7 +877,7 @@ onMounted(() => {
                                         class="bg-white divide-y divide-gray-200"
                                     >
                                         <tr
-                                            v-for="(user, index) in users"
+                                            v-for="(user, index) in last5Users"
                                             :key="user.id"
                                             class="hover:bg-gray-50 transition-colors"
                                         >
@@ -1012,7 +1017,7 @@ onMounted(() => {
                                         </tr>
 
                                         <!-- Empty State -->
-                                        <tr v-if="users.length === 0">
+                                        <tr v-if="last5Users.length === 0">
                                             <td
                                                 colspan="8"
                                                 class="px-6 py-12 text-center text-gray-500"
@@ -1054,6 +1059,16 @@ onMounted(() => {
                                     </span>
                                     <span>= Lihat file submission</span>
                                 </div>
+                            </div>
+
+                            <!-- View More Button -->
+                            <div class="mt-6 flex justify-center">
+                                <Link
+                                    :href="route('form-admin.index')"
+                                    class="inline-flex items-center gap-2 px-6 py-2 bg-green-600 text-white font-semibold rounded-3xl hover:bg-green-700 transition-colors"
+                                >
+                                    Lihat Selengkapnya
+                                </Link>
                             </div>
                         </div>
                     </div>

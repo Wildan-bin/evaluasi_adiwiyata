@@ -517,4 +517,21 @@ Route::middleware('auth')->get('/file-preview/{id}', function ($id) {
     ]);
 })->name('file.preview');
 
+// ============================================================================
+// FORM ROUTE - Single route for both User and Admin
+// ============================================================================
+Route::middleware('auth')->get('/form', function () {
+    $user = Auth::user();
+
+    // Jika admin, tampilkan FormAdmin dashboard
+    if ($user->role === 'admin') {
+        return Inertia::render('Features/Admin/FormAdmin');
+    }
+
+    // Jika user biasa, tampilkan Form wizard
+    return Inertia::render('Features/Form', [
+        'user' => $user,
+    ]);
+})->name('form');
+
 require __DIR__.'/auth.php';
