@@ -12,6 +12,7 @@ import {
     UserCheck,
     UserMinus,
     UsersRound,
+    Users,
 } from "lucide-vue-next";
 
 // State
@@ -773,138 +774,18 @@ onMounted(() => {
                 </div>
             </div>
             <div class="py-12">
-                <div class="mx-auto sm:px-3 lg:px-5">
-                    <!-- ============================================================== -->
-                    <!-- STATISTICS CARDS -->
-                    <!-- ============================================================== -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <!-- Card 1: Total Users -->
-                        <!-- <div
-                            class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-                        >
-                            <div class="p-6">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p
-                                            class="text-sm font-medium text-gray-500 uppercase tracking-wide"
-                                        >
-                                            Total Pengguna
-                                        </p>
-                                        <p
-                                            class="mt-2 text-3xl font-bold text-gray-900"
-                                        >
-                                            <span
-                                                v-if="isLoading"
-                                                class="inline-block w-12 h-8 bg-gray-200 rounded animate-pulse"
-                                            ></span>
-                                            <span v-else>{{ totalUsers }}</span>
-                                        </p>
-                                    </div>
-                                    <div class="p-3 bg-blue-100 rounded-full">
-                                        <UsersRound
-                                            class="w-8 h-8 text-blue-600"
-                                        />
-                                    </div>
-                                </div>
-                                <p class="mt-4 text-sm text-gray-600">
-                                    Jumlah seluruh pengguna terdaftar
-                                </p>
-                            </div>
-                            <div
-                                class="h-1 bg-gradient-to-r from-blue-500 to-blue-600"
-                            ></div>
-                        </div> -->
-
-                        <!-- Card 2: Partial Submit Users -->
-                        <!-- <div
-                            class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-                        >
-                            <div class="p-6">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p
-                                            class="text-sm font-medium text-gray-500 uppercase tracking-wide"
-                                        >
-                                            Submit Sebagian
-                                        </p>
-                                        <p
-                                            class="mt-2 text-3xl font-bold text-gray-900"
-                                        >
-                                            <span
-                                                v-if="isLoading"
-                                                class="inline-block w-12 h-8 bg-gray-200 rounded animate-pulse"
-                                            ></span>
-                                            <span v-else>{{
-                                                partialSubmitUsers
-                                            }}</span>
-                                        </p>
-                                    </div>
-                                    <div class="p-3 bg-amber-100 rounded-full">
-                                        <UserMinus
-                                            class="w-8 h-8 text-amber-600"
-                                        />
-                                    </div>
-                                </div>
-                                <p class="mt-4 text-sm text-gray-600">
-                                    Pengguna yang belum lengkap submit
-                                </p>
-                            </div>
-                            <div
-                                class="h-1 bg-gradient-to-r from-amber-500 to-orange-500"
-                            ></div>
-                        </div> -->
-
-                        <!-- Card 3: Complete Submit Users -->
-                        <!-- <div
-                            class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-                        >
-                            <div class="p-6">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p
-                                            class="text-sm font-medium text-gray-500 uppercase tracking-wide"
-                                        >
-                                            Submit Lengkap
-                                        </p>
-                                        <p
-                                            class="mt-2 text-3xl font-bold text-gray-900"
-                                        >
-                                            <span
-                                                v-if="isLoading"
-                                                class="inline-block w-12 h-8 bg-gray-200 rounded animate-pulse"
-                                            ></span>
-                                            <span v-else>{{
-                                                completeSubmitUsers
-                                            }}</span>
-                                        </p>
-                                    </div>
-                                    <div class="p-3 bg-green-100 rounded-full">
-                                        <UserCheck
-                                            class="w-8 h-8 text-green-600"
-                                        />
-                                    </div>
-                                </div>
-                                <p class="mt-4 text-sm text-gray-600">
-                                    Pengguna yang sudah submit A5-A8
-                                </p>
-                            </div>
-                            <div
-                                class="h-1 bg-gradient-to-r from-green-500 to-emerald-500"
-                            ></div>
-                        </div> -->
-                    </div>
-
+                <div class="mx-auto sm:px-3 lg:px-2">
                     <!-- ============================================================== -->
                     <!-- USER SUBMISSION STATUS TABLE -->
                     <!-- ============================================================== -->
                     <div
                         class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                     >
-                        <div class="p-6">
+                        <div class="p-2">
                             <!-- Header -->
                             <div class="flex items-center gap-3 mb-6">
-                                <Users class="w-6 h-6 text-green-600" />
-                                <h3 class="text-xl font-bold text-gray-900">
+                                <!-- <Users class="w-6 h-6 text-green-600" /> -->
+                                <h3 class="text-2xl font-bold text-gray-900">
                                     Status Pengisian Form
                                 </h3>
                             </div>
