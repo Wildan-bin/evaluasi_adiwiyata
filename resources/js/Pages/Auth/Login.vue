@@ -18,13 +18,13 @@ defineProps({
 
 const form = useForm({
     email: '',
-    password: '',
-    remember: false,
+    // password: '',
+    // remember: false,
 });
 
 const submit = () => {
     form.post(route('login'), {
-        onFinish: () => form.reset('password'),
+        // onFinish: () => form.reset('password'),
     });
 };
 </script>
@@ -54,6 +54,8 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
+            <!-- Password Field -->
+            <!-- 
             <div class="mt-4">
                 <InputLabel for="password" value="Password" />
 
@@ -69,6 +71,7 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
+            Remember Me Checkbox
             <div class="mt-4 block">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
@@ -77,8 +80,11 @@ const submit = () => {
                     >
                 </label>
             </div>
+            -->
 
             <div class="mt-4 flex items-center justify-end">
+                <!-- Forgot Password Link -->
+                <!-- 
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
@@ -86,6 +92,7 @@ const submit = () => {
                 >
                     Forgot your password?
                 </Link>
+                -->
 
                 <PrimaryButton
                     class="ms-4"

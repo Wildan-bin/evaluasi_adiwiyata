@@ -25,6 +25,8 @@ const submit = () => {
     <GuestLayout>
         <Head title="Forgot Password" />
 
+        <!-- FITUR FORGOT PASSWORD DINONAKTIFKAN -->
+        <!-- 
         <div class="mb-4 text-sm text-gray-600">
             Forgot your password? No problem. Just let us know your email
             address and we will email you a password reset link that will allow
@@ -64,5 +66,11 @@ const submit = () => {
                 </PrimaryButton>
             </div>
         </form>
+        -->
+        
+        <div class="text-center py-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Fitur Tidak Tersedia</h2>
+            <p class="text-gray-600">Fitur reset password saat ini sedang dinonaktifkan.</p>
+        </div>
     </GuestLayout>
 </template>
