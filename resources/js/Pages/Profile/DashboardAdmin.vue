@@ -1064,7 +1064,7 @@ onMounted(() => {
                             <!-- View More Button -->
                             <div class="mt-6 flex justify-center">
                                 <Link
-                                    :href="route('form-admin.index')"
+                                    :href="route('form')"
                                     class="inline-flex items-center gap-2 px-6 py-2 bg-green-600 text-white font-semibold rounded-3xl hover:bg-green-700 transition-colors"
                                 >
                                     Lihat Selengkapnya
