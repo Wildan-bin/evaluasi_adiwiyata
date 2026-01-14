@@ -119,41 +119,7 @@ onMounted(() => {
       form.noValidate = false;
     });
   }
-  // Counter for dynamic anggota rows
-const anggotaCounter = ref(0);
-const anggotaContainer = ref(null);
-
-function addAnggotaRow() {
-  anggotaCounter.value++;
-  const rowHtml = `
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-white rounded-lg border anggota-row" id="anggota-${anggotaCounter.value}">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-        <input type="text" name="anggota_nama[]" class="w-full rounded-lg border-gray-300 shadow-sm px-4 py-3 border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Peran/Tanggung Jawab</label>
-        <input type="text" name="anggota_peran[]" class="w-full rounded-lg border-gray-300 shadow-sm px-4 py-3 border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
-      </div>
-      <div class="flex items-end">
-        <button type="button" class="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 focus:outline-none" @click="removeAnggotaRow(${anggotaCounter.value})">
-          Hapus
-        </button>
-      </div>
-    </div>
-  `;
-  if (anggotaContainer.value) {
-    anggotaContainer.value.insertAdjacentHTML('beforeend', rowHtml);
-  }
-}
-
-function removeAnggotaRow(id) {
-  const row = document.getElementById(`anggota-${id}`);
-  if (row) {
-    row.remove();
-  }
-}
-
+// Counter for dynamic anggota rows
 const progressBar = ref(null);
 const formRef = ref(null);
 
@@ -184,17 +150,6 @@ function saveProgress() {
   alert('Progres administrasi berhasil disimpan!');
   window.location.href = 'dashboard_user.html';
 }
-
-onMounted(() => {
-  updateProgress();
-  const form = formRef.value;
-  if (!form) return;
-  const inputs = form.querySelectorAll('input[type="text"], input[type="number"], input[type="file"], select, textarea');
-  inputs.forEach(input => {
-    input.addEventListener('input', updateProgress);
-    input.addEventListener('change', updateProgress);
-  });
-});
 </script>
 
 <template>
