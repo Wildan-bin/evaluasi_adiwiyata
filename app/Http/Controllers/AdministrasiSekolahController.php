@@ -17,7 +17,7 @@ class AdministrasiSekolahController extends Controller
     // GET /administrasi-sekolah
     public function create()
     {
-        abort_if(Auth::user()->role !== 'user', 403);
+        abort_if(Auth::user()->role !== 'user' && Auth::user()->role !== 'admin', 403);
 
         $administrasi = AdministrasiSekolah::with(['ketua.anggota'])
             ->where('user_id', Auth::id())

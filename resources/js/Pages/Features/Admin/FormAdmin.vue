@@ -109,7 +109,7 @@ onMounted(() => {
             color="green"
         />
 
-        <main class="container mx-auto px-4 pt-24 pb-8">
+        <main class="container mx-auto px-4 pt-4 pb-8">
             <div class="py-12">
                 <div class="mx-auto sm:px-3 lg:px-5">
                     <!-- ============================================================== -->
