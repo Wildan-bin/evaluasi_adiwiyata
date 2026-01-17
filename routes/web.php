@@ -1,17 +1,18 @@
 <?php
 
+use App\Models\File;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AdministrasiSekolahController;
-use App\Http\Controllers\FileUploadController;
-use App\Http\Controllers\FormSubmissionController;
-use App\Http\Controllers\FileEvidenceController;
-use App\Models\File;
 use App\Http\Controllers\FormAdminController;
+use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\FileEvidenceController;
+use App\Http\Controllers\FormSubmissionController;
+use App\Http\Controllers\AdministrasiSekolahController;
 
 // CSRF Token Refresh Route (untuk SPA)
 Route::get('/csrf-token', function () {
@@ -37,6 +38,32 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     $user = Auth::user();
+
+    // Redirect mentor ke DashboardMentor
+    if ($user->role === 'mentor') {
+        // Get assigned school
+        $assignedSchool = DB::table('assign_mentor')
+            ->where('user_id_mentor', $user->id)
+            ->whereNull('assign_time_finished')
+            ->first();
+        
+        $schoolProfile = null;
+        if ($assignedSchool) {
+            $schoolProfile = \App\Models\AdministrasiSekolah::where('user_id', $assignedSchool->user_id_sekolah)
+                ->first();
+            
+            // Add school user info
+            $schoolUser = \App\Models\User::find($assignedSchool->user_id_sekolah);
+            $assignedSchool->school_name = $schoolUser->name ?? null;
+            $assignedSchool->school_email = $schoolUser->email ?? null;
+        }
+        
+        return Inertia::render('Features/Mentor/DashboardMentor', [
+            'user' => $user,
+            'assignedSchool' => $assignedSchool,
+            'schoolProfile' => $schoolProfile,
+        ]);
+    }
 
     // Redirect berdasarkan role
     if ($user->role === 'admin') {
@@ -347,7 +374,37 @@ Route::middleware('auth')->prefix('file-evidence')->name('file-evidence.')->grou
 // User create/view page and submit
 Route::middleware('auth')->group(function () {
     // Halaman form administrasi (role enforced in controller)
-    Route::get('/administrasi-sekolah', [AdministrasiSekolahController::class, 'create'])->name('administrasi-sekolah');
+    Route::get('/administrasi-sekolah', function () {
+        $user = Auth::user();
+
+        // Mentor view
+        if ($user->role === 'mentor') {
+            $assignedSchool = DB::table('assign_mentor')
+                ->where('user_id_mentor', $user->id)
+                ->whereNull('assign_time_finished')
+                ->first();
+            
+            $administrasiData = null;
+            if ($assignedSchool) {
+                $administrasiData = \App\Models\AdministrasiSekolah::where('user_id', $assignedSchool->user_id_sekolah)
+                    ->first();
+                
+                $schoolUser = \App\Models\User::find($assignedSchool->user_id_sekolah);
+                $assignedSchool->school_name = $schoolUser->name ?? null;
+                $assignedSchool->school_email = $schoolUser->email ?? null;
+            }
+            
+            return Inertia::render('Features/Mentor/AdministrasiMentor', [
+                'user' => $user,
+                'assignedSchool' => $assignedSchool,
+                'administrasiData' => $administrasiData,
+            ]);
+        }
+
+        // User view (existing)
+        return Inertia::render('Features/Administration');
+    })->name('administrasi-sekolah');
+
     // Submit form administrasi (role enforced in controller)
     Route::post('/administrasi-sekolah', [AdministrasiSekolahController::class, 'store'])->name('administrasi-sekolah.store');
 });
@@ -517,11 +574,96 @@ Route::middleware('auth')->get('/file-preview/{id}', function ($id) {
     ]);
 })->name('file.preview');
 
+
 // ============================================================================
 // FORM ROUTE - Single route for both User and Admin
 // ============================================================================
 Route::middleware('auth')->get('/form', function () {
     $user = Auth::user();
+
+    // Jika mentor, tampilkan FormMentor
+    if ($user->role === 'mentor') {
+        $assignedSchool = DB::table('assign_mentor')
+            ->where('user_id_mentor', $user->id)
+            ->whereNull('assign_time_finished')
+            ->first();
+        
+        $formData = [];
+        if ($assignedSchool) {
+            $formData = [
+                'a5' => \App\Models\Rencana::where('user_id', $assignedSchool->user_id_sekolah)
+                    ->with('comments')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'indikator' => $item->indikator,
+                            'path_file' => $item->path_file,
+                            'file_size' => $item->file_size ?? 0,
+                            'created_at' => $item->created_at,
+                            'comments' => $item->comments->map(function ($comment) {
+                                return [
+                                    'id' => $comment->id,
+                                    'comment' => $comment->comment,
+                                    'mentor_name' => $comment->mentor->name ?? 'Unknown',
+                                    'created_at' => $comment->created_at,
+                                ];
+                            }),
+                        ];
+                    }),
+                'a6' => \App\Models\BuktiSelfAssessment::where('user_id', $assignedSchool->user_id_sekolah)
+                    ->with('comments')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'indikator' => $item->indikator,
+                            'path_file' => $item->path_file,
+                            'file_size' => $item->file_size ?? 0,
+                            'created_at' => $item->created_at,
+                            'comments' => $item->comments->map(function ($comment) {
+                                return [
+                                    'id' => $comment->id,
+                                    'comment' => $comment->comment,
+                                    'mentor_name' => $comment->mentor->name ?? 'Unknown',
+                                    'created_at' => $comment->created_at,
+                                ];
+                            }),
+                        ];
+                    }),
+                'a8' => \App\Models\Pernyataan::where('user_id', $assignedSchool->user_id_sekolah)
+                    ->with('comments')
+                    ->first(),
+            ];
+
+            if ($formData['a8']) {
+                $formData['a8'] = [
+                    'id' => $formData['a8']->id,
+                    'bukti_persetujuan' => $formData['a8']->bukti_persetujuan,
+                    'file_size' => $formData['a8']->file_size ?? 0,
+                    'created_at' => $formData['a8']->created_at,
+                    'comments' => $formData['a8']->comments->map(function ($comment) {
+                        return [
+                            'id' => $comment->id,
+                            'comment' => $comment->comment,
+                            'mentor_name' => $comment->mentor->name ?? 'Unknown',
+                            'created_at' => $comment->created_at,
+                        ];
+                    }),
+                ];
+            }
+            
+            $schoolUser = \App\Models\User::find($assignedSchool->user_id_sekolah);
+            $assignedSchool->school_name = $schoolUser->name ?? null;
+            $assignedSchool->school_email = $schoolUser->email ?? null;
+        }
+        
+        return Inertia::render('Features/Mentor/FormMentor', [
+            'user' => $user,
+            'assignedSchool' => $assignedSchool,
+            'formData' => $formData,
+        ]);
+    }
 
     // Jika admin, tampilkan FormAdmin dashboard
     if ($user->role === 'admin') {
@@ -533,5 +675,26 @@ Route::middleware('auth')->get('/form', function () {
         'user' => $user,
     ]);
 })->name('form');
+
+// Mentor comment route
+Route::middleware('auth')->post('/mentor/comment', function () {
+    $user = Auth::user();
+    abort_if($user->role !== 'mentor', 403);
+    
+    $validated = request()->validate([
+        'file_id' => 'required|integer',
+        'file_type' => 'required|in:a5,a6,a8',
+        'comment' => 'required|string|max:1000',
+    ]);
+    
+    \App\Models\MentorComment::create([
+        'mentor_id' => $user->id,
+        'file_id' => $validated['file_id'],
+        'file_type' => $validated['file_type'],
+        'comment' => $validated['comment'],
+    ]);
+    
+    return back()->with('success', 'Komentar berhasil ditambahkan');
+})->name('mentor.comment.store');
 
 require __DIR__.'/auth.php';
