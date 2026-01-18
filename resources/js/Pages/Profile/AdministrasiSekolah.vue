@@ -5,151 +5,157 @@ import Header from '@/Components/Header.vue'
 import { Head } from '@inertiajs/vue3';
 import { ref, onMounted } from 'vue';
 
-// --- Maps helpers ---
+/* ================= ROUTER ================= */
+const router = useRouter()
+
+/* ================= MAPS HELPERS ================= */
 function setExtractedCoordinates(lat, lng, source) {
-  const latVal = Number(lat).toFixed(6);
-  const lngVal = Number(lng).toFixed(6);
-  const latEl = document.getElementById('lat');
-  const lngEl = document.getElementById('lng');
-  if (latEl) latEl.value = latVal;
-  if (lngEl) lngEl.value = lngVal;
-  const info = document.getElementById('maps-extracted');
-  if (info) info.textContent = `Koordinat diisi dari ${source}: ${latVal}, ${lngVal}`;
+  const latVal = Number(lat).toFixed(6)
+  const lngVal = Number(lng).toFixed(6)
+
+  const latEl = document.getElementById('lat')
+  const lngEl = document.getElementById('lng')
+  if (latEl) latEl.value = latVal
+  if (lngEl) lngEl.value = lngVal
+
+  const info = document.getElementById('maps-extracted')
+  if (info) {
+    info.textContent = `Koordinat diisi dari ${source}: ${latVal}, ${lngVal}`
+  }
 }
 
 function fillGeolocation() {
   if (!navigator.geolocation) {
-    alert('Geolocation tidak didukung pada browser ini.');
-    return;
+    alert('Geolocation tidak didukung pada browser ini.')
+    return
   }
-  navigator.geolocation.getCurrentPosition(function(pos) {
-    setExtractedCoordinates(pos.coords.latitude, pos.coords.longitude, 'Geolocation');
-  }, function(err) {
-    alert('Gagal mengambil lokasi: ' + (err.message || 'Permission denied'));
-  }, { enableHighAccuracy: true, timeout: 10000 });
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      setExtractedCoordinates(
+        pos.coords.latitude,
+        pos.coords.longitude,
+        'Geolocation'
+      )
+    },
+    (err) => {
+      alert('Gagal mengambil lokasi: ' + (err.message || 'Permission denied'))
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  )
 }
 
 function parseGoogleMapsUrl(url) {
-  if (!url) return null;
-  let m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
-  m = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
-  m = url.match(/3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
-  return null;
+  if (!url) return null
+
+  let m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) }
+
+  m = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/)
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) }
+
+  m = url.match(/3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/)
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) }
+
+  return null
 }
 
-// --- Dynamic anggota rows ---
-let anggotaCounter = 0;
+/* ================= ANGGOTA DINAMIS ================= */
+let anggotaCounter = 0
+
 function addAnggotaRow() {
-  const container = document.getElementById('anggota-container');
-  if (!container) return;
-  anggotaCounter++;
+  const container = document.getElementById('anggota-container')
+  if (!container) return
 
-  const row = document.createElement('div');
-  row.className = 'grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-white rounded-lg border anggota-row';
-  row.id = `anggota-${anggotaCounter}`;
+  anggotaCounter++
 
-  const col1 = document.createElement('div');
-  col1.innerHTML = `
-    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-    <input type="text" name="anggota_nama[]" class="w-full rounded-lg border-gray-300 shadow-sm px-4 py-3 border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
-  `;
+  const row = document.createElement('div')
+  row.className =
+    'grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-white rounded-lg border anggota-row'
+  row.id = `anggota-${anggotaCounter}`
 
-  const col2 = document.createElement('div');
-  col2.innerHTML = `
-    <label class="block text-sm font-medium text-gray-700 mb-1">Peran/Tanggung Jawab</label>
-    <input type="text" name="anggota_peran[]" class="w-full rounded-lg border-gray-300 shadow-sm px-4 py-3 border focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
-  `;
+  row.innerHTML = `
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+      <input type="text" name="anggota_nama[]" class="w-full rounded-lg border-gray-300 px-4 py-3 border">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Peran/Tanggung Jawab</label>
+      <input type="text" name="anggota_peran[]" class="w-full rounded-lg border-gray-300 px-4 py-3 border">
+    </div>
+    <div class="flex items-end">
+      <button type="button" class="text-red-600">Hapus</button>
+    </div>
+  `
 
-  const col3 = document.createElement('div');
-  col3.className = 'flex items-end';
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 focus:outline-none';
-  btn.textContent = 'Hapus';
-  btn.addEventListener('click', () => removeAnggotaRow(anggotaCounter));
-  col3.appendChild(btn);
+  row.querySelector('button').addEventListener('click', () => {
+    row.remove()
+  })
 
-  row.appendChild(col1);
-  row.appendChild(col2);
-  row.appendChild(col3);
-  container.appendChild(row);
+  container.appendChild(row)
 }
 
-function removeAnggotaRow(id) {
-  const row = document.getElementById(`anggota-${id}`);
-  if (row) row.remove();
-}
-
-// --- Form save draft handling (wire up on mounted) ---
-onMounted(() => {
-  const parseBtn = document.getElementById('parse-maps-btn');
-  if (parseBtn) {
-    parseBtn.addEventListener('click', function() {
-      const url = (document.getElementById('maps_link') || {}).value || '';
-      if (!url) {
-        alert('Tempel tautan Google Maps terlebih dahulu pada kolom tautan.');
-        return;
-      }
-      const coords = parseGoogleMapsUrl(url.trim());
-      if (coords) {
-        setExtractedCoordinates(coords.lat, coords.lng, 'tautan Google Maps');
-      } else {
-        alert('Tidak dapat menemukan koordinat dalam tautan. Gunakan opsi Bagikan → Salin tautan pada Google Maps atau tempel tautan yang mengandung @lat,lng atau !3d..!4d..');
-      }
-    });
-  }
-
-  const form = document.querySelector('form');
-  const saveBtn = document.getElementById('save-draft-btn');
-  const saveAction = document.getElementById('save-action');
-  if (saveBtn && form && saveAction) {
-    saveBtn.addEventListener('click', function() {
-      saveAction.value = 'draft';
-      form.noValidate = true;
-      form.submit();
-    });
-
-    form.addEventListener('submit', function(e) {
-      if (saveAction.value === 'draft') {
-        return;
-      }
-      form.noValidate = false;
-    });
-  }
-// Counter for dynamic anggota rows
-const progressBar = ref(null);
-const formRef = ref(null);
+/* ================= PROGRESS ================= */
+const progressBar = ref(null)
+const formRef = ref(null)
 
 function updateProgress() {
-  const form = formRef.value;
-  if (!form) return;
-  const inputs = form.querySelectorAll('input[type="text"], input[type="number"], input[type="file"], select, textarea');
-  const totalInputs = inputs.length;
-  let filledInputs = 0;
-  inputs.forEach(input => {
+  const form = formRef.value
+  if (!form) return
+
+  const inputs = form.querySelectorAll(
+    'input[type="text"], input[type="number"], input[type="file"], select, textarea'
+  )
+
+  let filled = 0
+  inputs.forEach((input) => {
     if (input.type === 'file') {
-      if (input.files.length > 0) filledInputs++;
+      if (input.files.length > 0) filled++
     } else if (input.value.trim() !== '') {
-      filledInputs++;
+      filled++
     }
-  });
-  const completionPercentage = totalInputs > 0 ? Math.round((filledInputs / totalInputs) * 100) : 0;
+  })
+
+  const percentage = inputs.length
+    ? Math.round((filled / inputs.length) * 100)
+    : 0
+
   if (progressBar.value) {
-    progressBar.value.style.width = `${completionPercentage}%`;
-    progressBar.value.textContent = `${completionPercentage}%`;
+    progressBar.value.style.width = `${percentage}%`
+    progressBar.value.textContent = `${percentage}%`
   }
 }
 
 function saveProgress() {
-  updateProgress();
-  const completionPercentage = parseInt(progressBar.value.textContent);
-  localStorage.setItem('ppepp_completion', completionPercentage);
-  alert('Progres administrasi berhasil disimpan!');
-  window.location.href = 'dashboard_user.html';
+  updateProgress()
+
+  const percentage = parseInt(progressBar.value?.textContent || 0)
+  localStorage.setItem('ppepp_completion', percentage)
+
+  alert('Progres administrasi berhasil disimpan!')
+  router.push('/dashboard-user')
 }
+
+/* ================= MOUNTED ================= */
+onMounted(() => {
+  const parseBtn = document.getElementById('parse-maps-btn')
+  if (parseBtn) {
+    parseBtn.addEventListener('click', () => {
+      const url = document.getElementById('maps_link')?.value || ''
+      if (!url) {
+        alert('Tempel tautan Google Maps terlebih dahulu.')
+        return
+      }
+
+      const coords = parseGoogleMapsUrl(url.trim())
+      if (coords) {
+        setExtractedCoordinates(coords.lat, coords.lng, 'Google Maps')
+      } else {
+        alert('Koordinat tidak ditemukan dalam tautan.')
+      }
+    })
+  }
+})
 </script>
 
 <template>
@@ -305,7 +311,7 @@ function saveProgress() {
               <input id="maps_link" name="maps_link" type="url" placeholder="https://www.google.com/maps/place/..." class="w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
               <div class="flex gap-2 items-center">
                 <button type="button" id="parse-maps-btn" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-md">Ambil Koordinat dari Tautan</button>
-                <button type="button" onclick="fillGeolocation()" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-md">Lokasi Saat Ini</button>
+                <button type="button" @click="fillGeolocation()" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-md">Lokasi Saat Ini</button>
               </div>
               <p id="maps-extracted" class="text-xs text-gray-500 mt-1"></p>
               <!-- Hidden latitude/longitude fields (keperluan server) -->
@@ -397,7 +403,7 @@ function saveProgress() {
           <div class="space-y-4">
             <div class="flex justify-between items-center">
               <h4 class="font-medium text-gray-700">Anggota Tim</h4>
-              <button type="button" onclick="addAnggotaRow()" class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+              <button type="button" @click="addAnggotaRow()" class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
                 + Tambah Anggota
               </button>
             </div>

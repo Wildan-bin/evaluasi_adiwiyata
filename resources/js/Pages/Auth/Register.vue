@@ -43,7 +43,7 @@ const submit = async () => {
                 <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-12">
                     <div class="flex items-center justify-center mb-4">
                         <div class="bg-white bg-opacity-20 rounded-full p-3">
-                            <Leaf class="w-8 h-8 text-white" />
+                            🌿
                         </div>
                     </div>
                     <h1 class="text-3xl font-bold text-white text-center">Greenedu</h1>
