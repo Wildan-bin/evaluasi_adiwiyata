@@ -9,6 +9,7 @@ use App\Models\Pernyataan;
 use App\Models\Permintaan;
 use App\Models\Kemajuan;
 use App\Models\User;
+use App\Models\MentorComment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -682,14 +683,23 @@ class FormSubmissionController extends Controller
     }
 
     /**
-     * Show user files for admin - displays all submissions from a user
+     * Show user files page - untuk FileUser.vue
      */
-    public function showUserFiles($userId)
+    public function showUserFiles($userId = null)
     {
-        $user = \App\Models\User::findOrFail($userId);
+        $currentUser = Auth::user();
+    
+        // Jika $userId tidak diberikan, gunakan user yang sedang login
+        if (!$userId) {
+            $user = $currentUser;
+        } else {
+            // Jika admin/mentor yang akses user lain, pastikan authorized
+            abort_if(!in_array($currentUser->role, ['admin', 'mentor']), 403);
+            $user = User::findOrFail($userId);
+        }
         
         // Get A5 files (Rencana) with mentor comments
-        $a5Files = Rencana::where('user_id', $userId)
+        $a5Files = Rencana::where('user_id', $user->id)
             ->with(['comments' => function ($query) {
                 $query->orderBy('created_at', 'desc');
             }])
@@ -706,7 +716,7 @@ class FormSubmissionController extends Controller
             });
         
         // Get A6 files (Bukti Self Assessment) with mentor comments
-        $a6Files = BuktiSelfAssessment::where('user_id', $userId)
+        $a6Files = BuktiSelfAssessment::where('user_id', $user->id)
             ->with(['comments' => function ($query) {
                 $query->orderBy('created_at', 'desc');
             }])
@@ -723,10 +733,10 @@ class FormSubmissionController extends Controller
             });
         
         // Get A7 data (Pendampingan)
-        $a7Data = Pendampingan::where('user_id', $userId)->get();
+        $a7Data = Pendampingan::where('user_id', $user->id)->get();
         
         // Get A8 data (Pernyataan) with mentor comments
-        $a8Data = Pernyataan::where('user_id', $userId)
+        $a8Data = Pernyataan::where('user_id', $user->id)
             ->with(['comments' => function ($query) {
                 $query->orderBy('created_at', 'desc');
             }])
@@ -743,14 +753,22 @@ class FormSubmissionController extends Controller
                 'comments' => $this->formatComments($a8Data->comments),
             ];
         }
-        
-        return Inertia::render('Features/Admin/Administrasi', [
+
+        $data = [
             'user' => $user,
             'a5_files' => $a5Files,
             'a6_files' => $a6Files,
             'a7_data' => $a7Data,
             'a8_data' => $a8Data
-        ]);
+        ];
+        
+        if ($currentUser->role === 'admin') {
+            // Admin melihat file submission user lain
+            return Inertia::render('Features/Admin/Administrasi', $data);
+        } else {
+            // Mentor atau user biasa melihat file mereka sendiri
+            return Inertia::render('Features/FileUser', $data);
+        }
     }
 
     /**
@@ -758,6 +776,10 @@ class FormSubmissionController extends Controller
      */
     private function formatComments($comments)
     {
+        if (!$comments) {
+            return [];
+        }
+        
         return $comments->map(function ($comment) {
             return [
                 'id' => $comment->id,
@@ -775,11 +797,22 @@ class FormSubmissionController extends Controller
      */
     private function getFileSize($filePath)
     {
-        if (!$filePath) return 0;
+        if (!$filePath) {
+            return 0;
+        }
         
         try {
-            if (Storage::disk('public')->exists($filePath)) {
-                return Storage::disk('public')->size($filePath);
+            // Normalize path
+            $path = ltrim($filePath, '/');
+            if (str_starts_with($path, 'public/')) {
+                $path = substr($path, 7);
+            }
+            if (str_starts_with($path, 'storage/')) {
+                $path = substr($path, 8);
+            }
+            
+            if (Storage::disk('public')->exists($path)) {
+                return Storage::disk('public')->size($path);
             }
         } catch (\Exception $e) {
             Log::error('Error getting file size: ' . $e->getMessage());

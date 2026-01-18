@@ -2,7 +2,11 @@
 
 use App\Models\File;
 use Inertia\Inertia;
+use App\Models\Rencana;
+use App\Models\Pernyataan;
+use App\Models\Pendampingan;
 use Illuminate\Support\Facades\DB;
+use App\Models\BuktiSelfAssessment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -355,6 +359,9 @@ Route::middleware('auth')->prefix('form')->name('form.')->group(function () {
     Route::get('/get-a8', [FormSubmissionController::class, 'getA8'])->name('get-a8');
 });
 
+// Tambahkan route untuk FileUser
+Route::middleware('auth')->get('/file-user', [FormSubmissionController::class, 'showUserFiles'])->name('file-user.index');
+
 // ============================================================================
 // FILE EVIDENCE ROUTES - Preview & Download (for A5, A6, A8)
 // ============================================================================
@@ -445,7 +452,7 @@ Route::middleware('auth')->prefix('api/file-upload')->name('file-upload.')->grou
 });
 
 // Admin User Files Page
-Route::middleware(['auth', 'role:admin,mentor'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/users/{userId}/files', [FormSubmissionController::class, 'showUserFiles'])
         ->name('admin.user-files');
 
@@ -494,9 +501,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/users/submission-status', [FormSubmissionController::class, 'getUsersSubmissionStatus'])
         ->name('users.submission-status');
 
-    // Admin - User Files View
-    Route::get('/admin/user-files/{userId}', [FormSubmissionController::class, 'showUserFiles'])
-        ->name('admin.user-files');
+    // Admin - User Files View, dicomment karena sudah ada routenya di atas
+    // Route::get('/admin/user-files/{userId}', [FormSubmissionController::class, 'showUserFiles'])
+    //     ->name('admin.user-files');
 
     // Form Submission Routes - A5, A6, A7, A8
     Route::post('/form/save-a5', [FormSubmissionController::class, 'saveA5'])->name('form.save-a5');
