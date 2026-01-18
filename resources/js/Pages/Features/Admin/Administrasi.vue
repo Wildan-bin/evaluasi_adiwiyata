@@ -16,7 +16,10 @@ import {
     Users as UsersIcon,
     FileCheck,
     ExternalLink,
-    X
+    X,
+    MessageCircle,
+    ChevronDown,
+    ChevronUp
 } from 'lucide-vue-next';
 
 // Props dari controller
@@ -36,11 +39,21 @@ const showPreview = ref(false);
 const previewUrl = ref('');
 const downloadUrl = ref('');
 const isLoading = ref(false);
+const expandedComments = ref({});
 
 // Helper untuk mendapatkan nama file dari path
 const getFileName = (path) => {
     if (!path) return 'Unknown';
     return path.split('/').pop();
+};
+
+// Helper untuk format ukuran file
+const formatFileSize = (bytes) => {
+    if (!bytes || bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 };
 
 // Cek apakah ada data di setiap section
@@ -56,6 +69,11 @@ const hasA8 = computed(() => props.a8_data !== null);
 // Kembali ke dashboard
 const goBack = () => {
     router.visit(route('dashboard'));
+};
+
+// Toggle comment section
+const toggleComments = (fileId) => {
+    expandedComments.value[fileId] = !expandedComments.value[fileId];
 };
 
 /**
@@ -166,7 +184,7 @@ const handleKeydown = (event) => {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
                     <!-- A5 Card - Rencana & Evaluasi PBLHS -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-[600px]">
                         <div class="p-4 bg-gradient-to-r from-emerald-500 to-green-600">
                             <div class="flex items-center gap-3">
                                 <ClipboardList class="w-6 h-6 text-white" />
@@ -174,34 +192,64 @@ const handleKeydown = (event) => {
                             </div>
                         </div>
                         <div class="p-4">
-                            <div v-if="hasA5" class="space-y-3">
+                            <div v-if="hasA5" class="space-y-3 max-h-[600px] overflow-y-auto">
                                 <div 
                                     v-for="file in a5_files" 
                                     :key="file.id"
-                                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                    class="border border-gray-200 rounded-lg overflow-hidden"
                                 >
-                                    <div class="flex items-center gap-3 flex-1 min-w-0">
-                                        <FileText class="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                                        <div class="min-w-0">
-                                            <p class="text-sm font-medium text-gray-900 truncate">{{ file.indikator }}</p>
-                                            <p class="text-xs text-gray-500 truncate">{{ getFileName(file.path_file) }}</p>
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors">
+                                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                                            <FileText class="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-sm font-medium text-gray-900 truncate">{{ file.indikator }}</p>
+                                                <p class="text-xs text-gray-500 truncate">{{ getFileName(file.path_file) }} • {{ formatFileSize(file.file_size) }}</p>
+                                            </div>
+                                            <div v-if="file.comments && file.comments.length > 0" class="flex items-center gap-1 text-blue-600 flex-shrink-0">
+                                                <MessageCircle class="w-4 h-4" />
+                                                <span class="text-xs font-medium">{{ file.comments.length }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2 flex-shrink-0 ml-2">
+                                            <button
+                                                v-if="file.comments && file.comments.length > 0"
+                                                @click="toggleComments(`a5-${file.id}`)"
+                                                class="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors"
+                                                title="Toggle Comments"
+                                            >
+                                                <ChevronDown v-if="!expandedComments[`a5-${file.id}`]" class="w-4 h-4" />
+                                                <ChevronUp v-else class="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                @click="openPreview(file, 'a5')"
+                                                class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                                title="Preview"
+                                            >
+                                                <Eye class="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                @click="downloadFileFromCard(file.id, 'a5')"
+                                                class="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                                title="Download"
+                                            >
+                                                <Download class="w-4 h-4" />
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 flex-shrink-0">
-                                        <button
-                                            @click="openPreview(file, 'a5')"
-                                            class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                                            title="Preview"
-                                        >
-                                            <Eye class="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            @click="downloadFileFromCard(file.id, 'a5')"
-                                            class="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
-                                            title="Download"
-                                        >
-                                            <Download class="w-4 h-4" />
-                                        </button>
+                                    
+                                    <!-- Comments Section -->
+                                    <div v-if="expandedComments[`a5-${file.id}`] && file.comments && file.comments.length > 0" 
+                                         class="p-3 bg-blue-50 border-t border-blue-100 space-y-2 max-h-60 overflow-y-auto">
+                                        <p class="text-xs font-semibold text-gray-700 mb-2 sticky top-0 bg-blue-50">
+                                            💬 Komentar Mentor ({{ file.comments.length }})
+                                        </p>
+                                        <div v-for="comment in file.comments" :key="comment.id" 
+                                             class="p-2 bg-white rounded border border-blue-200 text-xs">
+                                            <p class="text-gray-800 font-medium">{{ comment.comment }}</p>
+                                            <p class="text-gray-500 mt-1 text-xs">
+                                                👤 {{ comment.mentor_name }} • {{ new Date(comment.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -213,7 +261,7 @@ const handleKeydown = (event) => {
                     </div>
 
                     <!-- A6 Card - Bukti Self Assessment -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-[600px]">
                         <div class="p-4 bg-gradient-to-r from-blue-500 to-indigo-600">
                             <div class="flex items-center gap-3">
                                 <ClipboardCheck class="w-6 h-6 text-white" />
@@ -221,34 +269,64 @@ const handleKeydown = (event) => {
                             </div>
                         </div>
                         <div class="p-4">
-                            <div v-if="hasA6" class="space-y-3 max-h-80 overflow-y-auto">
+                            <div v-if="hasA6" class="space-y-3 max-h-[600px] overflow-y-auto">
                                 <div 
                                     v-for="file in a6_files" 
                                     :key="file.id"
-                                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                                    class="border border-gray-200 rounded-lg overflow-hidden"
                                 >
-                                    <div class="flex items-center gap-3 flex-1 min-w-0">
-                                        <FileText class="w-5 h-5 text-blue-600 flex-shrink-0" />
-                                        <div class="min-w-0">
-                                            <p class="text-sm font-medium text-gray-900 truncate">{{ file.indikator }}</p>
-                                            <p class="text-xs text-gray-500 truncate">{{ getFileName(file.path_file) }}</p>
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors">
+                                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                                            <FileText class="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-sm font-medium text-gray-900 truncate">{{ file.indikator }}</p>
+                                                <p class="text-xs text-gray-500 truncate">{{ getFileName(file.path_file) }} • {{ formatFileSize(file.file_size) }}</p>
+                                            </div>
+                                            <div v-if="file.comments && file.comments.length > 0" class="flex items-center gap-1 text-blue-600 flex-shrink-0">
+                                                <MessageCircle class="w-4 h-4" />
+                                                <span class="text-xs font-medium">{{ file.comments.length }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2 flex-shrink-0 ml-2">
+                                            <button
+                                                v-if="file.comments && file.comments.length > 0"
+                                                @click="toggleComments(`a6-${file.id}`)"
+                                                class="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors"
+                                                title="Toggle Comments"
+                                            >
+                                                <ChevronDown v-if="!expandedComments[`a6-${file.id}`]" class="w-4 h-4" />
+                                                <ChevronUp v-else class="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                @click="openPreview(file, 'a6')"
+                                                class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                                title="Preview"
+                                            >
+                                                <Eye class="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                @click="downloadFileFromCard(file.id, 'a6')"
+                                                class="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                                title="Download"
+                                            >
+                                                <Download class="w-4 h-4" />
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 flex-shrink-0">
-                                        <button
-                                            @click="openPreview(file, 'a6')"
-                                            class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                                            title="Preview"
-                                        >
-                                            <Eye class="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            @click="downloadFileFromCard(file.id, 'a6')"
-                                            class="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
-                                            title="Download"
-                                        >
-                                            <Download class="w-4 h-4" />
-                                        </button>
+                                    
+                                    <!-- Comments Section -->
+                                    <div v-if="expandedComments[`a6-${file.id}`] && file.comments && file.comments.length > 0" 
+                                         class="p-3 bg-blue-50 border-t border-blue-100 space-y-2 max-h-60 overflow-y-auto">
+                                        <p class="text-xs font-semibold text-gray-700 mb-2 sticky top-0 bg-blue-50">
+                                            💬 Komentar Mentor ({{ file.comments.length }})
+                                        </p>
+                                        <div v-for="comment in file.comments" :key="comment.id" 
+                                             class="p-2 bg-white rounded border border-blue-200 text-xs">
+                                            <p class="text-gray-800 font-medium">{{ comment.comment }}</p>
+                                            <p class="text-gray-500 mt-1 text-xs">
+                                                👤 {{ comment.mentor_name }} • {{ new Date(comment.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -323,28 +401,58 @@ const handleKeydown = (event) => {
                                 </div>
 
                                 <!-- Bukti Persetujuan File -->
-                                <div v-if="a8_data.bukti_persetujuan" class="p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-xs font-medium text-gray-500 uppercase mb-2">Bukti Persetujuan</p>
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <FileText class="w-4 h-4 text-purple-600" />
-                                            <span class="text-sm text-gray-700 truncate">{{ getFileName(a8_data.bukti_persetujuan) }}</span>
+                                <div v-if="a8_data.bukti_persetujuan" class="border border-gray-200 rounded-lg overflow-hidden">
+                                    <div class="p-3 bg-gray-50">
+                                        <p class="text-xs font-medium text-gray-500 uppercase mb-2">Bukti Persetujuan</p>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2 flex-1 min-w-0">
+                                                <FileText class="w-4 h-4 text-purple-600 flex-shrink-0" />
+                                                <span class="text-sm text-gray-700 truncate">{{ getFileName(a8_data.bukti_persetujuan) }} • {{ formatFileSize(a8_data.file_size) }}</span>
+                                                <div v-if="a8_data.comments && a8_data.comments.length > 0" class="flex items-center gap-1 text-blue-600 flex-shrink-0">
+                                                    <MessageCircle class="w-4 h-4" />
+                                                    <span class="text-xs font-medium">{{ a8_data.comments.length }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                <button
+                                                    v-if="a8_data.comments && a8_data.comments.length > 0"
+                                                    @click="toggleComments(`a8-${a8_data.id}`)"
+                                                    class="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors"
+                                                    title="Toggle Comments"
+                                                >
+                                                    <ChevronDown v-if="!expandedComments[`a8-${a8_data.id}`]" class="w-4 h-4" />
+                                                    <ChevronUp v-else class="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    @click="openPreview(a8_data, 'a8')"
+                                                    class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                                    title="Preview"
+                                                >
+                                                    <Eye class="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    @click="downloadFileFromCard(a8_data.id, 'a8')"
+                                                    class="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                                    title="Download"
+                                                >
+                                                    <Download class="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <button
-                                                @click="openPreview(a8_data, 'a8')"
-                                                class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                                                title="Preview"
-                                            >
-                                                <Eye class="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                @click="downloadFileFromCard(a8_data.id, 'a8')"
-                                                class="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
-                                                title="Download"
-                                            >
-                                                <Download class="w-4 h-4" />
-                                            </button>
+                                    </div>
+                                    
+                                    <!-- Comments Section -->
+                                    <div v-if="expandedComments[`a8-${a8_data.id}`] && a8_data.comments && a8_data.comments.length > 0" 
+                                         class="p-3 bg-purple-50 border-t border-purple-100 space-y-2 max-h-60 overflow-y-auto">
+                                        <p class="text-xs font-semibold text-gray-700 mb-2 sticky top-0 bg-purple-50">
+                                            💬 Komentar Mentor ({{ a8_data.comments.length }})
+                                        </p>
+                                        <div v-for="comment in a8_data.comments" :key="comment.id" 
+                                             class="p-2 bg-white rounded border border-purple-200 text-xs">
+                                            <p class="text-gray-800 font-medium">{{ comment.comment }}</p>
+                                            <p class="text-gray-500 mt-1 text-xs">
+                                                👤 {{ comment.mentor_name }} • {{ new Date(comment.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>

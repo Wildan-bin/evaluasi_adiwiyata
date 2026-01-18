@@ -688,17 +688,61 @@ class FormSubmissionController extends Controller
     {
         $user = \App\Models\User::findOrFail($userId);
         
-        // Get A5 files (Rencana)
-        $a5Files = Rencana::where('user_id', $userId)->get();
+        // Get A5 files (Rencana) with mentor comments
+        $a5Files = Rencana::where('user_id', $userId)
+            ->with(['comments' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }])
+            ->get()
+            ->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'indikator' => $file->indikator,
+                    'path_file' => $file->path_file,
+                    'file_size' => $this->getFileSize($file->path_file),
+                    'created_at' => $file->created_at,
+                    'comments' => $this->formatComments($file->comments),
+                ];
+            });
         
-        // Get A6 files (Bukti Self Assessment)
-        $a6Files = BuktiSelfAssessment::where('user_id', $userId)->get();
+        // Get A6 files (Bukti Self Assessment) with mentor comments
+        $a6Files = BuktiSelfAssessment::where('user_id', $userId)
+            ->with(['comments' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }])
+            ->get()
+            ->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'indikator' => $file->indikator,
+                    'path_file' => $file->path_file,
+                    'file_size' => $this->getFileSize($file->path_file),
+                    'created_at' => $file->created_at,
+                    'comments' => $this->formatComments($file->comments),
+                ];
+            });
         
         // Get A7 data (Pendampingan)
         $a7Data = Pendampingan::where('user_id', $userId)->get();
         
-        // Get A8 data (Pernyataan)
-        $a8Data = Pernyataan::where('user_id', $userId)->first();
+        // Get A8 data (Pernyataan) with mentor comments
+        $a8Data = Pernyataan::where('user_id', $userId)
+            ->with(['comments' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }])
+            ->first();
+        
+        if ($a8Data) {
+            $a8Data = [
+                'id' => $a8Data->id,
+                'pernyataan_data' => $a8Data->pernyataan_data,
+                'persetujuan_publikasi' => $a8Data->persetujuan_publikasi,
+                'bukti_persetujuan' => $a8Data->bukti_persetujuan,
+                'file_size' => $this->getFileSize($a8Data->bukti_persetujuan),
+                'created_at' => $a8Data->created_at,
+                'comments' => $this->formatComments($a8Data->comments),
+            ];
+        }
         
         return Inertia::render('Features/Admin/Administrasi', [
             'user' => $user,
@@ -707,5 +751,40 @@ class FormSubmissionController extends Controller
             'a7_data' => $a7Data,
             'a8_data' => $a8Data
         ]);
+    }
+
+    /**
+     * Format mentor comments untuk ditampilkan di frontend
+     */
+    private function formatComments($comments)
+    {
+        return $comments->map(function ($comment) {
+            return [
+                'id' => $comment->id,
+                'comment' => $comment->comment,
+                'mentor_name' => $comment->mentor->name ?? 'Unknown Mentor',
+                'mentor_id' => $comment->mentor_id,
+                'created_at' => $comment->created_at,
+                'file_type' => $comment->file_type,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get file size dari storage
+     */
+    private function getFileSize($filePath)
+    {
+        if (!$filePath) return 0;
+        
+        try {
+            if (Storage::disk('public')->exists($filePath)) {
+                return Storage::disk('public')->size($filePath);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error getting file size: ' . $e->getMessage());
+        }
+        
+        return 0;
     }
 }
