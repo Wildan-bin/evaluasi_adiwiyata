@@ -11,6 +11,13 @@ use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\FileEvidenceController;
 use App\Models\File;
+use App\Http\Controllers\FormAdminController;
+
+// CSRF Token Refresh Route (untuk SPA)
+Route::get('/csrf-token', function () {
+    return response()->json(['csrf_token' => csrf_token()]);
+})->name('csrf.token');
+
 // CSRF Token Refresh Route (untuk SPA)
 Route::get('/csrf-token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
@@ -219,47 +226,47 @@ Route::middleware('auth')->get('/api/submissions-with-files', function () {
 });
 
 // Preview/Download file evidence by encoded id
-Route::middleware('auth')->get('/file-evidence/{eid}/preview', function ($eid) {
-    $user = Auth::user();
-    abort_if(!$user || $user->role !== 'admin', 403);
+// Route::middleware('auth')->get('/file-evidence/{eid}/preview', function ($eid) {
+//     $user = Auth::user();
+//     abort_if(!$user || $user->role !== 'admin', 403);
 
-    // Decode file path from encrypted ID
-    $decoded = strtr($eid, '-_', '+/');
-    $decoded .= str_repeat('=', (4 - strlen($decoded) % 4) % 4);
-    @[$uid, $path] = explode('|', base64_decode($decoded, true), 2);
+//     // Decode file path from encrypted ID
+//     $decoded = strtr($eid, '-_', '+/');
+//     $decoded .= str_repeat('=', (4 - strlen($decoded) % 4) % 4);
+//     @[$uid, $path] = explode('|', base64_decode($decoded, true), 2);
 
-    if (!$path) abort(404);
+//     if (!$path) abort(404);
 
-    // Normalize path
-    $path = ltrim($path, '/');
-    if (str_starts_with($path, 'public/')) $path = substr($path, 7);
-    if (str_starts_with($path, 'storage/')) $path = substr($path, 8);
+//     // Normalize path
+//     $path = ltrim($path, '/');
+//     if (str_starts_with($path, 'public/')) $path = substr($path, 7);
+//     if (str_starts_with($path, 'storage/')) $path = substr($path, 8);
 
-    if (!Storage::disk('public')->exists($path)) abort(404);
+//     if (!Storage::disk('public')->exists($path)) abort(404);
 
-    return response()->file(Storage::disk('public')->path($path));
-})->name('file-evidence.preview');
+//     return response()->file(Storage::disk('public')->path($path));
+// })->name('file-evidence.preview');
 
-Route::middleware('auth')->get('/file-evidence/{eid}/download', function ($eid) {
-    $user = Auth::user();
-    abort_if(!$user || $user->role !== 'admin', 403);
+// Route::middleware('auth')->get('/file-evidence/{eid}/download', function ($eid) {
+//     $user = Auth::user();
+//     abort_if(!$user || $user->role !== 'admin', 403);
 
-    // Decode file path from encrypted ID
-    $decoded = strtr($eid, '-_', '+/');
-    $decoded .= str_repeat('=', (4 - strlen($decoded) % 4) % 4);
-    @[$uid, $path] = explode('|', base64_decode($decoded, true), 2);
+//     // Decode file path from encrypted ID
+//     $decoded = strtr($eid, '-_', '+/');
+//     $decoded .= str_repeat('=', (4 - strlen($decoded) % 4) % 4);
+//     @[$uid, $path] = explode('|', base64_decode($decoded, true), 2);
 
-    if (!$path) abort(404);
+//     if (!$path) abort(404);
 
-    // Normalize path
-    $path = ltrim($path, '/');
-    if (str_starts_with($path, 'public/')) $path = substr($path, 7);
-    if (str_starts_with($path, 'storage/')) $path = substr($path, 8);
+//     // Normalize path
+//     $path = ltrim($path, '/');
+//     if (str_starts_with($path, 'public/')) $path = substr($path, 7);
+//     if (str_starts_with($path, 'storage/')) $path = substr($path, 8);
 
-    if (!Storage::disk('public')->exists($path)) abort(404);
+//     if (!Storage::disk('public')->exists($path)) abort(404);
 
-    return response()->download(Storage::disk('public')->path($path), basename($path));
-})->name('file-evidence.download');
+//     return response()->download(Storage::disk('public')->path($path), basename($path));
+// })->name('file-evidence.download');
 
 
 Route::get('/upload', fn() => Inertia::render('Example/UploadFile'));
@@ -274,9 +281,9 @@ Route::middleware('auth')->group(function () {
     })->name('file-upload');
 
     // Admin file management page
-    Route::middleware('role:admin,mentor')->get('/admin/file-management', function () {
-        return Inertia::render('Features/Admin/AdminFileManagement');
-    })->name('admin.file-management');
+    // Route::middleware('role:admin,mentor')->get('/admin/file-management', function () {
+    //     return Inertia::render('Features/Admin/AdminFileManagement');
+    // })->name('admin.file-management');
 });
 
 // ============================================================================
@@ -400,10 +407,100 @@ Route::middleware(['auth', 'role:admin,mentor'])->group(function () {
     })->name('api.users');
 });
 
+// Admin Routes - Form Submission Status
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Form Admin Dashboard
+    Route::get('/admin/form-submissions', [FormAdminController::class, 'index'])
+        ->name('form-admin.index');
+    
+    // API endpoint for users status
+    Route::get('/api/form-admin/users-status', [FormAdminController::class, 'getUsersStatus'])
+        ->name('form-admin.users-status');
+    
+    // View user files
+    Route::get('/admin/user-files/{userId}', [FormAdminController::class, 'viewUserFiles'])
+        ->name('admin.user-files');
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Submission routes
+    Route::get('/form', function () {
+        return Inertia::render('Features/Form', [
+            'user' => Auth::user(),
+        ]);
+    })->name('form');
+
+    Route::get('/users/submission-status', [FormSubmissionController::class, 'getUsersSubmissionStatus'])
+        ->name('users.submission-status');
+
+    // Admin - User Files View
+    Route::get('/admin/user-files/{userId}', [FormSubmissionController::class, 'showUserFiles'])
+        ->name('admin.user-files');
+
+    // Form Submission Routes - A5, A6, A7, A8
+    Route::post('/form/save-a5', [FormSubmissionController::class, 'saveA5'])->name('form.save-a5');
+    Route::get('/form/get-a5', [FormSubmissionController::class, 'getA5'])->name('form.get-a5');
+
+    Route::post('/form/save-a6', [FormSubmissionController::class, 'saveA6'])->name('form.save-a6');
+    Route::get('/form/get-a6', [FormSubmissionController::class, 'getA6'])->name('form.get-a6');
+
+    Route::post('/form/save-a7', [FormSubmissionController::class, 'saveA7'])->name('form.save-a7');
+    Route::get('/form/get-a7', [FormSubmissionController::class, 'getA7'])->name('form.get-a7');
+
+    Route::post('/form/save-a8', [FormSubmissionController::class, 'saveA8'])->name('form.save-a8');
+    Route::get('/form/get-a8', [FormSubmissionController::class, 'getA8'])->name('form.get-a8');
+
+    Route::get('/form/status', [FormSubmissionController::class, 'getStatus'])->name('form.get-status');
+    Route::post('/form/save-step', [FormSubmissionController::class, 'saveStep'])->name('form.save-step');
+
+    // Submission routes
+    // Route::post('/submission/save-draft-a5', [SubmissionController::class, 'saveDraftA5'])
+    //     ->name('submission.save-draft-a5');
+
+    // Route::get('/submission/draft-a5', [SubmissionController::class, 'getDraftA5'])
+    //     ->name('submission.get-draft-a5');
+
+    // masih belum tau apakah akan digunakan
+    // Route::post('/submission/store', [SubmissionController::class, 'store'])->name('submission.store'); 
+    // masih belum tau apakah akan digunakan
+    // Route::post('/submission/draft', [SubmissionController::class, 'saveDraft'])->name('submission.draft'); 
+
+    // File Evidence routes - Updated untuk multiple model types
+    Route::get('/file-evidence/{type}/{id}/preview', [FileEvidenceController::class, 'preview'])
+        ->name('file-evidence.preview')
+        ->where('type', 'a5|a6|a8');
+
+    Route::get('/file-evidence/{type}/{id}/download', [FileEvidenceController::class, 'download'])
+        ->name('file-evidence.download')
+        ->where('type', 'a5|a6|a8');
+
+    // Admin test page
+    Route::get('/admin/test', function () {
+        return Inertia::render('Features/Admin/AdminTest');
+    })->name('admin.test');
+
+    // Test file preview route
+    Route::get('/test/file-preview', function () {
+        return Inertia::render('Features/Admin/FilePreviewTest');
+    })->name('test.file-preview');
+
+    // File viewer route
+    Route::get('/test/preview/{filename}', function ($filename) {
+        $path = storage_path('app/submissions/' . $filename);
+
+        if (!file_exists($path)) {
+            abort(404, 'File tidak ditemukan');
+        }
+
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"'
+        ]);
+    })->name('test.preview');
 });
 
 // New route for previewing PDF files in a modal
@@ -419,5 +516,22 @@ Route::middleware('auth')->get('/file-preview/{id}', function ($id) {
         'file' => $file,
     ]);
 })->name('file.preview');
+
+// ============================================================================
+// FORM ROUTE - Single route for both User and Admin
+// ============================================================================
+Route::middleware('auth')->get('/form', function () {
+    $user = Auth::user();
+
+    // Jika admin, tampilkan FormAdmin dashboard
+    if ($user->role === 'admin') {
+        return Inertia::render('Features/Admin/FormAdmin');
+    }
+
+    // Jika user biasa, tampilkan Form wizard
+    return Inertia::render('Features/Form', [
+        'user' => $user,
+    ]);
+})->name('form');
 
 require __DIR__.'/auth.php';

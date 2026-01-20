@@ -29,7 +29,6 @@ const form = useForm({
 const submit = async () => {
     // Refresh CSRF token sebelum login
     await refreshCsrfToken();
-
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
     });

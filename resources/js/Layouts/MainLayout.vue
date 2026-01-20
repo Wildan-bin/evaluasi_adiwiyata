@@ -187,13 +187,13 @@ let navigationItems = [
         description: 'Form Evaluasi PPEPP',
         color: 'text-green-400'
     },
-    {
-        name: 'Evaluasi PBLHS',
-        route: 'evaluation',
-        icon: FileText,
-        description: 'Hasil Evaluasi PPEPP',
-        color: 'text-green-400'
-    },
+    // {
+    //     name: 'Evaluasi PBLHS',
+    //     route: 'evaluation',
+    //     icon: FileText,
+    //     description: 'Hasil Evaluasi PPEPP',
+    //     color: 'text-green-400'
+    // },
     {
         name: 'Admin Test',
         route: 'admin.test',

@@ -568,6 +568,63 @@ class FormSubmissionController extends Controller
 
     /**
      * ============================================================================
+     * STEP STATUS & SAVE METHODS
+     * ============================================================================
+     */
+
+    /**
+     * Get status for all steps (A5, A6, A7, A8)
+     */
+    public function getStatus(Request $request)
+    {
+        $user = Auth::user();
+        $userId = $user->id;
+
+        // Check each step completion status
+        $completedSteps = [
+            'a5' => Rencana::where('user_id', $userId)->exists(),
+            'a6' => BuktiSelfAssessment::where('user_id', $userId)->exists(),
+            'a7' => Pendampingan::where('user_id', $userId)->exists(),
+            'a8' => Pernyataan::where('user_id', $userId)->exists(),
+        ];
+
+        // Get current progress from Kemajuan table
+        $kemajuan = Kemajuan::where('user_id', $userId)->first();
+
+        return response()->json([
+            'success' => true,
+            'completedSteps' => $completedSteps,
+            'progress' => $kemajuan ? $kemajuan->progress : 0
+        ]);
+    }
+
+    /**
+     * Save step data - Generic method (optional, untuk future use)
+     */
+    public function saveStep(Request $request)
+    {
+        $step = $request->input('step');
+        
+        // Route to specific save method based on step
+        switch ($step) {
+            case 'a5':
+                return $this->saveA5($request);
+            case 'a6':
+                return $this->saveA6($request);
+            case 'a7':
+                return $this->saveA7($request);
+            case 'a8':
+                return $this->saveA8($request);
+            default:
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid step'
+                ], 400);
+        }
+    }
+
+    /**
+     * ============================================================================
      * HELPER METHODS
      * ============================================================================
      */
@@ -629,19 +686,26 @@ class FormSubmissionController extends Controller
      */
     public function showUserFiles($userId)
     {
-        $user = User::findOrFail($userId);
+        $user = \App\Models\User::findOrFail($userId);
         
-        $a5_files = Rencana::where('user_id', $userId)->get();
-        $a6_files = BuktiSelfAssessment::where('user_id', $userId)->get();
-        $a7_data = Pendampingan::where('user_id', $userId)->get();
-        $a8_data = Pernyataan::where('user_id', $userId)->first();
-
+        // Get A5 files (Rencana)
+        $a5Files = Rencana::where('user_id', $userId)->get();
+        
+        // Get A6 files (Bukti Self Assessment)
+        $a6Files = BuktiSelfAssessment::where('user_id', $userId)->get();
+        
+        // Get A7 data (Pendampingan)
+        $a7Data = Pendampingan::where('user_id', $userId)->get();
+        
+        // Get A8 data (Pernyataan)
+        $a8Data = Pernyataan::where('user_id', $userId)->first();
+        
         return Inertia::render('Features/Admin/Administrasi', [
             'user' => $user,
-            'a5_files' => $a5_files,
-            'a6_files' => $a6_files,
-            'a7_data' => $a7_data,
-            'a8_data' => $a8_data,
+            'a5_files' => $a5Files,
+            'a6_files' => $a6Files,
+            'a7_data' => $a7Data,
+            'a8_data' => $a8Data
         ]);
     }
 }

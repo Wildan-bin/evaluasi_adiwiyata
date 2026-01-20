@@ -24,8 +24,5 @@ class DatabaseSeeder extends Seeder
 
         // Seed base users (admin, user, mentor) with password 12345678
         $this->call(UserSeeder::class);
-
-        // Optionally add more users via factory if needed
-        // User::factory(5)->create();
     }
 }
