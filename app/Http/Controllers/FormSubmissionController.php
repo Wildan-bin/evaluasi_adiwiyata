@@ -9,6 +9,7 @@ use App\Models\Pernyataan;
 use App\Models\Permintaan;
 use App\Models\Kemajuan;
 use App\Models\User;
+use App\Models\MentorComment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -682,30 +683,141 @@ class FormSubmissionController extends Controller
     }
 
     /**
-     * Show user files for admin - displays all submissions from a user
+     * Show user files page - untuk FileUser.vue
      */
-    public function showUserFiles($userId)
+    public function showUserFiles($userId = null)
     {
-        $user = \App\Models\User::findOrFail($userId);
+        $currentUser = Auth::user();
+    
+        // Jika $userId tidak diberikan, gunakan user yang sedang login
+        if (!$userId) {
+            $user = $currentUser;
+        } else {
+            // Jika admin/mentor yang akses user lain, pastikan authorized
+            abort_if(!in_array($currentUser->role, ['admin', 'mentor']), 403);
+            $user = User::findOrFail($userId);
+        }
         
-        // Get A5 files (Rencana)
-        $a5Files = Rencana::where('user_id', $userId)->get();
+        // Get A5 files (Rencana) with mentor comments
+        $a5Files = Rencana::where('user_id', $user->id)
+            ->with(['comments' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }])
+            ->get()
+            ->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'indikator' => $file->indikator,
+                    'path_file' => $file->path_file,
+                    'file_size' => $this->getFileSize($file->path_file),
+                    'created_at' => $file->created_at,
+                    'comments' => $this->formatComments($file->comments),
+                ];
+            });
         
-        // Get A6 files (Bukti Self Assessment)
-        $a6Files = BuktiSelfAssessment::where('user_id', $userId)->get();
+        // Get A6 files (Bukti Self Assessment) with mentor comments
+        $a6Files = BuktiSelfAssessment::where('user_id', $user->id)
+            ->with(['comments' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }])
+            ->get()
+            ->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'indikator' => $file->indikator,
+                    'path_file' => $file->path_file,
+                    'file_size' => $this->getFileSize($file->path_file),
+                    'created_at' => $file->created_at,
+                    'comments' => $this->formatComments($file->comments),
+                ];
+            });
         
         // Get A7 data (Pendampingan)
-        $a7Data = Pendampingan::where('user_id', $userId)->get();
+        $a7Data = Pendampingan::where('user_id', $user->id)->get();
         
-        // Get A8 data (Pernyataan)
-        $a8Data = Pernyataan::where('user_id', $userId)->first();
+        // Get A8 data (Pernyataan) with mentor comments
+        $a8Data = Pernyataan::where('user_id', $user->id)
+            ->with(['comments' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }])
+            ->first();
         
-        return Inertia::render('Features/Admin/Administrasi', [
+        if ($a8Data) {
+            $a8Data = [
+                'id' => $a8Data->id,
+                'pernyataan_data' => $a8Data->pernyataan_data,
+                'persetujuan_publikasi' => $a8Data->persetujuan_publikasi,
+                'bukti_persetujuan' => $a8Data->bukti_persetujuan,
+                'file_size' => $this->getFileSize($a8Data->bukti_persetujuan),
+                'created_at' => $a8Data->created_at,
+                'comments' => $this->formatComments($a8Data->comments),
+            ];
+        }
+
+        $data = [
             'user' => $user,
             'a5_files' => $a5Files,
             'a6_files' => $a6Files,
             'a7_data' => $a7Data,
             'a8_data' => $a8Data
-        ]);
+        ];
+        
+        if ($currentUser->role === 'admin') {
+            // Admin melihat file submission user lain
+            return Inertia::render('Features/Admin/Administrasi', $data);
+        } else {
+            // Mentor atau user biasa melihat file mereka sendiri
+            return Inertia::render('Features/FileUser', $data);
+        }
+    }
+
+    /**
+     * Format mentor comments untuk ditampilkan di frontend
+     */
+    private function formatComments($comments)
+    {
+        if (!$comments) {
+            return [];
+        }
+        
+        return $comments->map(function ($comment) {
+            return [
+                'id' => $comment->id,
+                'comment' => $comment->comment,
+                'mentor_name' => $comment->mentor->name ?? 'Unknown Mentor',
+                'mentor_id' => $comment->mentor_id,
+                'created_at' => $comment->created_at,
+                'file_type' => $comment->file_type,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get file size dari storage
+     */
+    private function getFileSize($filePath)
+    {
+        if (!$filePath) {
+            return 0;
+        }
+        
+        try {
+            // Normalize path
+            $path = ltrim($filePath, '/');
+            if (str_starts_with($path, 'public/')) {
+                $path = substr($path, 7);
+            }
+            if (str_starts_with($path, 'storage/')) {
+                $path = substr($path, 8);
+            }
+            
+            if (Storage::disk('public')->exists($path)) {
+                return Storage::disk('public')->size($path);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error getting file size: ' . $e->getMessage());
+        }
+        
+        return 0;
     }
 }

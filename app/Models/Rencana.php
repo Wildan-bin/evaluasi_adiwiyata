@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Rencana extends Model
@@ -39,5 +40,12 @@ class Rencana extends Model
     public function fileUpload(): BelongsTo
     {
         return $this->belongsTo(FileUpload::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(MentorComment::class, 'file_id')
+            ->where('file_type', 'a5')
+            ->with('mentor:id,name');
     }
 }

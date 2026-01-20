@@ -147,8 +147,11 @@ const handleFinalSubmit = async () => {
       return;
     }
     
-    alert('✓ Proposal berhasil dikirim! Terima kasih.');
-    window.location.href = route('dashboard');
+    // Alert success
+    // alert('✓ Proposal berhasil dikirim! Terima kasih.');
+    
+    // Navigate to FileUser page instead of dashboard
+    router.visit(route('file-user.index'));
 
   } catch (error) {
     console.error('Final submission error:', error);
@@ -196,9 +199,9 @@ const handleFinalSubmit = async () => {
             @click="handleFinalSubmit"
             :disabled="isSavingAndNavigating"
             type="button"
-            class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            📤 Kirim Proposal
+            {{ isSavingAndNavigating ? 'Memproses...' : 'Lihat File' }}
           </button>
 
           <!-- Next Button (on A5-A7) -->

@@ -19,16 +19,17 @@ import {
     X,
     MessageCircle,
     ChevronDown,
-    ChevronUp
+    ChevronUp,
+    ArrowRight
 } from 'lucide-vue-next';
 
 // Props dari controller
 const props = defineProps({
-    user: Object,
     a5_files: Array,
     a6_files: Array,
     a7_data: Array,
-    a8_data: Object
+    a8_data: Object,
+    user: Object
 });
 
 // ============================================================================
@@ -68,6 +69,11 @@ const hasA8 = computed(() => props.a8_data !== null);
 
 // Kembali ke dashboard
 const goBack = () => {
+    router.visit(route('form'));
+};
+
+// Kembali ke dashboard
+const goBackDashboard = () => {
     router.visit(route('dashboard'));
 };
 
@@ -146,24 +152,31 @@ const handleKeydown = (event) => {
 
 <template>
     <MainLayout>
-        <Head :title="`File Submission - ${user?.name}`" />
+        <Head title="File Saya" />
 
         <Header
-            title="Administrasi File Submission"
-            :description="`Melihat file submission dari: ${user?.name}`"
+            title="File Saya"
+            description="Lihat semua file yang telah Anda upload"
             color="blue"
         />
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <!-- Back Button -->
-                <div class="mb-6">
+                <div class="mb-6 flex gap-4">
                     <button
                         @click="goBack"
                         class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                         <ArrowLeft class="w-4 h-4" />
-                        Kembali ke Dashboard
+                        Kembali ke Form
+                    </button>
+                    <button
+                        @click="goBackDashboard"
+                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                        Dashboard
+                        <ArrowRight class="w-4 h-4" />
                     </button>
                 </div>
 
@@ -174,8 +187,8 @@ const handleKeydown = (event) => {
                             <UsersIcon class="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h2 class="text-lg font-bold text-gray-900">{{ user?.name }}</h2>
-                            <p class="text-sm text-gray-500">{{ user?.email }}</p>
+                            <h2 class="text-lg font-bold text-gray-900">File Submission Anda</h2>
+                            <p class="text-sm text-gray-500">Lihat dan kelola semua file yang telah diupload</p>
                         </div>
                     </div>
                 </div>

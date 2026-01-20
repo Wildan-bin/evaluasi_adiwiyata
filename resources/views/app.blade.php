@@ -21,7 +21,7 @@
 
 </head>
 
-<body class="font-[inter] antialiased">
+<body class="font-[Inter] antialiased">
     @inertia
 </body>
 
