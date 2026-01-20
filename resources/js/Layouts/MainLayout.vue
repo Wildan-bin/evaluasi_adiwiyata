@@ -101,7 +101,9 @@ const toggleUserMenu = () => {
 const handleLogout = async () => {
     // Refresh CSRF token sebelum logout
     await refreshCsrfToken();
-        router.post(route('logout'));
+    router.post(route('logout'));
+};
+
 const toggleDropdown = (routeName) => {
     activeDropdown.value = activeDropdown.value === routeName ? null : routeName;
 };
@@ -482,7 +484,6 @@ const isItemActive = (item) => {
                                 <User :class="isSidebarOpen ? 'w-5 h-5' : 'w-6 h-6'" class="text-white" />
                                 <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
                             </div>
-                        
 
                             <!-- User Info -->
                             <!-- <div v-if="isSidebarOpen" class="ml-3 flex-1 text-left">

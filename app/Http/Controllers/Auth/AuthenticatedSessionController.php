@@ -22,7 +22,6 @@ class AuthenticatedSessionController extends Controller
         Log::info('Login page accessed', ['user' => Auth::user()?->id]);
 
         return Inertia::render('Auth/Login', [
-            'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
         ]);
     }
