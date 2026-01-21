@@ -157,15 +157,15 @@ const submit = async () => {
                                 </Link>
                             </div>
 
-                            <!-- Register Link -->
+                            <!-- Request Access Link (untuk Sekolah) -->
                             <div class="pt-2">
                                 <p class="text-sm text-gray-600">
-                                    Belum memiliki akun?
+                                    Sekolah belum terdaftar?
                                     <Link
-                                        :href="route('register')"
+                                        :href="route('request.access')"
                                         class="text-green-600 hover:text-green-700 font-semibold transition"
                                     >
-                                        Daftar di sini
+                                        Request Akun
                                     </Link>
                                 </p>
                             </div>

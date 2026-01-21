@@ -40,6 +40,11 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+// Request Access Route (untuk sekolah yang ingin daftar)
+Route::get('/request-access', function () {
+    return Inertia::render('Auth/RequestAccess');
+})->name('request.access');
+
 Route::get('/dashboard', function () {
     $user = Auth::user();
 
@@ -116,7 +121,117 @@ Route::get('/administration', function () {
 })->middleware(['auth'])->name('administration');
 
 Route::get('/admin-test', function () {
-    return Inertia::render('Features/Admin/AdminTest');
+    $user = Auth::user();
+    
+    // Get A5 files (Rencana) with mentor comments
+    $a5Files = \App\Models\Rencana::where('user_id', $user->id)
+        ->with(['comments' => function ($query) {
+            $query->orderBy('created_at', 'desc');
+        }])
+        ->get()
+        ->map(function ($file) {
+            return [
+                'id' => $file->id,
+                'indikator' => $file->indikator,
+                'path_file' => $file->path_file,
+                'file_size' => $file->path_file ? (\Illuminate\Support\Facades\Storage::disk('public')->exists($file->path_file) ? \Illuminate\Support\Facades\Storage::disk('public')->size($file->path_file) : 0) : 0,
+                'created_at' => $file->created_at,
+                'comments' => $file->comments ? $file->comments->map(function ($comment) {
+                    return [
+                        'id' => $comment->id,
+                        'comment' => $comment->comment,
+                        'mentor_name' => $comment->mentor->name ?? 'Unknown Mentor',
+                        'mentor_id' => $comment->mentor_id,
+                        'created_at' => $comment->created_at,
+                        'file_type' => $comment->file_type,
+                    ];
+                })->toArray() : [],
+            ];
+        });
+    
+    // Get A6 files (Bukti Self Assessment) with mentor comments
+    $a6Files = \App\Models\BuktiSelfAssessment::where('user_id', $user->id)
+        ->with(['comments' => function ($query) {
+            $query->orderBy('created_at', 'desc');
+        }])
+        ->get()
+        ->map(function ($file) {
+            return [
+                'id' => $file->id,
+                'indikator' => $file->indikator,
+                'path_file' => $file->path_file,
+                'file_size' => $file->path_file ? (\Illuminate\Support\Facades\Storage::disk('public')->exists($file->path_file) ? \Illuminate\Support\Facades\Storage::disk('public')->size($file->path_file) : 0) : 0,
+                'created_at' => $file->created_at,
+                'comments' => $file->comments ? $file->comments->map(function ($comment) {
+                    return [
+                        'id' => $comment->id,
+                        'comment' => $comment->comment,
+                        'mentor_name' => $comment->mentor->name ?? 'Unknown Mentor',
+                        'mentor_id' => $comment->mentor_id,
+                        'created_at' => $comment->created_at,
+                        'file_type' => $comment->file_type,
+                    ];
+                })->toArray() : [],
+            ];
+        });
+    
+    // Get A7 data (Pendampingan)
+    $a7Data = \App\Models\Pendampingan::where('user_id', $user->id)->get();
+    
+    // Get A8 data (Pernyataan) with mentor comments
+    $a8Data = \App\Models\Pernyataan::where('user_id', $user->id)
+        ->with(['comments' => function ($query) {
+            $query->orderBy('created_at', 'desc');
+        }])
+        ->first();
+    
+    if ($a8Data) {
+        $a8Data = [
+            'id' => $a8Data->id,
+            'pernyataan_data' => $a8Data->pernyataan_data,
+            'persetujuan_publikasi' => $a8Data->persetujuan_publikasi,
+            'bukti_persetujuan' => $a8Data->bukti_persetujuan,
+            'file_size' => $a8Data->bukti_persetujuan ? (\Illuminate\Support\Facades\Storage::disk('public')->exists($a8Data->bukti_persetujuan) ? \Illuminate\Support\Facades\Storage::disk('public')->size($a8Data->bukti_persetujuan) : 0) : 0,
+            'created_at' => $a8Data->created_at,
+            'comments' => $a8Data->comments ? $a8Data->comments->map(function ($comment) {
+                return [
+                    'id' => $comment->id,
+                    'comment' => $comment->comment,
+                    'mentor_name' => $comment->mentor->name ?? 'Unknown Mentor',
+                    'mentor_id' => $comment->mentor_id,
+                    'created_at' => $comment->created_at,
+                    'file_type' => $comment->file_type,
+                ];
+            })->toArray() : [],
+        ];
+    }
+
+    // Get Administrasi files (from file_uploads table with category 'administrasi')
+    $administrasiFiles = \App\Models\FileUpload::where('user_id', $user->id)
+        ->where('category', 'administrasi')
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->map(function ($file) {
+            return [
+                'id' => $file->id,
+                'indikator' => $file->indikator,
+                'original_filename' => $file->original_filename,
+                'system_filename' => $file->system_filename,
+                'file_path' => $file->file_path,
+                'file_size' => $file->file_size,
+                'status' => $file->status,
+                'created_at' => $file->created_at,
+            ];
+        });
+
+    return Inertia::render('Features/Admin/AdminTest', [
+        'user' => $user,
+        'a5_files' => $a5Files,
+        'a6_files' => $a6Files,
+        'a7_data' => $a7Data,
+        'a8_data' => $a8Data,
+        'administrasi_files' => $administrasiFiles
+    ]);
 })->middleware(['auth'])->name('admin.test');
 
 // ROUTE UNTUK CONTOH KOMPONEN
@@ -408,8 +523,15 @@ Route::middleware('auth')->group(function () {
             ]);
         }
 
-        // User view (existing)
-        return Inertia::render('Features/Administration');
+        // User view - fetch existing uploaded files
+        $uploadedFiles = \App\Models\FileUpload::where('user_id', $user->id)
+            ->where('category', 'administrasi')
+            ->get()
+            ->keyBy('indikator');
+        
+        return Inertia::render('Features/Administration', [
+            'uploadedFiles' => $uploadedFiles,
+        ]);
     })->name('administrasi-sekolah');
 
     // Submit form administrasi (role enforced in controller)

@@ -119,7 +119,7 @@ defineProps({
                                 berkelanjutan untuk sekolah
                             </p>
 
-                            <div class="flex gap-4 justify-center">
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                                 <Link
                                     v-if="canLogin"
                                     href="/login"
@@ -128,11 +128,10 @@ defineProps({
                                     Masuk Sekarang
                                 </Link>
                                 <Link
-                                    v-if="canRegister"
-                                    href="/register"
+                                    href="/request-access"
                                     class="px-6 py-3 border-2 border-green-600 text-green-600 rounded-lg hover:bg-green-50 font-semibold transition"
                                 >
-                                    Daftar Baru
+                                    Request Akun Sekolah
                                 </Link>
                             </div>
                         </div>

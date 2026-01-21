@@ -150,8 +150,8 @@ const handleFinalSubmit = async () => {
     // Alert success
     // alert('✓ Proposal berhasil dikirim! Terima kasih.');
     
-    // Navigate to FileUser page instead of dashboard
-    router.visit(route('file-user.index'));
+    // Navigate to Admin Test page to view uploaded files
+    router.visit('/admin-test');
 
   } catch (error) {
     console.error('Final submission error:', error);
