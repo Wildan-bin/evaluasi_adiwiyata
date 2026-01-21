@@ -178,7 +178,7 @@ let navigationItems = [
         icon: Upload,
         description: 'Unggah Bukti Administrasi',
         color: 'text-green-400',
-        routePattern: 'administrasi.*'
+        // routePattern: 'administrasi.*'
     },
     {
         name: 'Self Assessment',
