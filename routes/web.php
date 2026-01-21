@@ -123,6 +123,76 @@ Route::get('/administration', function () {
 Route::get('/admin-test', function () {
     $user = Auth::user();
     
+    // ============================================
+    // ADMIN VIEW - Dashboard Review
+    // ============================================
+    if ($user->role === 'admin') {
+        // Statistik file administrasi
+        $totalAdministrasiFiles = \App\Models\FileUpload::where('category', 'administrasi')->count();
+        $pendingAdministrasi = \App\Models\FileUpload::where('category', 'administrasi')->where('status', 'pending')->count();
+        $approvedAdministrasi = \App\Models\FileUpload::where('category', 'administrasi')->where('status', 'approved')->count();
+        $rejectedAdministrasi = \App\Models\FileUpload::where('category', 'administrasi')->where('status', 'rejected')->count();
+        
+        // Total sekolah yang sudah upload
+        $totalSchools = \App\Models\FileUpload::where('category', 'administrasi')
+            ->distinct('user_id')
+            ->count('user_id');
+        
+        // File terbaru yang pending (untuk quick review)
+        $pendingFiles = \App\Models\FileUpload::where('category', 'administrasi')
+            ->where('status', 'pending')
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'indikator' => $file->indikator,
+                    'original_filename' => $file->original_filename,
+                    'file_size' => $file->file_size,
+                    'status' => $file->status,
+                    'created_at' => $file->created_at,
+                    'user_name' => $file->user->name ?? 'Unknown',
+                    'user_id' => $file->user_id,
+                ];
+            });
+        
+        // File terbaru yang sudah direview
+        $recentReviewed = \App\Models\FileUpload::where('category', 'administrasi')
+            ->whereIn('status', ['approved', 'rejected'])
+            ->with('user')
+            ->orderBy('updated_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'indikator' => $file->indikator,
+                    'original_filename' => $file->original_filename,
+                    'status' => $file->status,
+                    'created_at' => $file->created_at,
+                    'updated_at' => $file->updated_at,
+                    'user_name' => $file->user->name ?? 'Unknown',
+                ];
+            });
+        
+        return Inertia::render('Features/Admin/DashboardReview', [
+            'stats' => [
+                'total_files' => $totalAdministrasiFiles,
+                'pending' => $pendingAdministrasi,
+                'approved' => $approvedAdministrasi,
+                'rejected' => $rejectedAdministrasi,
+                'total_schools' => $totalSchools,
+            ],
+            'pending_files' => $pendingFiles,
+            'recent_reviewed' => $recentReviewed,
+        ]);
+    }
+    
+    // ============================================
+    // USER VIEW - Lihat file sendiri
+    // ============================================
     // Get A5 files (Rencana) with mentor comments
     $a5Files = \App\Models\Rencana::where('user_id', $user->id)
         ->with(['comments' => function ($query) {
@@ -498,6 +568,19 @@ Route::middleware('auth')->group(function () {
     // Halaman form administrasi (role enforced in controller)
     Route::get('/administrasi-sekolah', function () {
         $user = Auth::user();
+
+        // Admin view - tampilkan semua file yang sudah diupload oleh semua user
+        if ($user->role === 'admin') {
+            $allUploadedFiles = \App\Models\FileUpload::where('category', 'administrasi')
+                ->with('user')
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->groupBy('user_id');
+            
+            return Inertia::render('Features/Admin/AdministrasiAdmin', [
+                'allUploadedFiles' => $allUploadedFiles,
+            ]);
+        }
 
         // Mentor view
         if ($user->role === 'mentor') {
