@@ -84,9 +84,10 @@ defineProps({
                             >
                                 Log in
                             </Link>
+                            <!-- route register diganti menjadi informai -->
                             <Link
                                 v-if="canRegister"
-                                href="/register"
+                                :href="route('informasi')"
                                 class="bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 font-medium transition"
                             >
                                 Register
@@ -127,9 +128,10 @@ defineProps({
                                 >
                                     Masuk Sekarang
                                 </Link>
+                            <!-- route register diganti menjadi informai -->
                                 <Link
                                     v-if="canRegister"
-                                    href="/register"
+                                    :href="route('informasi')"
                                     class="px-6 py-3 border-2 border-green-600 text-green-600 rounded-lg hover:bg-green-50 font-semibold transition"
                                 >
                                     Daftar Baru

@@ -40,6 +40,11 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+
+Route::get('/informasi', function () {
+    return Inertia::render('Profile/PageInformasi');
+})->name('informasi');
+
 Route::get('/dashboard', function () {
     $user = Auth::user();
 
