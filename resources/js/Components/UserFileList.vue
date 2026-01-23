@@ -2,7 +2,7 @@
     <div>
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
             <p class="mt-2 text-sm text-gray-600">Memuat data...</p>
         </div>
 
@@ -93,7 +93,7 @@
                     <div class="flex flex-col space-y-2 ml-4">
                         <button
                             @click="handlePreview(file.id)"
-                            class="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                            class="p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
                             title="Preview"
                         >
                             <svg

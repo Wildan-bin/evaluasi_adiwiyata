@@ -7,7 +7,7 @@
                 :class="[
                     'px-4 py-2 text-sm font-medium rounded-md',
                     filter === 'all'
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-green-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 ]"
             >
@@ -18,7 +18,7 @@
                 :class="[
                     'px-4 py-2 text-sm font-medium rounded-md',
                     filter === 'pending'
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-green-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 ]"
             >
@@ -29,7 +29,7 @@
                 :class="[
                     'px-4 py-2 text-sm font-medium rounded-md',
                     filter === 'approved'
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-green-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 ]"
             >
@@ -40,7 +40,7 @@
                 :class="[
                     'px-4 py-2 text-sm font-medium rounded-md',
                     filter === 'rejected'
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-green-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 ]"
             >
@@ -50,7 +50,7 @@
 
         <!-- File List -->
         <div v-if="loading" class="text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
             <p class="mt-2 text-sm text-gray-600">Memuat data...</p>
         </div>
         <div v-else-if="files.length === 0" class="text-center py-8">
@@ -95,7 +95,7 @@
                     <div class="flex items-center space-x-2 ml-4">
                         <button
                             @click="handlePreview(file.id)"
-                            class="p-2 text-blue-600 hover:bg-blue-50 rounded-md"
+                            class="p-2 text-green-600 hover:bg-green-50 rounded-md"
                             title="Preview"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,7 +130,7 @@
                         <button
                             v-if="file.status === 'pending'"
                             @click="openReviewModal(file)"
-                            class="px-3 py-1 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                            class="px-3 py-1 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md"
                         >
                             Review
                         </button>
@@ -197,7 +197,7 @@
                         <textarea
                             v-model="comment"
                             rows="4"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500"
                             placeholder="Berikan catatan atau saran untuk user..."
                         />
                     </div>
@@ -214,7 +214,7 @@
                         <button
                             @click="handleReview"
                             :disabled="!reviewStatus || isSubmitting"
-                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {{ isSubmitting ? 'Menyimpan...' : 'Simpan Review' }}
                         </button>

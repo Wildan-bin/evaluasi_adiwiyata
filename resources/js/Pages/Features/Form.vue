@@ -199,7 +199,7 @@ const handleFinalSubmit = async () => {
             @click="handleFinalSubmit"
             :disabled="isSavingAndNavigating"
             type="button"
-            class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {{ isSavingAndNavigating ? 'Memproses...' : 'Lihat File' }}
           </button>

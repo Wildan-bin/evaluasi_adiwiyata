@@ -102,7 +102,7 @@ const anggotaTim = computed(() => {
                         <!-- Action Button -->
                         <Link
                             :href="route('administrasi-sekolah')"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
                         >
                             ← Kembali ke Form
                         </Link>
@@ -124,9 +124,9 @@ const anggotaTim = computed(() => {
                     </div>
 
                     <!-- Admin Note -->
-                    <div v-if="administrasi.admin_note" class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p class="text-sm font-semibold text-blue-900 mb-1">Catatan Admin:</p>
-                        <p class="text-sm text-blue-800 whitespace-pre-line">{{ administrasi.admin_note }}</p>
+                    <div v-if="administrasi.admin_note" class="mt-4 p-4 bg-teal-50 rounded-lg border border-teal-200">
+                        <p class="text-sm font-semibold text-teal-900 mb-1">Catatan Admin:</p>
+                        <p class="text-sm text-teal-800 whitespace-pre-line">{{ administrasi.admin_note }}</p>
                     </div>
 
                     <!-- Edit Request Info -->
@@ -172,7 +172,7 @@ const anggotaTim = computed(() => {
                         <a
                             :href="administrasi.google_maps_url"
                             target="_blank"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                            class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
                         >
                             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>

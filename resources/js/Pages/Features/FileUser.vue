@@ -183,8 +183,8 @@ const handleKeydown = (event) => {
                 <!-- User Info Card -->
                 <div class="mb-6 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                            <UsersIcon class="w-6 h-6 text-blue-600" />
+                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                            <UsersIcon class="w-6 h-6 text-green-600" />
                         </div>
                         <div>
                             <h2 class="text-lg font-bold text-gray-900">File Submission Anda</h2>
@@ -218,7 +218,7 @@ const handleKeydown = (event) => {
                                                 <p class="text-sm font-medium text-gray-900 truncate">{{ file.indikator }}</p>
                                                 <p class="text-xs text-gray-500 truncate">{{ getFileName(file.path_file) }} • {{ formatFileSize(file.file_size) }}</p>
                                             </div>
-                                            <div v-if="file.comments && file.comments.length > 0" class="flex items-center gap-1 text-blue-600 flex-shrink-0">
+                                            <div v-if="file.comments && file.comments.length > 0" class="flex items-center gap-1 text-emerald-600 flex-shrink-0">
                                                 <MessageCircle class="w-4 h-4" />
                                                 <span class="text-xs font-medium">{{ file.comments.length }}</span>
                                             </div>
@@ -235,7 +235,7 @@ const handleKeydown = (event) => {
                                             </button>
                                             <button
                                                 @click="openPreview(file, 'a5')"
-                                                class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                                class="p-2 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
                                                 title="Preview"
                                             >
                                                 <Eye class="w-4 h-4" />
@@ -290,12 +290,12 @@ const handleKeydown = (event) => {
                                 >
                                     <div class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors">
                                         <div class="flex items-center gap-3 flex-1 min-w-0">
-                                            <FileText class="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                            <FileText class="w-5 h-5 text-teal-600 flex-shrink-0" />
                                             <div class="min-w-0 flex-1">
                                                 <p class="text-sm font-medium text-gray-900 truncate">{{ file.indikator }}</p>
                                                 <p class="text-xs text-gray-500 truncate">{{ getFileName(file.path_file) }} • {{ formatFileSize(file.file_size) }}</p>
                                             </div>
-                                            <div v-if="file.comments && file.comments.length > 0" class="flex items-center gap-1 text-blue-600 flex-shrink-0">
+                                            <div v-if="file.comments && file.comments.length > 0" class="flex items-center gap-1 text-teal-600 flex-shrink-0">
                                                 <MessageCircle class="w-4 h-4" />
                                                 <span class="text-xs font-medium">{{ file.comments.length }}</span>
                                             </div>
@@ -312,7 +312,7 @@ const handleKeydown = (event) => {
                                             </button>
                                             <button
                                                 @click="openPreview(file, 'a6')"
-                                                class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                                class="p-2 text-teal-600 hover:bg-teal-100 rounded-lg transition-colors"
                                                 title="Preview"
                                             >
                                                 <Eye class="w-4 h-4" />

@@ -190,8 +190,8 @@ const getScoreBadgeClasses = (color) => {
           </div>
 
           <!-- Score Description -->
-          <div v-if="scoreDescription" class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p class="text-sm text-blue-700 font-medium">{{ scoreDescription }}</p>
+          <div v-if="scoreDescription" class="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p class="text-sm text-green-700 font-medium">{{ scoreDescription }}</p>
           </div>
         </div>
 

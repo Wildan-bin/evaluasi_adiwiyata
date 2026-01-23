@@ -5,12 +5,12 @@
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Pilih Pengguna</h2>
 
             <div v-if="loading" class="text-center py-4">
-                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
             </div>
             <select
                 v-else
                 @change="handleUserChange"
-                class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-green-500 focus:border-green-500"
             >
                 <option value="" disabled selected>-- Pilih Pengguna --</option>
                 <option v-for="user in users" :key="user.id" :value="user.id">

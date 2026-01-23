@@ -100,7 +100,7 @@ onMounted(() => {
 
             <!-- Action Buttons -->
             <div class="flex justify-center gap-4 mb-8">
-                <Link href="/form" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-300 inline-block">
+                <Link href="/form" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-300 inline-block">
                     Mulai Pengisian
                 </Link>
                 <button class="bg-gray-400 text-white font-bold py-3 px-8 rounded-lg shadow-lg cursor-not-allowed" disabled>

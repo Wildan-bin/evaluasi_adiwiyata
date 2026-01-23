@@ -3,7 +3,7 @@
         <h2 class="text-xl font-bold text-gray-900 mb-6">Upload Terbaru</h2>
 
         <div v-if="loading" class="text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
             <p class="mt-2 text-sm text-gray-600">Memuat data...</p>
         </div>
 
@@ -35,7 +35,7 @@
                         <p class="text-xs text-gray-500">{{ file.uploaded_at }}</p>
                         <a
                             :href="`/admin/users/${file.user_id}/files`"
-                            class="mt-2 inline-block text-xs text-blue-600 hover:text-blue-800 font-medium"
+                            class="mt-2 inline-block text-xs text-green-600 hover:text-green-800 font-medium"
                         >
                             Lihat Detail →
                         </a>
@@ -70,7 +70,7 @@
                         <p class="text-xs text-gray-500">{{ file.uploaded_at }}</p>
                         <a
                             :href="`/admin/users/${file.user_id}/files`"
-                            class="mt-2 inline-block text-xs text-blue-600 hover:text-blue-800 font-medium"
+                            class="mt-2 inline-block text-xs text-green-600 hover:text-green-800 font-medium"
                         >
                             Lihat Detail →
                         </a>
@@ -105,7 +105,7 @@
                         <p class="text-xs text-gray-500">{{ file.uploaded_at }}</p>
                         <a
                             :href="`/admin/users/${file.user_id}/files`"
-                            class="mt-2 inline-block text-xs text-blue-600 hover:text-blue-800 font-medium"
+                            class="mt-2 inline-block text-xs text-green-600 hover:text-green-800 font-medium"
                         >
                             Lihat Detail →
                         </a>

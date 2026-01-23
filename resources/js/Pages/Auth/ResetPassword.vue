@@ -61,8 +61,8 @@ const submit = () => {
                 <!-- Form Section -->
                 <div class="px-8 py-8">
                     <!-- Info Message -->
-                    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p class="text-sm text-blue-700">
+                    <div class="mb-6 p-4 bg-teal-50 border border-teal-200 rounded-lg">
+                        <p class="text-sm text-teal-700">
                             Masukkan email Anda dan password baru untuk mereset akun Anda.
                         </p>
                     </div>

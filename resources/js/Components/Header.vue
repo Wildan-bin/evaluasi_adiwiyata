@@ -247,7 +247,7 @@ const descriptionColorClass = computed(() => {
           <a
             v-if="crumb.href"
             :href="crumb.href"
-            class="text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+            class="text-green-600 hover:text-green-700 hover:underline transition-colors"
           >
             {{ crumb.name }}
           </a>

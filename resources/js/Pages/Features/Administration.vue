@@ -193,12 +193,12 @@ const documents = [
             </div>
 
             <!-- Info Notice -->
-            <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="mt-8 bg-teal-50 border border-teal-200 rounded-lg p-4">
                 <div class="flex gap-3">
-                    <AlertCircle class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <div class="text-sm text-blue-800">
+                    <AlertCircle class="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+                    <div class="text-sm text-teal-800">
                         <p class="font-semibold mb-1">Catatan Penting:</p>
-                        <ul class="list-disc list-inside space-y-1 text-blue-700">
+                        <ul class="list-disc list-inside space-y-1 text-teal-700">
                             <li>Pastikan semua dokumen telah lengkap sebelum melanjutkan</li>
                             <li>Format file yang diizinkan: PDF, DOC, DOCX, XLS, XLSX</li>
                             <li>Maksimal ukuran file: 10 MB per dokumen</li>

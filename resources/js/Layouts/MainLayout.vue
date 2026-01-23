@@ -265,7 +265,7 @@ const isItemActive = (item) => {
 </script>
 
 <template>
-    <div class="relative min-h-screen bg-[FAF9F6]">
+    <div class="relative min-h-screen bg-[#FAF9F6]">
         <!-- Background gradient dengan warna hijau tema Adiwiyata: emerald (90), green (50), teal (50) -->
 
         <!-- Mobile Header Bar - FIXED Z-INDEX -->

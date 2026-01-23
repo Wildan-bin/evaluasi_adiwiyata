@@ -88,7 +88,7 @@ const removeRow = (rowIndex) => {
                   :value="row[field.name] || ''"
                   @input="(e) => updateField(rowIndex, field.name, e.target.value)"
                   :placeholder="`Masukkan ${field.label.toLowerCase()}`"
-                  class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
               </div>
             </template>
@@ -109,7 +109,7 @@ const removeRow = (rowIndex) => {
     <!-- Add Button -->
     <button
       @click="addRow"
-      class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors font-semibold text-sm"
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 transition-colors font-semibold text-sm"
     >
       <Plus class="w-4 h-4" />
       Tambah Baris
@@ -123,6 +123,6 @@ input {
 }
 
 input:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
 }
 </style>
