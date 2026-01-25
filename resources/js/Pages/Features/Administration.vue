@@ -1,211 +1,217 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
+import axios from 'axios';
+import { router, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
-import { Upload, FileText, CheckCircle, AlertCircle } from 'lucide-vue-next';
+import WizardLayout from '@/Components/WizardLayout.vue';
+import WizardLayoutAdministrasi from '@/Components/WizardLayoutAdministrasi.vue';
+import SekolahStep from './Administration/SekolahStep.vue';
+import TimStep from './Administration/TimStep.vue';
+import AdministrasiDasarStep from './Administration/AdministrasiDasarStep.vue';
 
-// State
-const files = ref({
-    a1_sk: null,
-    a2_tim: null,
-    a3_rencana: null,
-    a4_anggaran: null
-});
-
-const uploadStatus = ref({
-    a1_sk: null,
-    a2_tim: null,
-    a3_rencana: null,
-    a4_anggaran: null
-});
-
-const isUploading = ref(false);
-
-// File handlers
-const handleFileSelect = (key, event) => {
-    const file = event.target.files[0];
-    if (file) {
-        files.value[key] = file;
-        uploadStatus.value[key] = null; // Reset status
-    }
-};
-
-const uploadFile = async (key) => {
-    if (!files.value[key]) return;
-
-    isUploading.value = true;
-    uploadStatus.value[key] = 'uploading';
-
-    const formData = new FormData();
-    formData.append('file', files.value[key]);
-    formData.append('type', key);
-
-    try {
-        // TODO: Replace with actual API endpoint
-        // const response = await axios.post('/api/administration/upload', formData);
-
-        // Simulate upload
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        uploadStatus.value[key] = 'success';
-    } catch (error) {
-        console.error('Upload error:', error);
-        uploadStatus.value[key] = 'error';
-    } finally {
-        isUploading.value = false;
-    }
-};
-
-const removeFile = (key) => {
-    files.value[key] = null;
-    uploadStatus.value[key] = null;
-};
-
-// Document sections
-const documents = [
-    {
-        key: 'a1_sk',
-        label: 'A1 - SK Tim Adiwiyata',
-        description: 'Upload Surat Keputusan (SK) pembentukan Tim Adiwiyata sekolah',
-        accept: '.pdf,.doc,.docx'
-    },
-    {
-        key: 'a2_tim',
-        label: 'A2 - Struktur Tim Adiwiyata',
-        description: 'Upload dokumen struktur dan susunan Tim Adiwiyata',
-        accept: '.pdf,.doc,.docx'
-    },
-    {
-        key: 'a3_rencana',
-        label: 'A3 - Rencana Kegiatan',
-        description: 'Upload rencana kegiatan program Adiwiyata',
-        accept: '.pdf,.doc,.docx,.xls,.xlsx'
-    },
-    {
-        key: 'a4_anggaran',
-        label: 'A4 - Anggaran Program',
-        description: 'Upload dokumen anggaran untuk program Adiwiyata',
-        accept: '.pdf,.doc,.docx,.xls,.xlsx'
-    }
+// ============================================================================
+// WIZARD CONFIGURATION
+// ============================================================================
+const steps = [
+  { id: 'adm1', label: 'Data Sekolah', icon: '🏫', component: SekolahStep },
+  { id: 'adm2', label: 'SK Tim & Struktur', icon: '👥', component: TimStep },
+  { id: 'adm3', label: 'Administrasi Dasar', icon: '📄', component: AdministrasiDasarStep }
 ];
+
+// ============================================================================
+// STATE
+// ============================================================================
+const page = usePage();
+const currentStepIndex = ref(0);
+const isSavingAndNavigating = ref(false);
+const submitError = ref('');
+
+// Get initial completed steps from Inertia props
+const completedSteps = reactive({
+  adm1: page.props.completedSteps?.adm1 || false,
+  adm2: page.props.completedSteps?.adm2 || false,
+  adm3: page.props.completedSteps?.adm3 || false
+});
+
+// Watch untuk update dari Inertia (ketika page dirender ulang)
+watch(() => page.props.completedSteps, (newValue) => {
+  if (newValue) {
+    Object.assign(completedSteps, newValue);
+  }
+}, { deep: true });
+
+// ============================================================================
+// LIFECYCLE - FETCH INITIAL STATUS
+// ============================================================================
+onMounted(async () => {
+  await fetchStepStatus();
+});
+
+// ============================================================================
+// METHODS - FETCH STEP STATUS
+// ============================================================================
+const fetchStepStatus = async () => {
+  try {
+    const response = await axios.get(route('administrasi.get-status'));
+    
+    if (response.data.completedSteps) {
+      Object.assign(completedSteps, response.data.completedSteps);
+    }
+  } catch (error) {
+    console.error('Error fetching step status:', error);
+  }
+};
+
+// ============================================================================
+// COMPUTED
+// ============================================================================
+const currentStep = computed(() => steps[currentStepIndex.value]);
+const currentStepId = computed(() => currentStep.value?.id);
+const canGoNext = computed(() => currentStepIndex.value < steps.length - 1);
+const canGoPrevious = computed(() => currentStepIndex.value > 0);
+const allStepsCompleted = computed(() => Object.values(completedSteps).every(v => v));
+
+// ============================================================================
+// METHODS - NAVIGATION
+// ============================================================================
+
+const goNext = () => {
+  if (canGoNext.value) {
+    currentStepIndex.value++;
+  }
+};
+
+const goPrevious = () => {
+  if (canGoPrevious.value) {
+    currentStepIndex.value--;
+  }
+};
+
+// ============================================================================
+// METHODS - HANDLE SAVE & CONTINUE (From Child Components)
+// ============================================================================
+
+const handleSaveAndContinue = async (formData) => {
+  try {
+    isSavingAndNavigating.value = true;
+    submitError.value = '';
+    
+    // Refresh status dari backend
+    await fetchStepStatus();
+    
+    // FORCE UPDATE: Trigger Inertia to update shared props
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Navigate to next step
+    if (canGoNext.value) {
+      goNext();
+    }
+  } catch (error) {
+    console.error('Save error:', error);
+    submitError.value = 'Gagal menyimpan data. Silakan coba lagi.';
+  } finally {
+    isSavingAndNavigating.value = false;
+  }
+};
+
+// ============================================================================
+// METHODS - HANDLE FINAL SUBMIT (From Last Step)
+// ============================================================================
+
+const handleFinalSubmit = async () => {
+  try {
+    isSavingAndNavigating.value = true;
+    submitError.value = '';
+    
+    // Refresh status terakhir kali
+    await fetchStepStatus();
+    
+    // Cek apakah semua step sudah completed
+    if (!allStepsCompleted.value) {
+      submitError.value = '⚠️ Harap selesaikan semua step sebelum pengiriman!';
+      return;
+    }
+    
+    // Navigate to dashboard or admin page
+    router.visit(route('dashboard'));
+
+  } catch (error) {
+    console.error('Final submission error:', error);
+    submitError.value = 'Gagal menyelesaikan proses. Silakan coba lagi.';
+  } finally {
+    isSavingAndNavigating.value = false;
+  }
+};
 </script>
 
 <template>
-    <MainLayout>
-        <div class="p-6 max-w-5xl mx-auto">
-            <!-- Header -->
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                    Administrasi Sekolah
-                </h1>
-                <p class="text-gray-600">
-                    Unggah dokumen administrasi sekolah untuk program Adiwiyata
-                </p>
-            </div>
+  <MainLayout>
+    <WizardLayoutAdministrasi
+      :steps="steps"
+      :completed="completedSteps"
+    >
+      <!-- Step Content - Dynamic Component Rendering -->
+      <component
+        :is="currentStep.component"
+        :is-saving="isSavingAndNavigating"
+        @save-and-continue="handleSaveAndContinue"
+        @final-submit="handleFinalSubmit"
+      />
 
-            <!-- Upload Cards -->
-            <div class="space-y-6">
-                <div
-                    v-for="doc in documents"
-                    :key="doc.key"
-                    class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-                >
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-1">
-                                {{ doc.label }}
-                            </h3>
-                            <p class="text-sm text-gray-600">
-                                {{ doc.description }}
-                            </p>
-                        </div>
-                        <FileText class="w-8 h-8 text-emerald-500" />
-                    </div>
+      <!-- Navigation Footer -->
+      <div class="mt-12 pt-8 border-t border-gray-200 flex items-center justify-between gap-4">
+        <!-- Previous Button -->
+        <button
+          @click="goPrevious"
+          :disabled="!canGoPrevious || isSavingAndNavigating"
+          type="button"
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all"
+          :class="canGoPrevious && !isSavingAndNavigating
+            ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
+        >
+          ← Sebelumnya
+        </button>
 
-                    <!-- File Input Area -->
-                    <div class="space-y-3">
-                        <div
-                            v-if="!files[doc.key]"
-                            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-emerald-400 transition-colors cursor-pointer"
-                            @click="$refs[`fileInput_${doc.key}`][0].click()"
-                        >
-                            <Upload class="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                            <p class="text-sm text-gray-600 mb-1">
-                                Klik untuk memilih file
-                            </p>
-                            <p class="text-xs text-gray-500">
-                                Format: {{ doc.accept }}
-                            </p>
-                            <input
-                                :ref="`fileInput_${doc.key}`"
-                                type="file"
-                                :accept="doc.accept"
-                                class="hidden"
-                                @change="handleFileSelect(doc.key, $event)"
-                            />
-                        </div>
+        <!-- Right Side Actions -->
+        <div class="flex items-center gap-3">
+          <!-- Finish Button (on last step) -->
+          <button
+            v-if="currentStepIndex === steps.length - 1"
+            @click="handleFinalSubmit"
+            :disabled="isSavingAndNavigating"
+            type="button"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {{ isSavingAndNavigating ? 'Memproses...' : 'Selesai' }}
+          </button>
 
-                        <!-- Selected File Display -->
-                        <div v-else class="flex items-center justify-between bg-gray-50 rounded-lg p-4">
-                            <div class="flex items-center gap-3">
-                                <FileText class="w-5 h-5 text-emerald-600" />
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900">
-                                        {{ files[doc.key].name }}
-                                    </p>
-                                    <p class="text-xs text-gray-500">
-                                        {{ (files[doc.key].size / 1024).toFixed(2) }} KB
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <!-- Status Indicator -->
-                                <CheckCircle
-                                    v-if="uploadStatus[doc.key] === 'success'"
-                                    class="w-5 h-5 text-green-500"
-                                />
-                                <AlertCircle
-                                    v-if="uploadStatus[doc.key] === 'error'"
-                                    class="w-5 h-5 text-red-500"
-                                />
-
-                                <!-- Upload Button -->
-                                <button
-                                    v-if="uploadStatus[doc.key] !== 'success'"
-                                    @click="uploadFile(doc.key)"
-                                    :disabled="isUploading"
-                                    class="px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    {{ uploadStatus[doc.key] === 'uploading' ? 'Uploading...' : 'Upload' }}
-                                </button>
-
-                                <!-- Remove Button -->
-                                <button
-                                    @click="removeFile(doc.key)"
-                                    class="px-4 py-2 text-red-600 text-sm hover:bg-red-50 rounded-lg transition-colors"
-                                >
-                                    Hapus
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Info Notice -->
-            <div class="mt-8 bg-teal-50 border border-teal-200 rounded-lg p-4">
-                <div class="flex gap-3">
-                    <AlertCircle class="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
-                    <div class="text-sm text-teal-800">
-                        <p class="font-semibold mb-1">Catatan Penting:</p>
-                        <ul class="list-disc list-inside space-y-1 text-teal-700">
-                            <li>Pastikan semua dokumen telah lengkap sebelum melanjutkan</li>
-                            <li>Format file yang diizinkan: PDF, DOC, DOCX, XLS, XLSX</li>
-                            <li>Maksimal ukuran file: 10 MB per dokumen</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+          <!-- Next Button (on other steps) -->
+          <button
+            v-else
+            @click="goNext"
+            :disabled="!canGoNext || isSavingAndNavigating"
+            type="button"
+            class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all"
+            :class="canGoNext && !isSavingAndNavigating
+              ? 'bg-green-600 text-white hover:bg-green-700'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
+          >
+            Lanjut →
+          </button>
         </div>
-    </MainLayout>
+      </div>
+
+      <!-- Error Message -->
+      <transition
+        enter-active-class="transition-all duration-300"
+        enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+      >
+        <div v-if="submitError" class="mt-4 p-4 bg-red-50 border border-red-300 rounded-lg text-red-700 font-medium">
+          {{ submitError }}
+        </div>
+      </transition>
+    </WizardLayoutAdministrasi>
+  </MainLayout>
 </template>

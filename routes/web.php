@@ -413,8 +413,21 @@ Route::middleware('auth')->group(function () {
             ]);
         }
 
-        // User view (existing)
-        return Inertia::render('Features/Administration');
+        // User view - Administration Wizard with completedSteps
+        $sekolah = \App\Models\AdministrasiSekolah::where('user_id', $user->id)->first();
+        $hasSkTim = \App\Models\SkTim::where('user_id', $user->id)->exists();
+        $hasKetua = $sekolah ? \App\Models\Ketua::where('sekolah_id', $sekolah->id)->exists() : false;
+        $hasDasar = \App\Models\AdministrasiDasar::where('user_id', $user->id)->exists();
+
+        $completedSteps = [
+            'adm1' => $sekolah !== null,
+            'adm2' => $hasSkTim && $hasKetua,
+            'adm3' => $hasDasar,
+        ];
+
+        return Inertia::render('Features/Administration', [
+            'completedSteps' => $completedSteps
+        ]);
     })->name('administrasi-sekolah');
 
     // Submit form administrasi (role enforced in controller)
@@ -435,6 +448,27 @@ Route::middleware('auth')->prefix('administrasi-sekolah')->name('administrasi.')
     // Secure inline file preview for admin/owner
     Route::get('/{id}/file', [AdministrasiSekolahController::class, 'streamFile'])->name('file');
 });
+
+// ============================================================================
+// ADMINISTRATION WIZARD ROUTES - Step-by-step administration form
+// ============================================================================
+Route::middleware('auth')->prefix('administrasi')->name('administrasi.')->group(function () {
+    // Status endpoint - get completion status for all steps
+    Route::get('/get-status', [\App\Http\Controllers\AdministrationController::class, 'getStatus'])->name('get-status');
+    
+    // Step 1: Sekolah Data
+    Route::get('/get-sekolah', [\App\Http\Controllers\AdministrationController::class, 'getSekolah'])->name('get-sekolah');
+    Route::post('/sekolah/store', [\App\Http\Controllers\AdministrationController::class, 'storeSekolah'])->name('sekolah.store');
+    
+    // Step 2: SK Tim + Ketua & Anggota
+    Route::get('/get-tim', [\App\Http\Controllers\AdministrationController::class, 'getTim'])->name('get-tim');
+    Route::post('/tim/store', [\App\Http\Controllers\AdministrationController::class, 'storeTim'])->name('tim.store');
+    
+    // Step 3: Administrasi Dasar (PDF files)
+    Route::get('/get-dasar', [\App\Http\Controllers\AdministrationController::class, 'getDasar'])->name('get-dasar');
+    Route::post('/administrasi-dasar/store', [\App\Http\Controllers\AdministrationController::class, 'storeAdministrasiDasar'])->name('administrasi-dasar.store');
+});
+
 
 // ============================================================================
 // FILE UPLOAD ROUTES - New comprehensive file upload system
