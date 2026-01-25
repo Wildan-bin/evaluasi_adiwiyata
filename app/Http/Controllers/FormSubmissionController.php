@@ -73,8 +73,8 @@ class FormSubmissionController extends Controller
                     $fileName = $this->renameFile($user->name, $indicatorName, 'A5', $file);
 
                     // Store file ke public folder
-                    $storagePath = Storage::disk('public')->putFileAs(
-                        'input_A5',
+                    $storagePath = Storage::disk('local')->putFileAs(
+                        'storage/input_A5',
                         $file,
                         $fileName
                     );
@@ -192,8 +192,8 @@ class FormSubmissionController extends Controller
                     $fileName = $this->renameFile($user->name, $indicatorName, 'A6', $file);
 
                     // Store file
-                    $storagePath = Storage::disk('public')->putFileAs(
-                        'input_A6',
+                    $storagePath = Storage::disk('local')->putFileAs(
+                        'storage/input_A6',
                         $file,
                         $fileName
                     );
@@ -406,8 +406,8 @@ class FormSubmissionController extends Controller
                 $fileName = $this->renameFile($user->name, 'bukti_persetujuan', 'A8', $file);
 
                 // Store file
-                $buktiPath = Storage::disk('public')->putFileAs(
-                    'input_A8',
+                $buktiPath = Storage::disk('local')->putFileAs(
+                    'storage/input_A8',
                     $file,
                     $fileName
                 );
@@ -811,8 +811,8 @@ class FormSubmissionController extends Controller
                 $path = substr($path, 8);
             }
             
-            if (Storage::disk('public')->exists($path)) {
-                return Storage::disk('public')->size($path);
+            if (Storage::disk('local')->exists($path)) {
+                return Storage::disk('local')->size($path);
             }
         } catch (\Exception $e) {
             Log::error('Error getting file size: ' . $e->getMessage());
