@@ -298,8 +298,8 @@ class AdministrationController extends Controller
                 $fileName = $this->renameFile($user->name, $indikator, 'AdministrasiDasar', $file);
 
                 // Save file ke storage/app/public/input_administrasi_dasar
-                $storagePath = Storage::disk('public')->putFileAs(
-                    'input_administrasi_dasar',
+                $storagePath = Storage::disk('local')->putFileAs(
+                    'storage/input_administrasi_dasar',
                     $file,
                     $fileName
                 );
