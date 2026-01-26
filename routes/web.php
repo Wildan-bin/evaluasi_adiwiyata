@@ -19,6 +19,7 @@ use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\FileEvidenceController;
 use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\AdministrasiSekolahController;
+use App\Http\Controllers\AdministrasiMentorController;
 
 // CSRF Token Refresh Route (untuk SPA)
 Route::get('/csrf-token', function () {
@@ -396,28 +397,9 @@ Route::middleware('auth')->group(function () {
             return app(\App\Http\Controllers\AdministrasiAdminController::class)->index();
         }
 
-        // Mentor view
+        // ✅ Mentor view - tampilkan AdministrasiMentor dengan data lengkap
         if ($user->role === 'mentor') {
-            $assignedSchool = DB::table('assign_mentor')
-                ->where('user_id_mentor', $user->id)
-                ->whereNull('assign_time_finished')
-                ->first();
-            
-            $administrasiData = null;
-            if ($assignedSchool) {
-                $administrasiData = \App\Models\AdministrasiSekolah::where('user_id', $assignedSchool->user_id_sekolah)
-                    ->first();
-                
-                $schoolUser = \App\Models\User::find($assignedSchool->user_id_sekolah);
-                $assignedSchool->school_name = $schoolUser->name ?? null;
-                $assignedSchool->school_email = $schoolUser->email ?? null;
-            }
-            
-            return Inertia::render('Features/Mentor/AdministrasiMentor', [
-                'user' => $user,
-                'assignedSchool' => $assignedSchool,
-                'administrasiData' => $administrasiData,
-            ]);
+            return app(\App\Http\Controllers\AdministrasiMentorController::class)->index();
         }
 
         // User view - Administration Wizard with completedSteps
@@ -454,6 +436,21 @@ Route::middleware('auth')->prefix('administrasi-sekolah')->name('administrasi.')
 
     // Secure inline file preview for admin/owner
     Route::get('/{id}/file', [AdministrasiSekolahController::class, 'streamFile'])->name('file');
+});
+
+// ============================================================================
+// MENTOR ADMINISTRASI ROUTES
+// ============================================================================
+Route::middleware(['auth', 'role:mentor'])->prefix('mentor/administrasi')->name('mentor.administrasi.')->group(function () {
+    Route::get('/preview/{type}/{id}', [AdministrasiMentorController::class, 'preview'])
+        ->name('preview')
+        ->where('type', 'skTim|administrasiDasar')
+        ->where('id', '[0-9]+');
+    
+    Route::get('/download/{type}/{id}', [AdministrasiMentorController::class, 'download'])
+        ->name('download')
+        ->where('type', 'skTim|administrasiDasar')
+        ->where('id', '[0-9]+');
 });
 
 // ============================================================================
