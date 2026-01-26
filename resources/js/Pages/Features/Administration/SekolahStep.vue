@@ -17,6 +17,7 @@ const draftSaveMessage = ref('');
 const draftSaveError = ref('');
 const dataExists = ref(false);
 const isLoading = ref(true);
+const savedData = ref(null);
 
 const formData = reactive({
   nama_sekolah: '',
@@ -52,9 +53,10 @@ onMounted(async () => {
 const checkDataExists = async () => {
   try {
     const response = await axios.get(route('administrasi.get-sekolah'));
-    if (response.data.data) {
+    if (response.data.sekolah) {
       dataExists.value = true;
-      Object.assign(formData, response.data.data);
+      savedData.value = response.data.sekolah;
+      Object.assign(formData, response.data.sekolah);
     }
   } catch (error) {
     console.error('Error checking sekolah data:', error);
@@ -97,25 +99,114 @@ const saveSekolah = async () => {
       <Loader class="w-8 h-8 animate-spin text-green-600" />
     </div>
 
-    <!-- Data Already Exists -->
+    <!-- Data Already Exists - READ ONLY VIEW -->
     <div v-else-if="dataExists" class="space-y-6">
       <div class="p-6 bg-green-50 border-2 border-green-500 rounded-xl">
         <div class="flex items-center gap-3 mb-2">
           <CheckCircle class="w-6 h-6 text-green-600" />
-          <h3 class="text-lg font-bold text-green-900">Data Sekolah Sudah Tersimpan</h3>
+          <h3 class="text-lg font-bold text-green-900">✓ Data Sekolah Sudah Tersimpan</h3>
         </div>
         <p class="text-sm text-green-800">Data administrasi sekolah sudah lengkap. Silakan lanjut ke tahap berikutnya.</p>
+      </div>
+
+      <!-- Display Saved Data -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+        <h3 class="text-xl font-bold text-gray-900 border-b pb-3">Informasi Sekolah</h3>
+
+        <!-- Identitas Sekolah -->
+        <div class="space-y-4">
+          <h4 class="text-sm font-semibold text-gray-500 uppercase">Identitas Sekolah</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">Nama Sekolah</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.nama_sekolah || '-' }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">NPSN</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.npsn || '-' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alamat -->
+        <div class="space-y-4">
+          <h4 class="text-sm font-semibold text-gray-500 uppercase">Alamat</h4>
+          <div class="bg-gray-50 p-3 rounded-lg">
+            <p class="text-xs text-gray-500 mb-1">Alamat Lengkap</p>
+            <p class="text-sm font-semibold text-gray-900">{{ savedData?.alamat || '-' }}</p>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">Kelurahan</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.kelurahan || '-' }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">Kecamatan</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.kecamatan || '-' }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">Kota/Kab</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.kota || '-' }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">Provinsi</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.provinsi || '-' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kontak -->
+        <div class="space-y-4">
+          <h4 class="text-sm font-semibold text-gray-500 uppercase">Kontak</h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">Kode Pos</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.kode_pos || '-' }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">Telepon</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.telepon || '-' }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">Email</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.email || '-' }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">Website</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.website || '-' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kepala Sekolah -->
+        <div class="space-y-4">
+          <h4 class="text-sm font-semibold text-gray-500 uppercase">Kepala Sekolah</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">Nama</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.nama_kepala_sekolah || '-' }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">NIP</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.nip_kepala_sekolah || '-' }}</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">No. Telepon</p>
+              <p class="text-sm font-semibold text-gray-900">{{ savedData?.telp_kepala_sekolah || '-' }}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <button
         @click="continueToNext"
         class="w-full px-6 py-4 bg-green-600 text-white font-bold rounded-lg transition-all hover:bg-green-700"
       >
-        Lanjut ke Tahap Berikutnya
+        Lanjut ke Tahap Berikutnya →
       </button>
     </div>
 
-    <!-- Form -->
+    <!-- Form (Hanya muncul jika data belum ada) -->
     <div v-else class="space-y-6">
       <div class="border-b border-gray-200 pb-6">
         <h2 class="text-2xl font-bold text-gray-900 mb-2">🏫 Data Sekolah</h2>

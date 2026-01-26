@@ -7,6 +7,10 @@ use App\Models\Pendampingan;
 use App\Models\Permintaan;
 use App\Models\Pernyataan;
 use App\Models\Rencana;
+use App\Models\AdministrasiSekolah;
+use App\Models\SkTim;
+use App\Models\Ketua;
+use App\Models\AdministrasiDasar;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -30,11 +34,12 @@ class HandleInertiaRequests extends Middleware
             // Interceptor di bootstrap.js akan ambil token dari sini untuk setiap request
             'csrf_token' => csrf_token(),
             'completedSteps' => $this->getCompletedSteps($request),
+            'completedAdministrasi' => $this->getCompletedAdministrasi($request), // ✅ Pisahkan
         ];
     }
 
     /**
-     * Get completed steps based on database records for the logged-in user.
+     * Get completed steps for FORM (A5-A8)
      */
     private function getCompletedSteps(Request $request): array
     {
@@ -65,5 +70,42 @@ class HandleInertiaRequests extends Middleware
             // A8 - Pernyataan & Persetujuan
             'a8' => Pernyataan::where('user_id', $userId)->exists(),
         ];
+    }
+
+    /**
+     * Get completed steps for ADMINISTRASI (Data Sekolah, SK Tim, Administrasi Dasar)
+     */
+    private function getCompletedAdministrasi(Request $request): array
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return [
+                'dataSekolah' => false,
+                'skTim' => false,
+                'administrasiDasar' => false,
+            ];
+        }
+
+        $userId = $user->id;
+
+        return [
+            'dataSekolah' => AdministrasiSekolah::where('user_id', $userId)->exists(),
+            'skTim' => $this->checkSkTimCompleted($userId),
+            'administrasiDasar' => AdministrasiDasar::where('user_id', $userId)->exists(),
+        ];
+    }
+
+    private function checkSkTimCompleted($userId)
+    {
+        $hasSkTim = SkTim::where('user_id', $userId)->exists();
+        $sekolah = AdministrasiSekolah::where('user_id', $userId)->first();
+        $hasKetua = false;
+
+        if ($sekolah) {
+            $hasKetua = Ketua::where('sekolah_id', $sekolah->id)->exists();
+        }
+
+        return $hasSkTim && $hasKetua;
     }
 }

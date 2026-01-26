@@ -3,7 +3,7 @@ import { reactive, computed, ref, onMounted } from 'vue';
 import axios from 'axios';
 import { secureUpload } from '@/Composables/useCsrf';
 import FileUploadCard from '@/Components/FileUploadCard.vue';
-import { CheckCircle, Loader, Plus, Trash2 } from 'lucide-vue-next';
+import { CheckCircle, Loader, FileText } from 'lucide-vue-next';
 
 const props = defineProps({
   isSaving: Boolean
@@ -19,6 +19,7 @@ const draftSaveMessage = ref('');
 const draftSaveError = ref('');
 const dataExists = ref(false);
 const isLoading = ref(true);
+const savedDocuments = ref([]);
 
 // Daftar indikator administrasi dasar
 const indicators = [
@@ -46,7 +47,7 @@ const fileCount = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return fileCount.value > 0; // Minimal 1 file
+  return fileCount.value > 0;
 });
 
 // ============================================================================
@@ -63,7 +64,10 @@ onMounted(async () => {
 const checkDataExists = async () => {
   try {
     const response = await axios.get(route('administrasi.get-dasar'));
-    dataExists.value = response.data.data_exists;
+    if (response.data.documents && response.data.documents.length > 0) {
+      dataExists.value = true;
+      savedDocuments.value = response.data.documents;
+    }
   } catch (error) {
     console.error('Error checking administrasi dasar data:', error);
     dataExists.value = false;
@@ -91,7 +95,6 @@ const saveAdministrasiDasar = async () => {
   try {
     const formDataObj = new FormData();
 
-    // Append files with their indicators
     Object.entries(formData.files).forEach(([fieldName, data]) => {
       if (data.file instanceof File) {
         formDataObj.append(`files[${fieldName}][file]`, data.file);
@@ -124,25 +127,51 @@ const saveAdministrasiDasar = async () => {
       <Loader class="w-8 h-8 animate-spin text-green-600" />
     </div>
 
-    <!-- Data Already Exists -->
+    <!-- Data Already Exists - READ ONLY VIEW -->
     <div v-else-if="dataExists" class="space-y-6">
       <div class="p-6 bg-green-50 border-2 border-green-500 rounded-xl">
         <div class="flex items-center gap-3 mb-2">
           <CheckCircle class="w-6 h-6 text-green-600" />
-          <h3 class="text-lg font-bold text-green-900">Administrasi Dasar Sudah Lengkap</h3>
+          <h3 class="text-lg font-bold text-green-900">✓ Administrasi Dasar Sudah Lengkap</h3>
         </div>
-        <p class="text-sm text-green-800">Dokumen administrasi dasar sudah tersimpan. Proses pengisian administrasi selesai!</p>
+        <p class="text-sm text-green-800">{{ savedDocuments.length }} dokumen administrasi dasar sudah tersimpan. Proses pengisian administrasi selesai!</p>
+      </div>
+
+      <!-- Display Saved Documents -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+        <h3 class="text-xl font-bold text-gray-900 border-b pb-3">Dokumen Tersimpan</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div 
+            v-for="(doc, index) in savedDocuments" 
+            :key="index"
+            class="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:shadow-md transition-shadow"
+          >
+            <FileText class="w-10 h-10 text-blue-600 flex-shrink-0" />
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-gray-900 truncate">{{ doc.indikator }}</p>
+              <p class="text-xs text-gray-500 mt-1">{{ doc.path_file }}</p>
+            </div>
+            <a 
+              :href="`/storage/${doc.path_file}`"
+              target="_blank"
+              class="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors flex-shrink-0"
+            >
+              Lihat
+            </a>
+          </div>
+        </div>
       </div>
 
       <button
         @click="continueToNext"
         class="w-full px-6 py-4 bg-green-600 text-white font-bold rounded-lg transition-all hover:bg-green-700"
       >
-        Selesai
+        ✓ Selesai
       </button>
     </div>
 
-    <!-- Form -->
+    <!-- Form (Hanya muncul jika data belum ada) -->
     <div v-else class="space-y-6">
       <div class="border-b border-gray-200 pb-6">
         <h2 class="text-2xl font-bold text-gray-900 mb-2">📄 Administrasi Dasar</h2>

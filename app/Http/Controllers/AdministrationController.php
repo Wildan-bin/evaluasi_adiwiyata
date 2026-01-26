@@ -24,9 +24,9 @@ class AdministrationController extends Controller
         $user = Auth::user();
 
         $completedSteps = [
-            'adm1' => $this->checkStep1Completed($user->id),
-            'adm2' => $this->checkStep2Completed($user->id),
-            'adm3' => $this->checkStep3Completed($user->id),
+            'dataSekolah' => $this->checkStep1Completed($user->id),
+            'skTim' => $this->checkStep2Completed($user->id),
+            'administrasiDasar' => $this->checkStep3Completed($user->id),
         ];
 
         return response()->json([
@@ -39,6 +39,7 @@ class AdministrationController extends Controller
      */
     private function checkStep1Completed($userId)
     {
+        // ✅ Cek apakah ada data di tabel administrasi_sekolah untuk user ini
         return AdministrasiSekolah::where('user_id', $userId)->exists();
     }
 
@@ -47,8 +48,10 @@ class AdministrationController extends Controller
      */
     private function checkStep2Completed($userId)
     {
+        // ✅ Cek SK Tim
         $hasSkTim = SkTim::where('user_id', $userId)->exists();
         
+        // ✅ Cek Ketua (harus ada sekolah dulu)
         $sekolah = AdministrasiSekolah::where('user_id', $userId)->first();
         $hasKetua = false;
         
@@ -56,6 +59,8 @@ class AdministrationController extends Controller
             $hasKetua = Ketua::where('sekolah_id', $sekolah->id)->exists();
         }
 
+        // ✅ Step 2 completed jika SK Tim DAN Ketua ada
+        // Anggota optional (boleh ada boleh tidak)
         return $hasSkTim && $hasKetua;
     }
 
@@ -64,6 +69,7 @@ class AdministrationController extends Controller
      */
     private function checkStep3Completed($userId)
     {
+        // ✅ Cek apakah ada minimal 1 dokumen administrasi dasar
         return AdministrasiDasar::where('user_id', $userId)->exists();
     }
 
@@ -76,13 +82,12 @@ class AdministrationController extends Controller
         $sekolah = AdministrasiSekolah::where('user_id', $user->id)->first();
 
         return response()->json([
-            'data_exists' => $sekolah !== null,
-            'data' => $sekolah
+            'sekolah' => $sekolah
         ]);
     }
 
     /**
-     * Store/Update Sekolah data
+     * Store Sekolah data
      */
     public function storeSekolah(Request $request)
     {
@@ -98,18 +103,12 @@ class AdministrationController extends Controller
             'provinsi' => 'required|string|max:100',
             'kode_pos' => 'nullable|string|max:10',
             'telepon' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
+            'email' => 'nullable|email|max:100',
             'website' => 'nullable|url|max:255',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'google_maps_url' => 'nullable|url',
-            'nama_kepala_sekolah' => 'required|string|max:255',
-            'nip_kepala_sekolah' => 'nullable|string|max:30',
-            'telp_kepala_sekolah' => 'nullable|string|max:20',
+            'google_maps_url' => 'nullable|url|max:500',
         ]);
-
-        $validated['user_id'] = $user->id;
-        $validated['status'] = 'pending';
 
         $sekolah = AdministrasiSekolah::updateOrCreate(
             ['user_id' => $user->id],
@@ -119,42 +118,34 @@ class AdministrationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Data sekolah berhasil disimpan',
-            'data' => $sekolah
+            'sekolah' => $sekolah
         ]);
     }
 
     /**
-     * Get Tim data for current user
+     * Get Tim data (SK Tim + Ketua + Anggota)
      */
     public function getTim()
     {
         $user = Auth::user();
         $sekolah = AdministrasiSekolah::where('user_id', $user->id)->first();
 
-        if (!$sekolah) {
-            return response()->json([
-                'data_exists' => false,
-                'message' => 'Data sekolah belum diisi'
-            ], 400);
-        }
-
         $skTim = SkTim::where('user_id', $user->id)->first();
-        $ketua = Ketua::where('sekolah_id', $sekolah->id)->first();
+        $ketua = null;
         $anggota = [];
 
-        if ($ketua) {
-            $anggota = Anggota::where('ketua_id', $ketua->id)->get();
+        if ($sekolah) {
+            $ketua = Ketua::where('sekolah_id', $sekolah->id)->first();
+            
+            if ($ketua) {
+                $anggota = Anggota::where('ketua_id', $ketua->id)->get();
+            }
         }
 
-        $dataExists = $skTim !== null && $ketua !== null;
-
         return response()->json([
-            'data_exists' => $dataExists,
-            'data' => [
-                'sk_tim' => $skTim,
-                'ketua' => $ketua,
-                'anggota' => $anggota
-            ]
+            'skTim' => $skTim,
+            'ketua' => $ketua,
+            'anggota' => $anggota
         ]);
     }
 
@@ -193,9 +184,9 @@ class AdministrationController extends Controller
         // Rename file: NamaUser_SK-Tim_Administration.pdf
         $fileName = $this->renameFile($user->name, 'SK-Tim', 'Administration', $file);
         
-        // Store file ke storage/app/public/input_sk_tim (sama seperti A5)
-        $storagePath = Storage::disk('local')->putFileAs(
-            'storage/input_sk_tim',
+        // Store file ke storage/app/public/input_sk_tim
+        $storagePath = Storage::disk('public')->putFileAs(
+            'input_sk_tim',
             $file,
             $fileName
         );
@@ -248,16 +239,15 @@ class AdministrationController extends Controller
     }
 
     /**
-     * Get Administrasi Dasar data for current user
+     * Get Administrasi Dasar data
      */
     public function getDasar()
     {
         $user = Auth::user();
-        $records = AdministrasiDasar::where('user_id', $user->id)->get();
+        $documents = AdministrasiDasar::where('user_id', $user->id)->get();
 
         return response()->json([
-            'data_exists' => $records->count() > 0,
-            'data' => $records
+            'documents' => $documents
         ]);
     }
 
@@ -298,8 +288,8 @@ class AdministrationController extends Controller
                 $fileName = $this->renameFile($user->name, $indikator, 'AdministrasiDasar', $file);
 
                 // Save file ke storage/app/public/input_administrasi_dasar
-                $storagePath = Storage::disk('local')->putFileAs(
-                    'storage/input_administrasi_dasar',
+                $storagePath = Storage::disk('public')->putFileAs(
+                    'input_administrasi_dasar',
                     $file,
                     $fileName
                 );
@@ -335,7 +325,6 @@ class AdministrationController extends Controller
 
     /**
      * Rename file dengan format: NamaUser_indikator_form.pdf
-     * Helper method dari FormSubmissionController
      */
     private function renameFile($userName, $indicator, $form, $file)
     {

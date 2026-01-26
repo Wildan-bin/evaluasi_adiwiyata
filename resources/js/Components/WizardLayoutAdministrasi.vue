@@ -1,94 +1,39 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
-import StepSidebar from './StepSidebar.vue';
-import { ChevronLeft, ChevronRight, Save, AlertCircle } from 'lucide-vue-next';
+import { computed } from 'vue';
+import StepSidebarAdministrasi from './StepSidebarAdministrasi.vue';
 
-const page = usePage();
-
-const steps = [
-  { id: 'a5', label: 'Data Sekolah', icon: '📋' },
-  { id: 'a6', label: 'SK Tim & Struktur', icon: '✓' },
-  { id: 'a7', label: 'Administrasi Dasar', icon: '🤝' },
-];
-
-// Get current step from URL or route name
-const currentStepId = computed(() => {
-  const routeName = page.component || '';
-  const match = routeName.match(/A[5-8]/);
-  return match ? `a${match[0].charAt(1).toLowerCase()}` : 'a5';
+// ✅ Terima props dari parent (Administration.vue)
+const props = defineProps({
+  steps: {
+    type: Array,
+    required: true
+  },
+  completed: {
+    type: Object,
+    required: true
+  },
+  currentStepIndex: {
+    type: Number,
+    required: true,
+    default: 0
+  }
 });
+
+// ✅ Emit navigate event ke parent
+const emit = defineEmits(['navigate']);
+
+const handleNavigate = (payload) => {
+  emit('navigate', payload);
+};
 
 const currentStep = computed(() => {
-  return steps.find(s => s.id === currentStepId.value)?.label || 'Loading...';
+  return props.steps[props.currentStepIndex]?.label || 'Loading...';
 });
 
-const currentStepIndex = computed(() => {
-  return steps.findIndex(s => s.id === currentStepId.value);
-});
-
-// Use completedSteps from Inertia shared data (middleware)
-const completedSteps = computed(() => page.props.completedSteps || {
-  a5: false,
-  a6: false,
-  a7: false,
-  a8: false
-});
-
-// Navigation helpers
-const canGoPrevious = computed(() => currentStepIndex.value > 0);
-const canGoNext = computed(() => currentStepIndex.value < steps.length - 1);
-const allStepsCompleted = computed(() => {
-  return steps.every(s => completedSteps.value[s.id]);
-});
-
-const isLoading = ref(false);
-
-// Navigation using router.visit
-const goToPrevious = () => {
-  if (canGoPrevious.value) {
-    const prevStep = steps[currentStepIndex.value - 1];
-    isLoading.value = true;
-    router.visit(route(`submission.${prevStep.id}`), {
-      preserveScroll: true,
-      onFinish: () => {
-        isLoading.value = false;
-      }
-    });
-  }
-};
-
-const goToNext = () => {
-  if (canGoNext.value) {
-    const nextStep = steps[currentStepIndex.value + 1];
-    isLoading.value = true;
-    router.visit(route(`submission.${nextStep.id}`), {
-      preserveScroll: true,
-      onFinish: () => {
-        isLoading.value = false;
-      }
-    });
-  }
-};
-
-// Emit events untuk parent form component
-const emit = defineEmits(['save', 'submit']);
-
-const handleSaveAndContinue = () => {
-  emit('save', { goNext: true });
-};
-
-const handleSaveDraft = () => {
-  emit('save', { goNext: false });
-};
-
-const handleFinalSubmit = () => {
-  emit('submit');
-};
-
-// Calculate progress percentage
+// ✅ Calculate progress percentage
 const progressPercentage = computed(() => {
-  return Math.round(((currentStepIndex.value + 1) / steps.length) * 100);
+  const completedCount = Object.values(props.completed).filter(Boolean).length;
+  return Math.round((completedCount / props.steps.length) * 100);
 });
 </script>
 
@@ -117,35 +62,21 @@ const progressPercentage = computed(() => {
       </div>
     </div>
 
-    <!-- Tambahkan min-h-[calc(100vh-80px)] untuk memastikan flex container punya tinggi minimum -->
+    <!-- Main Layout -->
     <div class="flex min-h-[calc(100vh-80px)]">
-      <!-- Sidebar Progress -->
-      <StepSidebar 
+      <!-- Sidebar Progress - ✅ Pass currentStepIndex juga -->
+      <StepSidebarAdministrasi 
         :steps="steps" 
-        :completed="completedSteps"
+        :completed="completed"
+        :current-step-index="currentStepIndex"
+        @navigate="handleNavigate"
       />
 
       <!-- Main Content -->
       <main class="flex-1 px-6 lg:px-8 py-8 mt-20">
         <div class="max-w-4xl mx-auto">
-
-          <!-- Loading State -->
-          <transition
-            enter-active-class="transition-all duration-300"
-            enter-from-class="opacity-0"
-            enter-to-class="opacity-100"
-            leave-active-class="transition-all duration-300"
-          >
-            <div v-if="isLoading" class="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-              <div class="bg-white rounded-xl shadow-2xl p-6 flex flex-col items-center gap-4">
-                <div class="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
-                <p class="font-semibold text-gray-900">Memuat halaman...</p>
-              </div>
-            </div>
-          </transition>
-
           <!-- Content Slot -->
-          <slot />  
+          <slot />
         </div>
       </main>
     </div>
@@ -156,24 +87,5 @@ const progressPercentage = computed(() => {
 /* Smooth transitions */
 button {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Loading spinner animation */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-/* Gradient text effect */
-.text-gradient {
-  background: linear-gradient(to right, #059669, #10b981);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 </style>

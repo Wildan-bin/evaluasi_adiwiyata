@@ -1,17 +1,19 @@
 <?php
 
-use App\Models\File;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdministrationController;
+use App\Http\Controllers\AdministrasiAdminController;
+use App\Http\Controllers\FileAdministrasiController;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Models\File;
 use App\Models\Rencana;
 use App\Models\Pernyataan;
 use App\Models\Pendampingan;
 use Illuminate\Support\Facades\DB;
 use App\Models\BuktiSelfAssessment;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Storage;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FormAdminController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\FileEvidenceController;
@@ -149,11 +151,11 @@ Route::get('/test/preview/{filename}', function ($filename) {
     $filename = basename($filename);
     $path = 'submissions/' . $filename;
 
-    if (!Storage::disk('public')->exists($path)) {
+    if (!Storage::disk('local')->exists($path)) {
         abort(404, 'File tidak ditemukan');
     }
 
-    $fullPath = Storage::disk('public')->path($path);
+    $fullPath = Storage::disk('local')->path($path);
 
     return response()->file($fullPath);
 })->name('test.preview');
@@ -170,7 +172,7 @@ Route::middleware('auth')->get('/api/submissions-with-files', function () {
 
     $makeId = function ($userId, $path) {
         $norm = ltrim($path, '/');
-        if (str_starts_with($norm, 'public/')) $norm = substr($norm, 7);
+        if (str_starts_with($norm, 'local/')) $norm = substr($norm, 7);
         if (str_starts_with($norm, 'storage/')) $norm = substr($norm, 8);
         // url-safe base64 of "userId|path"
         $raw = base64_encode($userId . '|' . $norm);
@@ -344,7 +346,7 @@ Route::middleware('auth')->prefix('submission')->name('submission.')->group(func
 });
 
 // ============================================================================
-// FORM SUBMISSION API ROUTES - Protected by auth middleware
+// FORM SUBMISSION API ROUTTES - Protected by auth middleware
 // ============================================================================
 Route::middleware('auth')->prefix('form')->name('form.')->group(function () {
     // A5 - Rencana (Perencanaan & Evaluasi)
@@ -389,6 +391,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/administrasi-sekolah', function () {
         $user = Auth::user();
 
+        // ✅ Admin view - tampilkan AdministrationAdmin
+        if ($user->role === 'admin') {
+            return app(\App\Http\Controllers\AdministrasiAdminController::class)->index();
+        }
+
         // Mentor view
         if ($user->role === 'mentor') {
             $assignedSchool = DB::table('assign_mentor')
@@ -420,13 +427,13 @@ Route::middleware('auth')->group(function () {
         $hasDasar = \App\Models\AdministrasiDasar::where('user_id', $user->id)->exists();
 
         $completedSteps = [
-            'adm1' => $sekolah !== null,
-            'adm2' => $hasSkTim && $hasKetua,
-            'adm3' => $hasDasar,
+            'dataSekolah' => $sekolah !== null,
+            'skTim' => $hasSkTim && $hasKetua,
+            'administrasiDasar' => $hasDasar,
         ];
 
         return Inertia::render('Features/Administration', [
-            'completedSteps' => $completedSteps
+            'completedAdministrasi' => $completedSteps
         ]);
     })->name('administrasi-sekolah');
 
@@ -450,25 +457,61 @@ Route::middleware('auth')->prefix('administrasi-sekolah')->name('administrasi.')
 });
 
 // ============================================================================
-// ADMINISTRATION WIZARD ROUTES - Step-by-step administration form
+// ADMINISTRASI ROUTES
 // ============================================================================
-Route::middleware('auth')->prefix('administrasi')->name('administrasi.')->group(function () {
-    // Status endpoint - get completion status for all steps
-    Route::get('/get-status', [\App\Http\Controllers\AdministrationController::class, 'getStatus'])->name('get-status');
+Route::middleware(['auth', 'verified'])->group(function () {
     
-    // Step 1: Sekolah Data
-    Route::get('/get-sekolah', [\App\Http\Controllers\AdministrationController::class, 'getSekolah'])->name('get-sekolah');
-    Route::post('/sekolah/store', [\App\Http\Controllers\AdministrationController::class, 'storeSekolah'])->name('sekolah.store');
-    
-    // Step 2: SK Tim + Ketua & Anggota
-    Route::get('/get-tim', [\App\Http\Controllers\AdministrationController::class, 'getTim'])->name('get-tim');
-    Route::post('/tim/store', [\App\Http\Controllers\AdministrationController::class, 'storeTim'])->name('tim.store');
-    
-    // Step 3: Administrasi Dasar (PDF files)
-    Route::get('/get-dasar', [\App\Http\Controllers\AdministrationController::class, 'getDasar'])->name('get-dasar');
-    Route::post('/administrasi-dasar/store', [\App\Http\Controllers\AdministrationController::class, 'storeAdministrasiDasar'])->name('administrasi-dasar.store');
-});
+    // Route utama administrasi - redirect berdasarkan role
+    Route::get('/administrasi', function () {
+        $user = Auth::user();
+        
+        if ($user->role === 'admin') {
+            return app(\App\Http\Controllers\AdministrasiAdminController::class)->index();
+        }
+        
+        return Inertia::render('Features/Administration');
+    })->name('administrasi');
 
+    // ============================================================
+    // USER ROUTES - Untuk pengisian administrasi
+    // ============================================================
+    Route::prefix('administrasi')->name('administrasi.')->group(function () {
+        Route::get('/get-status', [AdministrationController::class, 'getStatus'])
+            ->name('get-status');
+        Route::get('/get-sekolah', [AdministrationController::class, 'getSekolah'])
+            ->name('get-sekolah');
+        Route::post('/sekolah', [AdministrationController::class, 'storeSekolah'])
+            ->name('sekolah.store');
+        Route::get('/get-tim', [AdministrationController::class, 'getTim'])
+            ->name('get-tim');
+        Route::post('/tim', [AdministrationController::class, 'storeTim'])
+            ->name('tim.store');
+        Route::get('/get-dasar', [AdministrationController::class, 'getDasar'])
+            ->name('get-dasar');
+        Route::post('/administrasi-dasar', [AdministrationController::class, 'storeAdministrasiDasar'])
+            ->name('administrasi-dasar.store');
+    });
+
+    // File Administrasi untuk user
+    Route::get('/file-administrasi', [FileAdministrasiController::class, 'index'])
+        ->name('file-administrasi');
+    Route::get('/file-administrasi/preview/{type}/{id}', [FileAdministrasiController::class, 'preview'])
+        ->name('file-administrasi.preview');
+    Route::get('/file-administrasi/download/{type}/{id}', [FileAdministrasiController::class, 'download'])
+        ->name('file-administrasi.download');
+
+    // ============================================================
+    // ADMIN ROUTES - Gunakan middleware role:admin
+    // ============================================================
+    Route::middleware(['role:admin'])->prefix('admin/administrasi')->name('admin.administrasi.')->group(function () {
+        Route::get('/{user}', [AdministrasiAdminController::class, 'show'])
+            ->name('show');
+        Route::get('/{user}/preview/{type}/{id}', [AdministrasiAdminController::class, 'preview'])
+            ->name('preview');
+        Route::get('/{user}/download/{type}/{id}', [AdministrasiAdminController::class, 'download'])
+            ->name('download');
+    });
+});
 
 // ============================================================================
 // FILE UPLOAD ROUTES - New comprehensive file upload system
@@ -742,5 +785,17 @@ Route::middleware('auth')->post('/mentor/comment', function () {
     
     return back()->with('success', 'Komentar berhasil ditambahkan');
 })->name('mentor.comment.store');
+
+// File Administrasi Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/file-administrasi', [FileAdministrasiController::class, 'index'])
+        ->name('file-administrasi');
+    
+    Route::get('/file-administrasi/preview/{type}/{id}', [FileAdministrasiController::class, 'preview'])
+        ->name('file-administrasi.preview');
+    
+    Route::get('/file-administrasi/download/{type}/{id}', [FileAdministrasiController::class, 'download'])
+        ->name('file-administrasi.download');
+});
 
 require __DIR__.'/auth.php';

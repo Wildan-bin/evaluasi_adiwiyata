@@ -3,19 +3,19 @@ import { ref, reactive, computed, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { router, usePage } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
-import WizardLayout from '@/Components/WizardLayout.vue';
 import WizardLayoutAdministrasi from '@/Components/WizardLayoutAdministrasi.vue';
 import SekolahStep from './Administration/SekolahStep.vue';
 import TimStep from './Administration/TimStep.vue';
 import AdministrasiDasarStep from './Administration/AdministrasiDasarStep.vue';
+import { Eye } from 'lucide-vue-next';
 
 // ============================================================================
 // WIZARD CONFIGURATION
 // ============================================================================
 const steps = [
-  { id: 'adm1', label: 'Data Sekolah', icon: '🏫', component: SekolahStep },
-  { id: 'adm2', label: 'SK Tim & Struktur', icon: '👥', component: TimStep },
-  { id: 'adm3', label: 'Administrasi Dasar', icon: '📄', component: AdministrasiDasarStep }
+  { id: 'dataSekolah', label: 'Data Sekolah', icon: '🏫', component: SekolahStep },
+  { id: 'skTim', label: 'SK Tim & Struktur', icon: '👥', component: TimStep },
+  { id: 'administrasiDasar', label: 'Administrasi Dasar', icon: '📄', component: AdministrasiDasarStep }
 ];
 
 // ============================================================================
@@ -26,15 +26,15 @@ const currentStepIndex = ref(0);
 const isSavingAndNavigating = ref(false);
 const submitError = ref('');
 
-// Get initial completed steps from Inertia props
+// ✅ Gunakan completedAdministrasi (bukan completedSteps)
 const completedSteps = reactive({
-  adm1: page.props.completedSteps?.adm1 || false,
-  adm2: page.props.completedSteps?.adm2 || false,
-  adm3: page.props.completedSteps?.adm3 || false
+  dataSekolah: page.props.completedAdministrasi?.dataSekolah || false,
+  skTim: page.props.completedAdministrasi?.skTim || false,
+  administrasiDasar: page.props.completedAdministrasi?.administrasiDasar || false
 });
 
-// Watch untuk update dari Inertia (ketika page dirender ulang)
-watch(() => page.props.completedSteps, (newValue) => {
+// ✅ Watch untuk update dari Inertia
+watch(() => page.props.completedAdministrasi, (newValue) => {
   if (newValue) {
     Object.assign(completedSteps, newValue);
   }
@@ -71,6 +71,9 @@ const canGoNext = computed(() => currentStepIndex.value < steps.length - 1);
 const canGoPrevious = computed(() => currentStepIndex.value > 0);
 const allStepsCompleted = computed(() => Object.values(completedSteps).every(v => v));
 
+// ✅ Cek apakah ada data untuk ditampilkan
+const hasAnyData = computed(() => Object.values(completedSteps).some(v => v));
+
 // ============================================================================
 // METHODS - NAVIGATION
 // ============================================================================
@@ -87,8 +90,18 @@ const goPrevious = () => {
   }
 };
 
+// ✅ Handle navigation dari StepSidebar
+const handleNavigate = ({ stepIndex }) => {
+  currentStepIndex.value = stepIndex;
+};
+
+// ✅ Navigate ke halaman File Administrasi
+const goToFileAdministrasi = () => {
+  router.visit(route('file-administrasi'));
+};
+
 // ============================================================================
-// METHODS - HANDLE SAVE & CONTINUE (From Child Components)
+// METHODS - HANDLE SAVE & CONTINUE
 // ============================================================================
 
 const handleSaveAndContinue = async (formData) => {
@@ -96,13 +109,10 @@ const handleSaveAndContinue = async (formData) => {
     isSavingAndNavigating.value = true;
     submitError.value = '';
     
-    // Refresh status dari backend
+    // ✅ Refresh status dari backend
     await fetchStepStatus();
     
-    // FORCE UPDATE: Trigger Inertia to update shared props
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Navigate to next step
+    // ✅ Navigate to next step
     if (canGoNext.value) {
       goNext();
     }
@@ -115,7 +125,7 @@ const handleSaveAndContinue = async (formData) => {
 };
 
 // ============================================================================
-// METHODS - HANDLE FINAL SUBMIT (From Last Step)
+// METHODS - HANDLE FINAL SUBMIT
 // ============================================================================
 
 const handleFinalSubmit = async () => {
@@ -132,7 +142,7 @@ const handleFinalSubmit = async () => {
       return;
     }
     
-    // Navigate to dashboard or admin page
+    // Navigate to dashboard
     router.visit(route('dashboard'));
 
   } catch (error) {
@@ -146,14 +156,29 @@ const handleFinalSubmit = async () => {
 
 <template>
   <MainLayout>
+    <!-- ✅ Pass currentStepIndex dan completedSteps -->
     <WizardLayoutAdministrasi
       :steps="steps"
       :completed="completedSteps"
+      :current-step-index="currentStepIndex"
+      @navigate="handleNavigate"
     >
-      <!-- Step Content - Dynamic Component Rendering -->
+      <!-- ✅ Button Lihat File (hanya muncul jika ada data) -->
+      <div v-if="hasAnyData" class="mb-6">
+        <button
+          @click="goToFileAdministrasi"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors"
+        >
+          <Eye class="w-4 h-4" />
+          Lihat File Administrasi
+        </button>
+      </div>
+
+      <!-- Step Content - Pass isCompleted ke component -->
       <component
         :is="currentStep.component"
         :is-saving="isSavingAndNavigating"
+        :is-completed="completedSteps[currentStepId]"
         @save-and-continue="handleSaveAndContinue"
         @final-submit="handleFinalSubmit"
       />
@@ -179,9 +204,12 @@ const handleFinalSubmit = async () => {
           <button
             v-if="currentStepIndex === steps.length - 1"
             @click="handleFinalSubmit"
-            :disabled="isSavingAndNavigating"
+            :disabled="isSavingAndNavigating || !allStepsCompleted"
             type="button"
-            class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white transition-colors"
+            :class="allStepsCompleted && !isSavingAndNavigating
+              ? 'bg-blue-600 hover:bg-blue-700'
+              : 'bg-gray-400 cursor-not-allowed'"
           >
             {{ isSavingAndNavigating ? 'Memproses...' : 'Selesai' }}
           </button>
