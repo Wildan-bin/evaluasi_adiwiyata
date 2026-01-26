@@ -664,7 +664,7 @@ class FormSubmissionController extends Controller
     public function getUsersSubmissionStatus()
     {
         $users = User::select('id', 'name', 'email', 'role')
-            ->where('role', '!=', 'admin')
+            ->where('role', 'user')
             ->get()
             ->map(function ($user) {
                 return [
