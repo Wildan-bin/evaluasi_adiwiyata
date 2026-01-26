@@ -1,4 +1,5 @@
 <script setup>
+// filepath: /home/wildanrobin/Projects/evaluasi_adiwiyata/resources/js/Pages/Profile/DashboardAdmin.vue
 import MainLayout from "@/Layouts/MainLayout.vue";
 import Header from "@/Components/Header.vue";
 import { Head, router, Link } from "@inertiajs/vue3";
@@ -13,12 +14,39 @@ import {
     UserMinus,
     UsersRound,
     Users,
+    CheckCircle,
+    XCircle,
+    Loader,
 } from "lucide-vue-next";
 
 // State
-// const users = ref([]);
 const isLoading = ref(true);
 const error = ref("");
+
+// Props dari backend
+const props = defineProps({
+    admins: {
+        type: Array,
+        default: () => [],
+    },
+    users: {
+        type: Array,
+        default: () => [],
+    },
+    mentors: {
+        type: Array,
+        default: () => [],
+    },
+    administrasiSekolah: {
+        type: Array,
+        default: () => [],
+    },
+});
+
+// Reactive data untuk users (dari props)
+const admins = ref(props.admins);
+const users = ref(props.users);
+const mentors = ref(props.mentors);
 
 // Total jumlah user
 const totalUsers = computed(() => users.value.length);
@@ -49,31 +77,6 @@ const completeSubmitUsers = computed(() => {
 const last5Users = computed(() => {
     return users.value.slice(-5);
 });
-
-// Props dari backend
-const props = defineProps({
-    admins: {
-        type: Array,
-        default: () => [],
-    },
-    users: {
-        type: Array,
-        default: () => [],
-    },
-    mentors: {
-        type: Array,
-        default: () => [],
-    },
-    administrasiSekolah: {
-        type: Array,
-        default: () => [],
-    },
-});
-
-// Reactive data untuk users (dari props)
-const admins = ref(props.admins);
-const users = ref(props.users);
-const mentors = ref(props.mentors);
 
 // Data sekolah
 const schools = ref([
@@ -109,24 +112,12 @@ const evaluatedSchools = ref([
 // Data administrasi sekolah dari backend props
 const administrasiSekolah = ref(props.administrasiSekolah);
 
-// Modal state
-const showModal = ref(false);
-const modalType = ref("");
-const showPassword = ref(false);
-const formData = ref({
-    name: "",
-    email: "",
-    password: "",
-    password_confirmation: "",
-});
-const formErrors = ref({});
-
 // Preview Modal state
 const showPreviewModal = ref(false);
 const previewData = ref(null);
 const previewLoading = ref(false);
 const previewError = ref(null);
-const previewDocType = ref(""); // rencana, self_assessment, kebutuhan_pendampingan, pernyataan
+const previewDocType = ref("");
 const previewDocTitle = ref("");
 const previewSchoolName = ref("");
 const previewUserId = ref(null);
@@ -141,18 +132,11 @@ const docTypeConfig = {
     pernyataan: { title: "Pernyataan & Persetujuan", color: "red" },
 };
 
-// Open modal untuk tambah user
-const openAddUserModal = (type) => {
-    modalType.value = type;
-    showModal.value = true;
-    formData.value = {
-        name: "",
-        email: "",
-        password: "",
-        password_confirmation: "",
-    };
-    formErrors.value = {};
-    showPassword.value = false;
+// ============================================================================
+// NAVIGATION FUNCTIONS - Navigasi ke halaman Register dengan role
+// ============================================================================
+const navigateToAddUser = (role) => {
+    router.visit(route('register.role', { role: role }));
 };
 
 // Preview Modal Functions
@@ -201,88 +185,18 @@ const closePreviewModal = () => {
     previewError.value = null;
 };
 
-// Close modal
-const closeModal = () => {
-    showModal.value = false;
-    formData.value = {
-        name: "",
-        email: "",
-        password: "",
-        password_confirmation: "",
-    };
-    formErrors.value = {};
-    showPassword.value = false;
-};
-
-// Validate form
-const validateForm = () => {
-    formErrors.value = {};
-
-    if (!formData.value.name) {
-        formErrors.value.name = "Nama wajib diisi";
-    }
-
-    if (!formData.value.email) {
-        formErrors.value.email = "Email wajib diisi";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)) {
-        formErrors.value.email = "Format email tidak valid";
-    }
-
-    if (!formData.value.password) {
-        formErrors.value.password = "Password wajib diisi";
-    } else if (formData.value.password.length < 8) {
-        formErrors.value.password = "Password minimal 8 karakter";
-    }
-
-    if (formData.value.password !== formData.value.password_confirmation) {
-        formErrors.value.password_confirmation =
-            "Konfirmasi password tidak cocok";
-    }
-
-    return Object.keys(formErrors.value).length === 0;
-};
-
-// Submit form
-const submitForm = () => {
-    if (!validateForm()) {
-        return;
-    }
-
-    // Kirim ke backend dengan Inertia
-    router.post(
-        "/users",
-        {
-            name: formData.value.name,
-            email: formData.value.email,
-            password: formData.value.password,
-            password_confirmation: formData.value.password_confirmation,
-            role: modalType.value,
-        },
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                closeModal();
-                // Reload data setelah berhasil
-                router.reload({ only: ["admins", "users", "mentors"] });
-            },
-            onError: (errors) => {
-                formErrors.value = errors;
-            },
-        }
-    );
-};
-
 const deleteUser = (type, id) => {
     if (confirm("Apakah Anda yakin ingin menghapus user ini?")) {
         router.delete(`/users/${id}`, {
             preserveScroll: true,
             onSuccess: () => {
-                // Update akan otomatis dari backend
                 router.reload({ only: ["admins", "users", "mentors"] });
             },
         });
     }
-}; // Functions untuk assign mentor
+};
+
+// Functions untuk assign mentor
 const assignMentor = (schoolId, mentorName) => {
     const school = schools.value.find((s) => s.id === schoolId);
     if (school) {
@@ -295,7 +209,6 @@ const downloadBukti = (schoolId) => {
     const school = evaluatedSchools.value.find((s) => s.id === schoolId);
     if (school && school.hasFile) {
         alert("Downloading file bukti untuk " + school.name);
-        // Implement download logic here
     } else {
         alert("Belum ada file bukti untuk sekolah ini");
     }
@@ -360,10 +273,11 @@ onMounted(() => {
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-gray-800">Admin</h2>
                         <button
-                            @click="openAddUserModal('admin')"
-                            class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
+                            @click="navigateToAddUser('admin')"
+                            class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-md hover:bg-green-600 transition flex items-center gap-2"
                         >
-                            + Tambah Admin
+                            <UserPlus :size="18" />
+                            Tambah Admin
                         </button>
                     </div>
                     <div class="space-y-3" id="admin-list">
@@ -393,10 +307,11 @@ onMounted(() => {
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-gray-800">User</h2>
                         <button
-                            @click="openAddUserModal('user')"
-                            class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
+                            @click="navigateToAddUser('user')"
+                            class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-md hover:bg-green-600 transition flex items-center gap-2"
                         >
-                            + Tambah User
+                            <UserPlus :size="18" />
+                            Tambah User
                         </button>
                     </div>
                     <div class="space-y-3" id="user-list">
@@ -426,10 +341,11 @@ onMounted(() => {
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-gray-800">Mentor</h2>
                         <button
-                            @click="openAddUserModal('mentor')"
-                            class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
+                            @click="navigateToAddUser('mentor')"
+                            class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-md hover:bg-green-600 transition flex items-center gap-2"
                         >
-                            + Tambah Mentor
+                            <UserPlus :size="18" />
+                            Tambah Mentor
                         </button>
                     </div>
                     <div class="space-y-3" id="mentor-list">
@@ -463,7 +379,7 @@ onMounted(() => {
 
                 <div class="overflow-x-auto">
                     <table class="w-full">
-                        <thead class="bg-green-500 text-white">
+                        <thead class="bg-gray-50 text-gray-500 text-left text-xs font-medium uppercase tracking-wider">
                             <tr>
                                 <th class="px-6 py-4 text-left">
                                     Nama Sekolah
@@ -524,6 +440,7 @@ onMounted(() => {
                     </table>
                 </div>
             </div>
+
             <!-- Daftar Sekolah Sudah Evaluasi -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
                 <h2 class="text-2xl font-bold mb-6">
@@ -532,7 +449,7 @@ onMounted(() => {
 
                 <div class="overflow-x-auto">
                     <table class="w-full">
-                        <thead class="bg-green-500 text-white">
+                        <thead class="bg-gray-50 text-gray-500 text-left text-xs font-medium uppercase tracking-wider">
                             <tr>
                                 <th class="px-6 py-4 text-left">
                                     Nama Sekolah
@@ -590,416 +507,100 @@ onMounted(() => {
                                     </span>
                                 </td>
                             </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="px-6 py-4">SMP Example 1</td>
-                                <td class="px-6 py-4 text-center">Mentor B</td>
-                                <td class="px-6 py-4 text-center">
-                                    <a
-                                        href="#"
-                                        class="bg-green-500 text-white px-3 py-1 rounded"
-                                        id="download-bukti-1"
-                                        >Download Bukti</a
-                                    >
-                                    <span
-                                        class="block text-xs text-gray-500 mt-1"
-                                        id="bukti-status-1"
-                                        >Belum ada file bukti</span
-                                    >
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span
-                                        class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800"
-                                    >
-                                        Sudah Dievaluasi
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="px-6 py-4">SMP Example 1</td>
-                                <td class="px-6 py-4 text-center">Mentor C</td>
-                                <td class="px-6 py-4 text-center">
-                                    <a
-                                        href="#"
-                                        class="bg-green-500 text-white px-3 py-1 rounded"
-                                        id="download-bukti-2"
-                                        >Download Bukti</a
-                                    >
-                                    <span
-                                        class="block text-xs text-gray-500 mt-1"
-                                        id="bukti-status-2"
-                                        >Belum ada file bukti</span
-                                    >
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span
-                                        class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800"
-                                    >
-                                        Sudah Dievaluasi
-                                    </span>
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+
             <!-- Pemantauan Administrasi Sekolah Section -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
-                <h2 class="text-2xl font-bold mb-6">
-                    Pemantauan Administrasi Sekolah
-                </h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-green-500 text-white">
-                            <tr>
-                                <th class="px-6 py-4 text-left">
-                                    Nama Sekolah
-                                </th>
-                                <th class="px-6 py-4 text-center">
-                                    Rencana & Evaluasi PBLHS
-                                </th>
-                                <th class="px-6 py-4 text-center">
-                                    Self Assessment
-                                </th>
-                                <th class="px-6 py-4 text-center">
-                                    Kebutuhan Pendampingan
-                                </th>
-                                <th class="px-6 py-4 text-center">
-                                    Pernyataan & Persetujuan
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr
-                                v-for="adm in administrasiSekolah"
-                                :key="adm.id"
-                                class="border-b hover:bg-gray-50 transition"
-                            >
-                                <td class="px-6 py-4 font-medium">
-                                    {{ adm.name }}
-                                </td>
+            
 
-                                <!-- Rencana & Evaluasi PBLHS -->
-                                <td class="px-6 py-4 text-center">
-                                    <button
-                                        v-if="adm.rencana_evaluasi"
-                                        @click="
-                                            openPreviewModal(
-                                                adm.user_id,
-                                                'rencana'
-                                            )
-                                        "
-                                        class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition cursor-pointer"
-                                    >
-                                        <Eye :size="14" />
-                                        Lihat
-                                    </button>
-                                    <span
-                                        v-else
-                                        class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 cursor-not-allowed"
-                                    >
-                                        <X :size="14" />
-                                        Belum Terisi
-                                    </span>
-                                </td>
-
-                                <!-- Self Assessment -->
-                                <td class="px-6 py-4 text-center">
-                                    <button
-                                        v-if="adm.self_assessment"
-                                        @click="
-                                            openPreviewModal(
-                                                adm.user_id,
-                                                'self_assessment'
-                                            )
-                                        "
-                                        class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition cursor-pointer"
-                                    >
-                                        <Eye :size="14" />
-                                        Lihat
-                                    </button>
-                                    <span
-                                        v-else
-                                        class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 cursor-not-allowed"
-                                    >
-                                        <X :size="14" />
-                                        Belum Terisi
-                                    </span>
-                                </td>
-
-                                <!-- Kebutuhan Pendampingan -->
-                                <td class="px-6 py-4 text-center">
-                                    <button
-                                        v-if="adm.kebutuhan_pendampingan"
-                                        @click="
-                                            openPreviewModal(
-                                                adm.user_id,
-                                                'kebutuhan_pendampingan'
-                                            )
-                                        "
-                                        class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition cursor-pointer"
-                                    >
-                                        <Eye :size="14" />
-                                        Lihat
-                                    </button>
-                                    <span
-                                        v-else
-                                        class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 cursor-not-allowed"
-                                    >
-                                        <X :size="14" />
-                                        Belum Terisi
-                                    </span>
-                                </td>
-
-                                <!-- Pernyataan & Persetujuan -->
-                                <td class="px-6 py-4 text-center">
-                                    <button
-                                        v-if="adm.pernyataan"
-                                        @click="
-                                            openPreviewModal(
-                                                adm.user_id,
-                                                'pernyataan'
-                                            )
-                                        "
-                                        class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition cursor-pointer"
-                                    >
-                                        <Eye :size="14" />
-                                        Lihat
-                                    </button>
-                                    <span
-                                        v-else
-                                        class="inline-flex items-center gap-1 px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 cursor-not-allowed"
-                                    >
-                                        <X :size="14" />
-                                        Belum Terisi
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <!-- Status Pengisian Form Section -->
             <div class="py-12">
                 <div class="mx-auto sm:px-3 lg:px-2">
-                    <!-- ============================================================== -->
-                    <!-- USER SUBMISSION STATUS TABLE -->
-                    <!-- ============================================================== -->
-                    <div
-                        class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                    >
+                    <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div class="p-2">
-                            <!-- Header -->
                             <div class="flex items-center gap-3 mb-6">
-                                <!-- <Users class="w-6 h-6 text-green-600" /> -->
                                 <h3 class="text-2xl font-bold text-gray-900">
                                     Status Pengisian Form
                                 </h3>
                             </div>
 
-                            <!-- Loading State -->
-                            <div
-                                v-if="isLoading"
-                                class="flex items-center justify-center py-12"
-                            >
-                                <Loader
-                                    class="w-8 h-8 animate-spin text-green-600"
-                                />
-                                <span class="ml-3 text-gray-600"
-                                    >Memuat data...</span
-                                >
+                            <div v-if="isLoading" class="flex items-center justify-center py-12">
+                                <Loader class="w-8 h-8 animate-spin text-green-600" />
+                                <span class="ml-3 text-gray-600">Memuat data...</span>
                             </div>
 
-                            <!-- Error State -->
-                            <div
-                                v-else-if="error"
-                                class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700"
-                            >
+                            <div v-else-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
                                 {{ error }}
                             </div>
 
-                            <!-- Table -->
                             <div v-else class="overflow-x-auto">
-                                <table
-                                    class="min-w-full divide-y divide-gray-200"
-                                >
+                                <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
-                                            <th
-                                                scope="col"
-                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                            >
-                                                No
-                                            </th>
-                                            <th
-                                                scope="col"
-                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                            >
-                                                Nama
-                                            </th>
-                                            <th
-                                                scope="col"
-                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                            >
-                                                Email
-                                            </th>
-                                            <th
-                                                scope="col"
-                                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                            >
-                                                A5
-                                            </th>
-                                            <th
-                                                scope="col"
-                                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                            >
-                                                A6
-                                            </th>
-                                            <th
-                                                scope="col"
-                                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                            >
-                                                A7
-                                            </th>
-                                            <th
-                                                scope="col"
-                                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                            >
-                                                A8
-                                            </th>
-                                            <th
-                                                scope="col"
-                                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                            >
-                                                Lihat File
-                                            </th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">A5</th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">A6</th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">A7</th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">A8</th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Lihat File</th>
                                         </tr>
                                     </thead>
-                                    <tbody
-                                        class="bg-white divide-y divide-gray-200"
-                                    >
-                                        <tr
-                                            v-for="(user, index) in last5Users"
-                                            :key="user.id"
-                                            class="hover:bg-gray-50 transition-colors"
-                                        >
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                            >
-                                                {{ index + 1 }}
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr v-for="(user, index) in last5Users" :key="user.id" class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ index + 1 }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
                                             </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap"
-                                            >
-                                                <div
-                                                    class="text-sm font-medium text-gray-900"
-                                                >
-                                                    {{ user.name }}
-                                                </div>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-500">{{ user.email }}</div>
                                             </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap"
-                                            >
-                                                <div
-                                                    class="text-sm text-gray-500"
-                                                >
-                                                    {{ user.email }}
-                                                </div>
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-center"
-                                            >
-                                                <span
-                                                    v-if="user.a5_status"
-                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                                                >
-                                                    <CheckCircle
-                                                        class="w-3.5 h-3.5"
-                                                    />
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <span v-if="user.a5_status" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <CheckCircle class="w-3.5 h-3.5" />
                                                     Submitted
                                                 </span>
-                                                <span
-                                                    v-else
-                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
-                                                >
-                                                    <XCircle
-                                                        class="w-3.5 h-3.5"
-                                                    />
+                                                <span v-else class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    <XCircle class="w-3.5 h-3.5" />
                                                     Not Submitted
                                                 </span>
                                             </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-center"
-                                            >
-                                                <span
-                                                    v-if="user.a6_status"
-                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                                                >
-                                                    <CheckCircle
-                                                        class="w-3.5 h-3.5"
-                                                    />
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <span v-if="user.a6_status" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <CheckCircle class="w-3.5 h-3.5" />
                                                     Submitted
                                                 </span>
-                                                <span
-                                                    v-else
-                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
-                                                >
-                                                    <XCircle
-                                                        class="w-3.5 h-3.5"
-                                                    />
+                                                <span v-else class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    <XCircle class="w-3.5 h-3.5" />
                                                     Not Submitted
                                                 </span>
                                             </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-center"
-                                            >
-                                                <span
-                                                    v-if="user.a7_status"
-                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                                                >
-                                                    <CheckCircle
-                                                        class="w-3.5 h-3.5"
-                                                    />
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <span v-if="user.a7_status" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <CheckCircle class="w-3.5 h-3.5" />
                                                     Submitted
                                                 </span>
-                                                <span
-                                                    v-else
-                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
-                                                >
-                                                    <XCircle
-                                                        class="w-3.5 h-3.5"
-                                                    />
+                                                <span v-else class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    <XCircle class="w-3.5 h-3.5" />
                                                     Not Submitted
                                                 </span>
                                             </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-center"
-                                            >
-                                                <span
-                                                    v-if="user.a8_status"
-                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                                                >
-                                                    <CheckCircle
-                                                        class="w-3.5 h-3.5"
-                                                    />
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <span v-if="user.a8_status" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <CheckCircle class="w-3.5 h-3.5" />
                                                     Submitted
                                                 </span>
-                                                <span
-                                                    v-else
-                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
-                                                >
-                                                    <XCircle
-                                                        class="w-3.5 h-3.5"
-                                                    />
+                                                <span v-else class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    <XCircle class="w-3.5 h-3.5" />
                                                     Not Submitted
                                                 </span>
                                             </td>
-                                            <!-- Kolom Lihat File -->
-                                            <td
-                                                class="px-6 py-4 whitespace-nowrap text-center"
-                                            >
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
                                                 <button
-                                                    v-if="
-                                                        hasAnySubmission(user)
-                                                    "
+                                                    v-if="hasAnySubmission(user)"
                                                     @click="viewUserFiles(user)"
                                                     class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
                                                     title="Lihat File"
@@ -1015,13 +616,8 @@ onMounted(() => {
                                                 </span>
                                             </td>
                                         </tr>
-
-                                        <!-- Empty State -->
                                         <tr v-if="last5Users.length === 0">
-                                            <td
-                                                colspan="8"
-                                                class="px-6 py-12 text-center text-gray-500"
-                                            >
+                                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
                                                 Tidak ada data pengguna
                                             </td>
                                         </tr>
@@ -1029,39 +625,29 @@ onMounted(() => {
                                 </table>
                             </div>
 
-                            <!-- Legend -->
-                            <div
-                                class="mt-6 flex flex-wrap items-center gap-6 text-sm text-gray-600"
-                            >
+                            <div class="mt-6 flex flex-wrap items-center gap-6 text-sm text-gray-600">
                                 <div class="flex items-center gap-2">
-                                    <span
-                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                                    >
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         <CheckCircle class="w-3.5 h-3.5" />
                                         Submitted
                                     </span>
                                     <span>= Sudah mengisi</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span
-                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
-                                    >
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                         <XCircle class="w-3.5 h-3.5" />
                                         Not Submitted
                                     </span>
                                     <span>= Belum mengisi</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span
-                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-600"
-                                    >
+                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-600">
                                         <Eye class="w-4 h-4" />
                                     </span>
                                     <span>= Lihat file submission</span>
                                 </div>
                             </div>
 
-                            <!-- View More Button -->
                             <div class="mt-6 flex justify-center">
                                 <Link
                                     :href="route('form')"
@@ -1076,214 +662,6 @@ onMounted(() => {
             </div>
         </main>
 
-        <!-- Modal Add User -->
-        <Teleport to="body">
-            <Transition name="modal">
-                <div
-                    v-if="showModal"
-                    class="fixed inset-0 z-50 overflow-y-auto"
-                >
-                    <!-- Backdrop -->
-                    <div
-                        class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-                        @click="closeModal"
-                    ></div>
-
-                    <!-- Modal Content -->
-                    <div
-                        class="flex min-h-screen items-center justify-center p-4"
-                    >
-                        <div
-                            class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 transform transition-all"
-                        >
-                            <!-- Header -->
-                            <div class="flex items-center justify-between mb-6">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center"
-                                    >
-                                        <UserPlus
-                                            class="text-green-600"
-                                            :size="20"
-                                        />
-                                    </div>
-                                    <h3 class="text-xl font-bold text-gray-900">
-                                        Tambah
-                                        {{
-                                            modalType.charAt(0).toUpperCase() +
-                                            modalType.slice(1)
-                                        }}
-                                    </h3>
-                                </div>
-                                <button
-                                    @click="closeModal"
-                                    class="text-gray-400 hover:text-gray-600 transition"
-                                >
-                                    <X :size="24" />
-                                </button>
-                            </div>
-
-                            <!-- Form -->
-                            <form
-                                @submit.prevent="submitForm"
-                                class="space-y-4"
-                            >
-                                <!-- Nama -->
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 mb-1"
-                                    >
-                                        Nama Lengkap
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        v-model="formData.name"
-                                        type="text"
-                                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-                                        :class="
-                                            formErrors.name
-                                                ? 'border-red-500'
-                                                : 'border-gray-300'
-                                        "
-                                        placeholder="Masukkan nama lengkap"
-                                    />
-                                    <p
-                                        v-if="formErrors.name"
-                                        class="text-red-500 text-xs mt-1"
-                                    >
-                                        {{ formErrors.name }}
-                                    </p>
-                                </div>
-
-                                <!-- Email -->
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 mb-1"
-                                    >
-                                        Email
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        v-model="formData.email"
-                                        type="email"
-                                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-                                        :class="
-                                            formErrors.email
-                                                ? 'border-red-500'
-                                                : 'border-gray-300'
-                                        "
-                                        placeholder="contoh@email.com"
-                                    />
-                                    <p
-                                        v-if="formErrors.email"
-                                        class="text-red-500 text-xs mt-1"
-                                    >
-                                        {{ formErrors.email }}
-                                    </p>
-                                </div>
-
-                                <!-- Password -->
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 mb-1"
-                                    >
-                                        Password
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <div class="relative">
-                                        <input
-                                            v-model="formData.password"
-                                            :type="
-                                                showPassword
-                                                    ? 'text'
-                                                    : 'password'
-                                            "
-                                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition pr-10"
-                                            :class="
-                                                formErrors.password
-                                                    ? 'border-red-500'
-                                                    : 'border-gray-300'
-                                            "
-                                            placeholder="Minimal 8 karakter"
-                                        />
-                                        <button
-                                            type="button"
-                                            @click="
-                                                showPassword = !showPassword
-                                            "
-                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                        >
-                                            <Eye
-                                                v-if="!showPassword"
-                                                :size="20"
-                                            />
-                                            <EyeOff v-else :size="20" />
-                                        </button>
-                                    </div>
-                                    <p
-                                        v-if="formErrors.password"
-                                        class="text-red-500 text-xs mt-1"
-                                    >
-                                        {{ formErrors.password }}
-                                    </p>
-                                </div>
-
-                                <!-- Konfirmasi Password -->
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 mb-1"
-                                    >
-                                        Konfirmasi Password
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        v-model="formData.password_confirmation"
-                                        :type="
-                                            showPassword ? 'text' : 'password'
-                                        "
-                                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-                                        :class="
-                                            formErrors.password_confirmation
-                                                ? 'border-red-500'
-                                                : 'border-gray-300'
-                                        "
-                                        placeholder="Ulangi password"
-                                    />
-                                    <p
-                                        v-if="formErrors.password_confirmation"
-                                        class="text-red-500 text-xs mt-1"
-                                    >
-                                        {{ formErrors.password_confirmation }}
-                                    </p>
-                                </div>
-
-                                <!-- Buttons -->
-                                <div class="flex gap-3 pt-4">
-                                    <button
-                                        type="button"
-                                        @click="closeModal"
-                                        class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
-                                    >
-                                        Batal
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
-                                    >
-                                        Tambah
-                                        {{
-                                            modalType.charAt(0).toUpperCase() +
-                                            modalType.slice(1)
-                                        }}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </Transition>
-        </Teleport>
-
         <!-- Preview Modal -->
         <Teleport to="body">
             <Transition name="modal">
@@ -1292,117 +670,44 @@ onMounted(() => {
                     class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4"
                     @click.self="closePreviewModal"
                 >
-                    <div
-                        class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
-                    >
-                        <!-- Modal Header -->
-                        <div
-                            class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10"
-                        >
+                    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <div class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
                             <div>
-                                <h2 class="text-xl font-bold text-gray-900">
-                                    {{ previewDocTitle }}
-                                </h2>
-                                <p class="text-sm text-gray-600">
-                                    {{ previewSchoolName }}
-                                </p>
+                                <h2 class="text-xl font-bold text-gray-900">{{ previewDocTitle }}</h2>
+                                <p class="text-sm text-gray-600">{{ previewSchoolName }}</p>
                             </div>
-                            <button
-                                @click="closePreviewModal"
-                                class="text-gray-400 hover:text-gray-600 transition"
-                            >
+                            <button @click="closePreviewModal" class="text-gray-400 hover:text-gray-600 transition">
                                 <X :size="24" />
                             </button>
                         </div>
 
-                        <!-- Modal Body -->
                         <div class="p-6">
-                            <!-- Loading State -->
-                            <div
-                                v-if="previewLoading"
-                                class="flex flex-col items-center justify-center py-12"
-                            >
-                                <div
-                                    class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"
-                                ></div>
-                                <p class="mt-4 text-gray-600">
-                                    Memuat dokumen...
-                                </p>
+                            <div v-if="previewLoading" class="flex flex-col items-center justify-center py-12">
+                                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+                                <p class="mt-4 text-gray-600">Memuat dokumen...</p>
                             </div>
 
-                            <!-- Error State -->
-                            <div
-                                v-else-if="previewError"
-                                class="flex flex-col items-center justify-center py-12"
-                            >
-                                <div class="text-red-500 mb-4">
-                                    <X :size="48" />
-                                </div>
-                                <p class="text-gray-900 font-semibold">
-                                    {{ previewError }}
-                                </p>
-                                <button
-                                    @click="closePreviewModal"
-                                    class="mt-4 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-                                >
+                            <div v-else-if="previewError" class="flex flex-col items-center justify-center py-12">
+                                <div class="text-red-500 mb-4"><X :size="48" /></div>
+                                <p class="text-gray-900 font-semibold">{{ previewError }}</p>
+                                <button @click="closePreviewModal" class="mt-4 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
                                     Tutup
                                 </button>
                             </div>
 
-                            <!-- Document List -->
-                            <div
-                                v-else-if="
-                                    Array.isArray(previewData) &&
-                                    previewData.length > 0
-                                "
-                                class="space-y-4"
-                            >
-                                <div
-                                    v-for="(doc, index) in previewData"
-                                    :key="index"
-                                    class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-green-300 hover:bg-green-50 transition"
-                                >
-                                    <div
-                                        class="flex items-start justify-between"
-                                    >
+                            <div v-else-if="Array.isArray(previewData) && previewData.length > 0" class="space-y-4">
+                                <div v-for="(doc, index) in previewData" :key="index" class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-green-300 hover:bg-green-50 transition">
+                                    <div class="flex items-start justify-between">
                                         <div class="flex-1">
-                                            <h4
-                                                class="font-semibold text-gray-900"
-                                            >
-                                                {{
-                                                    doc.title ||
-                                                    doc.indikator ||
-                                                    `Dokumen ${index + 1}`
-                                                }}
-                                            </h4>
-                                            <p
-                                                class="text-sm text-gray-600 mt-1"
-                                            >
-                                                {{
-                                                    doc.description ||
-                                                    "File dokumen"
-                                                }}
-                                            </p>
-                                            <p
-                                                class="text-xs text-gray-500 mt-2"
-                                            >
-                                                Diupload:
-                                                {{
-                                                    doc.created_at
-                                                        ? new Date(
-                                                              doc.created_at
-                                                          ).toLocaleDateString(
-                                                              "id-ID"
-                                                          )
-                                                        : "N/A"
-                                                }}
+                                            <h4 class="font-semibold text-gray-900">{{ doc.title || doc.indikator || `Dokumen ${index + 1}` }}</h4>
+                                            <p class="text-sm text-gray-600 mt-1">{{ doc.description || "File dokumen" }}</p>
+                                            <p class="text-xs text-gray-500 mt-2">
+                                                Diupload: {{ doc.created_at ? new Date(doc.created_at).toLocaleDateString("id-ID") : "N/A" }}
                                             </p>
                                         </div>
                                         <a
                                             v-if="doc.path_file"
-                                            :href="`/administrasi-sekolah/${previewUserId}/file?path=${encodeURIComponent(
-                                                doc.path_file
-                                            )}`"
+                                            :href="`/administrasi-sekolah/${previewUserId}/file?path=${encodeURIComponent(doc.path_file)}`"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-sm ml-4 flex-shrink-0"
@@ -1414,32 +719,15 @@ onMounted(() => {
                                 </div>
                             </div>
 
-                            <!-- Empty State -->
-                            <div
-                                v-else
-                                class="flex flex-col items-center justify-center py-12"
-                            >
-                                <div class="text-gray-400 mb-4">
-                                    <X :size="48" />
-                                </div>
-                                <p class="text-gray-900 font-semibold">
-                                    Tidak ada dokumen
-                                </p>
-                                <p class="text-gray-600 text-sm mt-1">
-                                    Belum ada file yang diunggah untuk bagian
-                                    ini.
-                                </p>
+                            <div v-else class="flex flex-col items-center justify-center py-12">
+                                <div class="text-gray-400 mb-4"><X :size="48" /></div>
+                                <p class="text-gray-900 font-semibold">Tidak ada dokumen</p>
+                                <p class="text-gray-600 text-sm mt-1">Belum ada file yang diunggah untuk bagian ini.</p>
                             </div>
                         </div>
 
-                        <!-- Modal Footer -->
-                        <div
-                            class="sticky bottom-0 bg-gray-50 border-t px-6 py-4 flex justify-end"
-                        >
-                            <button
-                                @click="closePreviewModal"
-                                class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
-                            >
+                        <div class="sticky bottom-0 bg-gray-50 border-t px-6 py-4 flex justify-end">
+                            <button @click="closePreviewModal" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium">
                                 Tutup
                             </button>
                         </div>
@@ -1451,7 +739,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Modal Animation */
 .modal-enter-active,
 .modal-leave-active {
     transition: opacity 0.3s ease;

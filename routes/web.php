@@ -20,6 +20,7 @@ use App\Http\Controllers\FileEvidenceController;
 use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\AdministrasiSekolahController;
 use App\Http\Controllers\AdministrasiMentorController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 // CSRF Token Refresh Route (untuk SPA)
 Route::get('/csrf-token', function () {
@@ -794,5 +795,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/file-administrasi/download/{type}/{id}', [FileAdministrasiController::class, 'download'])
         ->name('file-administrasi.download');
 });
+
+/*
+|--------------------------------------------------------------------------
+| REGISTER ROUTES dengan ROLE (Admin Only)
+|--------------------------------------------------------------------------
+*/
+// ✅ Hapus route dari guest middleware, pindahkan ke admin middleware
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Route untuk register user baru oleh admin
+    Route::get('/register/{role}', [RegisteredUserController::class, 'createWithRole'])
+        ->name('register.role')
+        ->where('role', 'admin|user|mentor');
+    
+    // POST untuk store user baru oleh admin
+    Route::post('/register/{role}', [RegisteredUserController::class, 'storeByAdmin'])
+        ->name('register.store-by-admin')
+        ->where('role', 'admin|user|mentor');
+});
+
+// ❌ HAPUS bagian ini dari guest middleware:
+// Route::middleware('guest')->group(function () {
+//     Route::get('/register/{role}', [RegisteredUserController::class, 'createWithRole'])
+//         ->name('register.role')
+//         ->where('role', 'admin|user|mentor');
+// });
 
 require __DIR__.'/auth.php';

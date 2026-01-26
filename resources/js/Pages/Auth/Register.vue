@@ -1,13 +1,40 @@
 <script setup>
-import { ref } from 'vue';
+// filepath: /home/wildanrobin/Projects/evaluasi_adiwiyata/resources/js/Pages/Auth/Register.vue
+import { ref, computed } from 'vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { refreshCsrfToken } from '@/Composables/useCsrf';
+import { Leaf, Mail, Lock, Eye, EyeOff, UserPlus, User as UserIcon, ArrowLeft } from 'lucide-vue-next';
 
 const showPassword = ref(false);
 const showPasswordConfirm = ref(false);
+
+// Get props from backend
+const page = usePage();
+const roleFromUrl = computed(() => page.props.role || 'user');
+const isAdminCreating = computed(() => page.props.isAdminCreating || false);
+
+// Role display name
+const roleDisplayName = computed(() => {
+    const roleMap = {
+        'admin': 'Admin',
+        'user': 'User (Sekolah)',
+        'mentor': 'Mentor'
+    };
+    return roleMap[roleFromUrl.value] || 'User';
+});
+
+// Role color
+const roleColor = computed(() => {
+    const colorMap = {
+        'admin': 'from-red-500 to-rose-600',
+        'user': 'from-green-500 to-emerald-600',
+        'mentor': 'from-blue-500 to-indigo-600'
+    };
+    return colorMap[roleFromUrl.value] || 'from-green-500 to-emerald-600';
+});
 
 const form = useForm({
     name: '',
@@ -17,17 +44,40 @@ const form = useForm({
 });
 
 const submit = async () => {
-    // Refresh CSRF token sebelum register
     await refreshCsrfToken();
 
-    form.post(route('register'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
-    });
+    // ✅ Gunakan route berbeda berdasarkan siapa yang membuat
+    if (isAdminCreating.value) {
+        // Admin membuat user baru
+        form.post(route('register.store-by-admin', { role: roleFromUrl.value }), {
+            onFinish: () => form.reset('password', 'password_confirmation'),
+        });
+    } else {
+        // Guest self-registration
+        form.post(route('register'), {
+            onFinish: () => form.reset('password', 'password_confirmation'),
+        });
+    }
 };
+
+// ✅ Back button destination
+const backRoute = computed(() => {
+    if (isAdminCreating.value) {
+        return route('dashboard');
+    }
+    return route('login');
+});
+
+const backText = computed(() => {
+    if (isAdminCreating.value) {
+        return 'Kembali ke Dashboard';
+    }
+    return 'Sudah punya akun? Login';
+});
 </script>
 
 <template>
-    <Head title="Daftar - Greenedu" />
+    <Head :title="`Daftar ${roleDisplayName} - Greenedu`" />
 
     <div class="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <!-- Background decorative elements -->
@@ -37,17 +87,36 @@ const submit = async () => {
         </div>
 
         <div class="relative w-full max-w-md">
+            <!-- Back Button -->
+            <div class="mb-4">
+                <Link
+                    :href="backRoute"
+                    class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition"
+                >
+                    <ArrowLeft class="w-5 h-5" />
+                    <span>{{ backText }}</span>
+                </Link>
+            </div>
+
             <!-- Main Register Card -->
             <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
                 <!-- Header Section with Gradient -->
-                <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-12">
+                <div :class="`bg-gradient-to-r ${roleColor} px-8 py-12`">
                     <div class="flex items-center justify-center mb-4">
                         <div class="bg-white bg-opacity-20 rounded-full p-3">
                             <Leaf class="w-8 h-8 text-white" />
                         </div>
                     </div>
                     <h1 class="text-3xl font-bold text-white text-center">Greenedu</h1>
-                    <p class="text-green-100 text-center text-sm mt-2">Daftarkan Akun Baru Anda</p>
+                    <p class="text-white/80 text-center text-sm mt-2">
+                        {{ isAdminCreating ? 'Daftarkan Akun Baru' : 'Buat Akun Anda' }}
+                    </p>
+                    <!-- Role Badge (only show when admin creating) -->
+                    <div v-if="isAdminCreating" class="flex justify-center mt-4">
+                        <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white font-semibold text-sm">
+                            Role: {{ roleDisplayName }}
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Form Section -->
@@ -65,7 +134,7 @@ const submit = async () => {
                                     type="text"
                                     class="pl-10 w-full border-2 border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition"
                                     v-model="form.name"
-                                    placeholder="Masukkan nama lengkap Anda"
+                                    placeholder="Masukkan nama lengkap"
                                     required
                                     autofocus
                                     autocomplete="name"
@@ -86,7 +155,7 @@ const submit = async () => {
                                     type="email"
                                     class="pl-10 w-full border-2 border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition"
                                     v-model="form.email"
-                                    placeholder="Masukkan email Anda"
+                                    placeholder="Masukkan email"
                                     required
                                     autocomplete="username"
                                 />
@@ -134,7 +203,7 @@ const submit = async () => {
                                     :type="showPasswordConfirm ? 'text' : 'password'"
                                     class="pl-10 pr-10 w-full border-2 border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition"
                                     v-model="form.password_confirmation"
-                                    placeholder="Konfirmasi password Anda"
+                                    placeholder="Konfirmasi password"
                                     required
                                     autocomplete="new-password"
                                 />
@@ -154,36 +223,25 @@ const submit = async () => {
                         <button
                             type="submit"
                             :disabled="form.processing"
-                            class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group mt-6"
+                            :class="`w-full bg-gradient-to-r ${roleColor} hover:opacity-90 text-white font-semibold py-3 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group mt-6`"
                         >
                             <UserPlus class="w-5 h-5 group-hover:translate-x-1 transition" />
-                            <span v-if="!form.processing">Daftar</span>
+                            <span v-if="!form.processing">
+                                {{ isAdminCreating ? `Daftar ${roleDisplayName}` : 'Daftar Sekarang' }}
+                            </span>
                             <span v-else>Memproses...</span>
                         </button>
-
-                        <!-- Divider -->
-                        <div class="relative my-6">
-                            <div class="absolute inset-0 flex items-center">
-                                <div class="w-full border-t border-gray-200"></div>
-                            </div>
-                            <div class="relative flex justify-center text-sm">
-                                <span class="px-2 bg-white text-gray-500">atau</span>
-                            </div>
-                        </div>
-
-                        <!-- Login Link -->
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600">
-                                Sudah memiliki akun?
-                                <Link
-                                    :href="route('login')"
-                                    class="text-green-600 hover:text-green-700 font-semibold transition"
-                                >
-                                    Masuk di sini
-                                </Link>
-                            </p>
-                        </div>
                     </form>
+
+                    <!-- Link to login (only for guest) -->
+                    <div v-if="!isAdminCreating" class="mt-6 text-center">
+                        <p class="text-sm text-gray-600">
+                            Sudah punya akun?
+                            <Link :href="route('login')" class="text-green-600 hover:text-green-700 font-semibold">
+                                Login disini
+                            </Link>
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Footer -->
@@ -192,19 +250,6 @@ const submit = async () => {
                         © 2024 Program Greenedu. Semua hak dilindungi.
                     </p>
                 </div>
-            </div>
-
-            <!-- Bottom Info -->
-            <div class="mt-8 text-center">
-                <p class="text-sm text-gray-600">
-                    Kembali ke
-                    <Link
-                        href="/"
-                        class="text-green-600 hover:text-green-700 font-semibold transition"
-                    >
-                        beranda
-                    </Link>
-                </p>
             </div>
         </div>
     </div>

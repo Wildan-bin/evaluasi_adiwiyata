@@ -32,6 +32,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',  // ✅ HARUS ADA
+        'email_verified_at',
     ];
 
     /**

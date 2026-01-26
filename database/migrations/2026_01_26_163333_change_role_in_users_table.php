@@ -3,25 +3,28 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\User;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('role', 50)->default('user')->after('password');
+            // ✅ Hapus default 'user', ubah menjadi nullable
+            $table->string('role', 50)->nullable()->change();
         });
-
-        // Set role untuk user yang sudah ada
-        User::where('email', 'admin@test.com')->update(['role' => 'admin']);
-        User::where('email', 'user@test.com')->update(['role' => 'user']);
     }
 
+    /**
+     * Down the migrations.
+     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
+            // ✅ Kembalikan ke default 'user' jika rollback
+            $table->string('role', 50)->default('user')->change();
         });
     }
 };
