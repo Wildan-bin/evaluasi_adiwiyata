@@ -17,11 +17,14 @@ import {
     CheckCircle,
     XCircle,
     Loader,
+    RefreshCw,
 } from "lucide-vue-next";
 
 // State
 const isLoading = ref(true);
 const error = ref("");
+const schoolsLoading = ref(false);
+const assignLoading = ref(false);
 
 // Props dari backend
 const props = defineProps({
@@ -78,36 +81,10 @@ const last5Users = computed(() => {
     return users.value.slice(-5);
 });
 
-// Data sekolah
-const schools = ref([
-    { id: 1, name: "SDN Example 1", mentor: null, status: "pending" },
-    { id: 2, name: "SMP Example 1", mentor: null, status: "pending" },
-    { id: 3, name: "SMA Example 1", mentor: null, status: "pending" },
-]);
-
-const evaluatedSchools = ref([
-    {
-        id: 1,
-        name: "SDN Contoh 1",
-        mentor: "Mentor A",
-        status: "completed",
-        hasFile: false,
-    },
-    {
-        id: 2,
-        name: "SMP Contoh 2",
-        mentor: "Mentor B",
-        status: "completed",
-        hasFile: false,
-    },
-    {
-        id: 3,
-        name: "SMA Contoh 3",
-        mentor: "Mentor C",
-        status: "completed",
-        hasFile: true,
-    },
-]);
+// Data sekolah - now fetched from API
+const schools = ref([]);
+const evaluatedSchools = ref([]);
+const availableMentorsData = ref([]);
 
 // Data administrasi sekolah dari backend props
 const administrasiSekolah = ref(props.administrasiSekolah);
@@ -197,26 +174,92 @@ const deleteUser = (type, id) => {
 };
 
 // Functions untuk assign mentor
-const assignMentor = (schoolId, mentorName) => {
-    const school = schools.value.find((s) => s.id === schoolId);
-    if (school) {
-        school.mentor = mentorName;
-        alert("Mentor berhasil disimpan!");
+const assignMentor = async (schoolId, mentorId) => {
+    if (!mentorId) {
+        alert("Pilih mentor terlebih dahulu!");
+        return;
+    }
+
+    assignLoading.value = true;
+    try {
+        const response = await fetch('/api/mentor-assignment/assign', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify({
+                school_id: schoolId,
+                mentor_id: mentorId,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert(`Mentor berhasil di-assign ke ${data.data.school_name}!`);
+            // Refresh schools data
+            await fetchSchoolsReadyForAssignment();
+        } else {
+            alert(data.message || 'Gagal assign mentor');
+        }
+    } catch (err) {
+        console.error('Error assigning mentor:', err);
+        alert('Terjadi kesalahan saat assign mentor');
+    } finally {
+        assignLoading.value = false;
     }
 };
 
-const downloadBukti = (schoolId) => {
-    const school = evaluatedSchools.value.find((s) => s.id === schoolId);
-    if (school && school.hasFile) {
-        alert("Downloading file bukti untuk " + school.name);
-    } else {
-        alert("Belum ada file bukti untuk sekolah ini");
+// Re-assign mentor (change mentor)
+const reassignMentor = async (schoolId, newMentorId) => {
+    if (!newMentorId) {
+        alert("Pilih mentor baru terlebih dahulu!");
+        return;
+    }
+
+    if (!confirm("Apakah Anda yakin ingin mengganti mentor untuk sekolah ini?")) {
+        return;
+    }
+
+    assignLoading.value = true;
+    try {
+        const response = await fetch('/api/mentor-assignment/reassign', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify({
+                school_id: schoolId,
+                new_mentor_id: newMentorId,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert(`Mentor berhasil diganti dari ${data.data.old_mentor_name} ke ${data.data.new_mentor_name}!`);
+            // Refresh schools data
+            await fetchSchoolsReadyForAssignment();
+        } else {
+            alert(data.message || 'Gagal re-assign mentor');
+        }
+    } catch (err) {
+        console.error('Error re-assigning mentor:', err);
+        alert('Terjadi kesalahan saat re-assign mentor');
+    } finally {
+        assignLoading.value = false;
     }
 };
 
-// Available mentors list
+// Available mentors list - now from API data
 const availableMentors = computed(() => {
-    return mentors.value.map((m) => m.name);
+    return availableMentorsData.value;
 });
 
 // Check if user has any submission
@@ -228,6 +271,89 @@ const hasAnySubmission = (user) => {
 const viewUserFiles = (user) => {
     if (hasAnySubmission(user)) {
         router.visit(route("admin.user-files", { userId: user.id }));
+    }
+};
+
+// Fetch schools ready for mentor assignment
+const fetchSchoolsReadyForAssignment = async () => {
+    schoolsLoading.value = true;
+    try {
+        const response = await fetch('/api/mentor-assignment/schools', {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Separate schools: those without mentor (for assignment) and those with mentor
+            const schoolsWithoutMentor = data.schools
+                .filter(s => !s.has_mentor)
+                .map(s => ({
+                    ...s,
+                    selectedMentorId: null, // for v-model
+                }));
+            
+            const schoolsWithMentor = data.schools
+                .filter(s => s.has_mentor)
+                .map(s => ({
+                    ...s,
+                    selectedNewMentorId: null, // for re-assign v-model
+                }));
+            
+            schools.value = schoolsWithoutMentor;
+            // Schools with mentor that haven't been fully evaluated yet
+            // (can be shown in a different section or merged)
+        }
+    } catch (err) {
+        console.error('Error fetching schools:', err);
+    } finally {
+        schoolsLoading.value = false;
+    }
+};
+
+// Fetch available mentors
+const fetchMentors = async () => {
+    try {
+        const response = await fetch('/api/mentor-assignment/mentors', {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            availableMentorsData.value = data.mentors;
+        }
+    } catch (err) {
+        console.error('Error fetching mentors:', err);
+    }
+};
+
+// Fetch evaluated schools
+const fetchEvaluatedSchools = async () => {
+    try {
+        const response = await fetch('/api/mentor-assignment/evaluated', {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            evaluatedSchools.value = data.schools.map(s => ({
+                ...s,
+                hasFile: false, // TODO: implement file check
+            }));
+        }
+    } catch (err) {
+        console.error('Error fetching evaluated schools:', err);
     }
 };
 
@@ -245,8 +371,14 @@ const fetchUsersStatus = async () => {
     }
 };
 
-onMounted(() => {
-    fetchUsersStatus();
+onMounted(async () => {
+    // Fetch all data in parallel
+    await Promise.all([
+        fetchUsersStatus(),
+        fetchSchoolsReadyForAssignment(),
+        fetchMentors(),
+        fetchEvaluatedSchools(),
+    ]);
 });
 </script>
 
@@ -373,11 +505,32 @@ onMounted(() => {
 
             <!-- Pengajuan List Section -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-12">
-                <h2 class="text-2xl font-bold mb-6">
-                    Daftar Sekolah Pengajuan PPEPP
-                </h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">
+                        Daftar Sekolah Pengajuan PPEPP
+                    </h2>
+                    <button 
+                        @click="fetchSchoolsReadyForAssignment" 
+                        class="flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 rounded-lg transition"
+                        :disabled="schoolsLoading"
+                    >
+                        <RefreshCw :size="16" :class="{ 'animate-spin': schoolsLoading }" />
+                        Refresh
+                    </button>
+                </div>
 
-                <div class="overflow-x-auto">
+                <div v-if="schoolsLoading" class="flex items-center justify-center py-12">
+                    <Loader class="w-8 h-8 animate-spin text-green-600" />
+                    <span class="ml-3 text-gray-600">Memuat data sekolah...</span>
+                </div>
+
+                <div v-else-if="schools.length === 0" class="text-center py-12 text-gray-500">
+                    <UsersRound class="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <p>Tidak ada sekolah yang siap untuk di-assign mentor.</p>
+                    <p class="text-sm mt-2">Sekolah harus sudah mengisi semua form (A5, A6, A7, A8).</p>
+                </div>
+
+                <div v-else class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50 text-gray-500 text-left text-xs font-medium uppercase tracking-wider">
                             <tr>
@@ -395,22 +548,26 @@ onMounted(() => {
                                 :key="school.id"
                                 class="border-b hover:bg-gray-50 transition"
                             >
-                                <td class="px-6 py-4">{{ school.name }}</td>
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-medium">{{ school.name }}</p>
+                                        <p class="text-sm text-gray-500">{{ school.email }}</p>
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 text-center">
                                     <select
-                                        v-model="school.mentor"
-                                        class="border rounded px-3 py-2 w-40 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                        :disabled="school.mentor !== null"
+                                        v-model="school.selectedMentorId"
+                                        class="border rounded px-3 py-2 w-48 focus:outline-none focus:ring-2 focus:ring-green-500"
                                     >
                                         <option :value="null">
                                             Pilih Mentor
                                         </option>
                                         <option
                                             v-for="mentor in availableMentors"
-                                            :key="mentor"
-                                            :value="mentor"
+                                            :key="mentor.id"
+                                            :value="mentor.id"
                                         >
-                                            {{ mentor }}
+                                            {{ mentor.name }} ({{ mentor.active_assignments }} sekolah)
                                         </option>
                                     </select>
                                 </td>
@@ -418,21 +575,19 @@ onMounted(() => {
                                     <span
                                         class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800"
                                     >
-                                        Belum Dievaluasi
+                                        Belum Di-assign
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <button
-                                        @click="
-                                            assignMentor(
-                                                school.id,
-                                                school.mentor
-                                            )
-                                        "
-                                        :disabled="!school.mentor"
+                                        @click="assignMentor(school.id, school.selectedMentorId)"
+                                        :disabled="!school.selectedMentorId || assignLoading"
                                         class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
                                     >
-                                        Simpan Mentor
+                                        <span v-if="assignLoading">
+                                            <Loader class="w-4 h-4 animate-spin inline" />
+                                        </span>
+                                        <span v-else>Simpan Mentor</span>
                                     </button>
                                 </td>
                             </tr>
@@ -447,7 +602,12 @@ onMounted(() => {
                     Daftar Sekolah Sudah Evaluasi PPEPP
                 </h2>
 
-                <div class="overflow-x-auto">
+                <div v-if="evaluatedSchools.length === 0" class="text-center py-12 text-gray-500">
+                    <CheckCircle class="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <p>Belum ada sekolah yang selesai dievaluasi.</p>
+                </div>
+
+                <div v-else class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50 text-gray-500 text-left text-xs font-medium uppercase tracking-wider">
                             <tr>
@@ -456,7 +616,7 @@ onMounted(() => {
                                 </th>
                                 <th class="px-6 py-4 text-center">Mentor</th>
                                 <th class="px-6 py-4 text-center">
-                                    File Bukti
+                                    Tanggal Selesai
                                 </th>
                                 <th class="px-6 py-4 text-center">Status</th>
                             </tr>
@@ -467,37 +627,12 @@ onMounted(() => {
                                 :key="school.id"
                                 class="border-b hover:bg-gray-50 transition"
                             >
-                                <td class="px-6 py-4">{{ school.name }}</td>
+                                <td class="px-6 py-4">{{ school.school_name }}</td>
                                 <td class="px-6 py-4 text-center">
-                                    {{ school.mentor }}
+                                    {{ school.mentor_name }}
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <button
-                                        @click="downloadBukti(school.id)"
-                                        :class="
-                                            school.hasFile
-                                                ? 'bg-green-500 hover:bg-green-600'
-                                                : 'bg-gray-400 cursor-not-allowed'
-                                        "
-                                        class="text-white px-4 py-2 rounded transition"
-                                        :disabled="!school.hasFile"
-                                    >
-                                        Download Bukti
-                                    </button>
-                                    <span
-                                        class="block text-xs mt-1"
-                                        :class="
-                                            school.hasFile
-                                                ? 'text-green-600'
-                                                : 'text-gray-500'
-                                        "
-                                    >
-                                        {{
-                                            school.hasFile
-                                                ? "File tersedia"
-                                                : "Belum ada file bukti"
-                                        }}
-                                    </span>
+                                    {{ school.completed_at ? new Date(school.completed_at).toLocaleDateString('id-ID') : '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <span
