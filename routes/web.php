@@ -7,6 +7,7 @@ use App\Http\Controllers\FileAdministrasiController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use App\Models\File;
 use App\Models\Rencana;
@@ -549,6 +550,35 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
         return response()->json(['data' => $users]);
     })->name('api.users');
+});
+
+// ============================================================================
+// MENTOR ASSIGNMENT API ROUTES (Web-based with session auth)
+// ============================================================================
+Route::middleware(['auth', 'role:admin'])->prefix('api/mentor-assignment')->group(function () {
+    // Get all schools ready for mentor assignment (submitted all forms)
+    Route::get('/schools', [\App\Http\Controllers\MentorAssignmentController::class, 'getSchoolsReadyForAssignment'])
+        ->name('mentor-assignment.schools');
+    
+    // Get all available mentors
+    Route::get('/mentors', [\App\Http\Controllers\MentorAssignmentController::class, 'getMentors'])
+        ->name('mentor-assignment.mentors');
+    
+    // Assign mentor to school
+    Route::post('/assign', [\App\Http\Controllers\MentorAssignmentController::class, 'assignMentor'])
+        ->name('mentor-assignment.assign');
+    
+    // Re-assign mentor (admin only)
+    Route::put('/reassign', [\App\Http\Controllers\MentorAssignmentController::class, 'reassignMentor'])
+        ->name('mentor-assignment.reassign');
+    
+    // Remove assignment (admin only)
+    Route::delete('/remove/{schoolId}', [\App\Http\Controllers\MentorAssignmentController::class, 'removeAssignment'])
+        ->name('mentor-assignment.remove');
+    
+    // Get evaluated schools
+    Route::get('/evaluated', [\App\Http\Controllers\MentorAssignmentController::class, 'getEvaluatedSchools'])
+        ->name('mentor-assignment.evaluated');
 });
 
 // Admin Routes - Form Submission Status
