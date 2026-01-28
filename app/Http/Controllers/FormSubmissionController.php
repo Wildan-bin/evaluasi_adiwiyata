@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Rencana;
-use App\Models\BuktiSelfAssessment;
-use App\Models\Pendampingan;
-use App\Models\Pernyataan;
-use App\Models\Permintaan;
-use App\Models\Kemajuan;
 use App\Models\User;
-use App\Models\MentorComment;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Inertia\Response;
+use App\Models\Rencana;
+use App\Models\Kemajuan;
+use App\Models\Permintaan;
+use App\Models\Pernyataan;
+use App\Models\Pendampingan;
+use Illuminate\Http\Request;
+use App\Models\MentorComment;
+use App\Models\AdministrasiSekolah;
+use App\Models\BuktiSelfAssessment;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class FormSubmissionController extends Controller
 {
@@ -661,26 +663,89 @@ class FormSubmissionController extends Controller
     /**
      * Get users submission status - for admin dashboard
      */
-    public function getUsersSubmissionStatus()
-    {
-        $users = User::select('id', 'name', 'email', 'role')
-            ->where('role', 'user')
-            ->get()
-            ->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'a5_status' => Rencana::where('user_id', $user->id)->exists(),
-                    'a6_status' => BuktiSelfAssessment::where('user_id', $user->id)->exists(),
-                    'a7_status' => Pendampingan::where('user_id', $user->id)->exists() || 
-                                   Permintaan::where('user_id', $user->id)->exists(),
-                    'a8_status' => Pernyataan::where('user_id', $user->id)->exists(),
-                ];
-            });
+    // public function dashboardAdmin(): Response
+    // {
+    //     Log::info('[DashboardAdmin] Loading dashboard');
 
-        return response()->json(['users' => $users]);
-    }
+    //     // Get all users by role
+    //     $admins = User::where('role', 'admin')->get();
+    //     $mentors = User::where('role', 'mentor')->get();
+        
+    //     // Get all users dengan status submission
+    //     $users = User::where('role', 'user')
+    //         ->get()
+    //         ->map(function ($user) {
+    //             return [
+    //                 'id' => $user->id,
+    //                 'name' => $user->name,
+    //                 'email' => $user->email,
+    //                 'a5_status' => Rencana::where('user_id', $user->id)->exists(),
+    //                 'a6_status' => BuktiSelfAssessment::where('user_id', $user->id)->exists(),
+    //                 'a7_status' => Pendampingan::where('user_id', $user->id)->exists() || 
+    //                                Permintaan::where('user_id', $user->id)->exists(),
+    //                 'a8_status' => Pernyataan::where('user_id', $user->id)->exists(),
+    //             ];
+    //         });
+
+    //     // ✅ Filter users yang sudah complete semua form (A5, A6, A7, A8)
+    //     $completeSchools = User::where('role', 'user')
+    //         ->get()
+    //         ->map(function ($user) {
+    //             $a5_status = Rencana::where('user_id', $user->id)->exists();
+    //             $a6_status = BuktiSelfAssessment::where('user_id', $user->id)->exists();
+    //             $a7_status = Pendampingan::where('user_id', $user->id)->exists() || Permintaan::where('user_id', $user->id)->exists();
+    //             $a8_status = Pernyataan::where('user_id', $user->id)->exists();
+
+    //             // ✅ Hanya return jika SEMUA form sudah diisi
+    //             if ($a5_status && $a6_status && $a7_status && $a8_status) {
+    //                 $sekolah = AdministrasiSekolah::where('user_id', $user->id)->first();
+                    
+    //                 return [
+    //                     'id' => $user->id,
+    //                     'user_id' => $user->id,
+    //                     'name' => $user->name,
+    //                     'email' => $user->email,
+    //                     'sekolah_id' => $sekolah?->id,
+    //                     'nama_sekolah' => $sekolah?->nama_sekolah ?? 'N/A',
+    //                     'npsn' => $sekolah?->npsn ?? 'N/A',
+    //                     'mentor' => null, // Default mentor null, nanti diisi admin
+    //                     'status' => 'complete',
+    //                 ];
+    //             }
+
+    //             return null;
+    //         })
+    //         ->filter() // ✅ Hapus yang null (yang belum complete)
+    //         ->values(); // ✅ Reset array keys
+
+    //     Log::info('[DashboardAdmin] Complete schools count: ' . $completeSchools->count());
+
+    //     // Get administrasi sekolah data untuk preview
+    //     $administrasiSekolah = AdministrasiSekolah::with('user')
+    //         ->get()
+    //         ->map(function ($adm) {
+    //             return [
+    //                 'id' => $adm->id,
+    //                 'user_id' => $adm->user_id,
+    //                 'name' => $adm->user->name ?? 'Unknown',
+    //                 'nama_sekolah' => $adm->nama_sekolah,
+    //                 'npsn' => $adm->npsn,
+    //                 'rencana_evaluasi' => Rencana::where('user_id', $adm->user_id)->exists(),
+    //                 'self_assessment' => BuktiSelfAssessment::where('user_id', $adm->user_id)->exists(),
+    //                 'kebutuhan_pendampingan' => Pendampingan::where('user_id', $adm->user_id)->exists() || 
+    //                                             Permintaan::where('user_id', $adm->user_id)->exists(),
+    //                 'pernyataan' => Pernyataan::where('user_id', $adm->user_id)->exists(),
+    //             ];
+    //         });
+
+    //     return Inertia::render('Profile/DashboardAdmin', [
+    //         'admins' => $admins,
+    //         'users' => $users,
+    //         'mentors' => $mentors,
+    //         'completeSchools' => $completeSchools, // ✅ Data sekolah yang sudah complete
+    //         'administrasiSekolah' => $administrasiSekolah,
+    //     ]);
+    // }
 
     /**
      * Show user files page - untuk FileUser.vue

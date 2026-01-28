@@ -46,6 +46,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed'
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -97,5 +102,15 @@ class User extends Authenticatable
     public function administrasiSekolah()
     {
         return $this->hasOne(AdministrasiSekolah::class);
+    }
+
+    public function getActiveMentorAttribute()
+    {
+        return $this->assignedMentor?->mentor;
+    }
+
+    public function mentorComments()
+    {
+        return $this->hasMany(MentorComment::class, 'mentor_id');
     }
 }

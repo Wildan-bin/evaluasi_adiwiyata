@@ -1,5 +1,6 @@
 <script setup>
 // filepath: /home/wildanrobin/Projects/evaluasi_adiwiyata/resources/js/Pages/Profile/DashboardAdmin.vue
+
 import MainLayout from "@/Layouts/MainLayout.vue";
 import Header from "@/Components/Header.vue";
 import { Head, router, Link } from "@inertiajs/vue3";
@@ -10,48 +11,48 @@ import {
     UserPlus,
     Eye,
     EyeOff,
-    UserCheck,
-    UserMinus,
-    UsersRound,
-    Users,
     CheckCircle,
     XCircle,
     Loader,
 } from "lucide-vue-next";
 
-// State
-const isLoading = ref(true);
-const error = ref("");
-
 // Props dari backend
 const props = defineProps({
-    admins: {
-        type: Array,
-        default: () => [],
-    },
-    users: {
-        type: Array,
-        default: () => [],
-    },
-    mentors: {
-        type: Array,
-        default: () => [],
-    },
-    administrasiSekolah: {
-        type: Array,
-        default: () => [],
-    },
+    admins: { type: Array, default: () => [] },
+    users: { type: Array, default: () => [] },
+    mentors: { type: Array, default: () => [] },
+    completeSchools: { type: Array, default: () => [] },
+    administrasiSekolah: { type: Array, default: () => [] },    
 });
 
-// Reactive data untuk users (dari props)
+// Reactive data
 const admins = ref(props.admins);
 const users = ref(props.users);
 const mentors = ref(props.mentors);
 
-// Total jumlah user
+// ✅ FIX: Pisahkan selectedMentor dari savedMentor
+const completeSchools = ref(
+    props.completeSchools.map(school => ({
+        ...school,
+        selectedMentor: school.mentor,
+        savedMentor: school.mentor,
+    }))
+);
+
+const administrasiSekolah = ref(props.administrasiSekolah);
+const evaluatedSchools = ref([]);
+
+// State
+const isLoading = ref(false);
+const error = ref("");
+
+// Computed
+const availableMentors = computed(() => {
+    return mentors.value.map((m) => m.name);
+});
+
 const totalUsers = computed(() => users.value.length);
 
-// Jumlah user yang sudah submit sebagian (minimal 1 tapi belum semua)
 const partialSubmitUsers = computed(() => {
     return users.value.filter((user) => {
         const submittedCount = [
@@ -64,7 +65,6 @@ const partialSubmitUsers = computed(() => {
     }).length;
 });
 
-// Jumlah user yang sudah submit semua (A5, A6, A7, A8)
 const completeSubmitUsers = computed(() => {
     return users.value.filter((user) => {
         return (
@@ -73,44 +73,9 @@ const completeSubmitUsers = computed(() => {
     }).length;
 });
 
-// 5 user terakhir untuk ditampilkan di dashboard
 const last5Users = computed(() => {
     return users.value.slice(-5);
 });
-
-// Data sekolah
-const schools = ref([
-    { id: 1, name: "SDN Example 1", mentor: null, status: "pending" },
-    { id: 2, name: "SMP Example 1", mentor: null, status: "pending" },
-    { id: 3, name: "SMA Example 1", mentor: null, status: "pending" },
-]);
-
-const evaluatedSchools = ref([
-    {
-        id: 1,
-        name: "SDN Contoh 1",
-        mentor: "Mentor A",
-        status: "completed",
-        hasFile: false,
-    },
-    {
-        id: 2,
-        name: "SMP Contoh 2",
-        mentor: "Mentor B",
-        status: "completed",
-        hasFile: false,
-    },
-    {
-        id: 3,
-        name: "SMA Contoh 3",
-        mentor: "Mentor C",
-        status: "completed",
-        hasFile: true,
-    },
-]);
-
-// Data administrasi sekolah dari backend props
-const administrasiSekolah = ref(props.administrasiSekolah);
 
 // Preview Modal state
 const showPreviewModal = ref(false);
@@ -132,11 +97,85 @@ const docTypeConfig = {
     pernyataan: { title: "Pernyataan & Persetujuan", color: "red" },
 };
 
+onMounted(() => {
+    console.log('='.repeat(60));
+    console.log('[DashboardAdmin] Component mounted');
+    console.log('[DashboardAdmin] Complete Schools:', completeSchools.value.length);
+    console.log('[DashboardAdmin] Complete schools data:', completeSchools.value);
+    console.log('='.repeat(60));
+});
+
 // ============================================================================
-// NAVIGATION FUNCTIONS - Navigasi ke halaman Register dengan role
+// NAVIGATION FUNCTIONS
 // ============================================================================
 const navigateToAddUser = (role) => {
     router.visit(route('register.role', { role: role }));
+};
+
+// ============================================================================
+// ✅ MENTOR ASSIGNMENT FUNCTIONS - TANPA API (Gunakan Inertia)
+// ============================================================================
+const assignMentor = (school) => {
+    if (!school.selectedMentor) {
+        alert('Silakan pilih mentor terlebih dahulu');
+        return;
+    }
+
+    if (school.selectedMentor === school.savedMentor) {
+        alert('Mentor yang dipilih sama dengan yang sudah tersimpan');
+        return;
+    }
+
+    if (!confirm(`Apakah Anda yakin ingin menugaskan ${school.selectedMentor} untuk ${school.nama_sekolah}?`)) {
+        return;
+    }
+
+    console.log('[DashboardAdmin] Assigning mentor:', {
+        user_id_sekolah: school.user_id,
+        mentor_name: school.selectedMentor,
+    });
+
+    router.post(route('admin.assign-mentor'), {
+        user_id_sekolah: school.user_id,
+        mentor_name: school.selectedMentor,
+    }, {
+        preserveScroll: true,
+        onSuccess: (page) => {
+            console.log('[DashboardAdmin] ✅ Mentor assigned successfully');
+            alert(`Mentor ${school.selectedMentor} berhasil ditugaskan untuk ${school.nama_sekolah}`);
+            school.savedMentor = school.selectedMentor;
+        },
+        onError: (errors) => {
+            console.error('[DashboardAdmin] ❌ Error assigning mentor:', errors);
+            alert(errors.message || 'Gagal menyimpan mentor');
+        },
+    });
+};
+
+const removeMentor = (school) => {
+    if (!confirm(`Apakah Anda yakin ingin melepaskan mentor ${school.savedMentor} dari ${school.nama_sekolah}?`)) {
+        return;
+    }
+
+    console.log('[DashboardAdmin] Removing mentor:', {
+        user_id_sekolah: school.user_id,
+    });
+
+    router.post(route('admin.finish-mentor-assignment'), {
+        user_id_sekolah: school.user_id,
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            console.log('[DashboardAdmin] ✅ Mentor removed successfully');
+            alert(`Mentor berhasil dilepaskan dari ${school.nama_sekolah}`);
+            school.savedMentor = null;
+            school.selectedMentor = null;
+        },
+        onError: (errors) => {
+            console.error('[DashboardAdmin] ❌ Error removing mentor:', errors);
+            alert(errors.message || 'Gagal melepaskan mentor');
+        },
+    });
 };
 
 // Preview Modal Functions
@@ -196,58 +235,15 @@ const deleteUser = (type, id) => {
     }
 };
 
-// Functions untuk assign mentor
-const assignMentor = (schoolId, mentorName) => {
-    const school = schools.value.find((s) => s.id === schoolId);
-    if (school) {
-        school.mentor = mentorName;
-        alert("Mentor berhasil disimpan!");
-    }
-};
-
-const downloadBukti = (schoolId) => {
-    const school = evaluatedSchools.value.find((s) => s.id === schoolId);
-    if (school && school.hasFile) {
-        alert("Downloading file bukti untuk " + school.name);
-    } else {
-        alert("Belum ada file bukti untuk sekolah ini");
-    }
-};
-
-// Available mentors list
-const availableMentors = computed(() => {
-    return mentors.value.map((m) => m.name);
-});
-
-// Check if user has any submission
 const hasAnySubmission = (user) => {
     return user.a5_status || user.a6_status || user.a7_status || user.a8_status;
 };
 
-// Navigate to administration page
 const viewUserFiles = (user) => {
     if (hasAnySubmission(user)) {
         router.visit(route("admin.user-files", { userId: user.id }));
     }
 };
-
-// Fetch users submission status
-const fetchUsersStatus = async () => {
-    try {
-        isLoading.value = true;
-        const response = await axios.get(route("users.submission-status"));
-        users.value = response.data.users;
-    } catch (err) {
-        console.error("Error fetching users status:", err);
-        error.value = "Gagal memuat data pengguna";
-    } finally {
-        isLoading.value = false;
-    }
-};
-
-onMounted(() => {
-    fetchUsersStatus();
-});
 </script>
 
 <template>
@@ -288,9 +284,7 @@ onMounted(() => {
                         >
                             <div>
                                 <p class="font-medium">{{ admin.name }}</p>
-                                <p class="text-sm text-gray-500">
-                                    {{ admin.email }}
-                                </p>
+                                <p class="text-sm text-gray-500">{{ admin.email }}</p>
                             </div>
                             <button
                                 @click="deleteUser('admin', admin.id)"
@@ -322,9 +316,7 @@ onMounted(() => {
                         >
                             <div>
                                 <p class="font-medium">{{ user.name }}</p>
-                                <p class="text-sm text-gray-500">
-                                    {{ user.email }}
-                                </p>
+                                <p class="text-sm text-gray-500">{{ user.email }}</p>
                             </div>
                             <button
                                 @click="deleteUser('user', user.id)"
@@ -356,9 +348,7 @@ onMounted(() => {
                         >
                             <div>
                                 <p class="font-medium">{{ mentor.name }}</p>
-                                <p class="text-sm text-gray-500">
-                                    {{ mentor.email }}
-                                </p>
+                                <p class="text-sm text-gray-500">{{ mentor.email }}</p>
                             </div>
                             <button
                                 @click="deleteUser('mentor', mentor.id)"
@@ -371,19 +361,43 @@ onMounted(() => {
                 </div>
             </div>
 
-            <!-- Pengajuan List Section -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-12">
-                <h2 class="text-2xl font-bold mb-6">
-                    Daftar Sekolah Pengajuan PPEPP
-                </h2>
+            <!-- ✅ PENGAJUAN LIST SECTION -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold">
+                            Daftar Sekolah Pengajuan PPEPP
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Hanya menampilkan sekolah yang sudah menyelesaikan semua tahap form (A5, A6, A7, A8)
+                        </p>
+                    </div>
+                    <div class="text-sm">
+                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full font-semibold">
+                            {{ completeSchools.length }} Sekolah Siap
+                        </span>
+                    </div>
+                </div>
 
-                <div class="overflow-x-auto">
+                <!-- Empty State -->
+                <div v-if="completeSchools.length === 0" class="text-center py-12">
+                    <div class="text-gray-400 mb-4">
+                        <XCircle class="w-16 h-16 mx-auto" />
+                    </div>
+                    <p class="text-gray-600 font-semibold">Belum ada sekolah yang menyelesaikan semua form</p>
+                    <p class="text-sm text-gray-500 mt-2">
+                        Sekolah akan muncul di sini setelah menyelesaikan form A5, A6, A7, dan A8
+                    </p>
+                </div>
+
+                <!-- ✅ TABLE WITH FIXED BEHAVIOUR -->
+                <div v-else class="overflow-x-auto">
                     <table class="w-full">
-                        <thead class="bg-gray-50 text-gray-500 text-left text-xs font-medium uppercase tracking-wider">
+                        <thead class="bg-green-500 text-white">
                             <tr>
-                                <th class="px-6 py-4 text-left">
-                                    Nama Sekolah
-                                </th>
+                                <th class="px-6 py-4 text-left">No</th>
+                                <th class="px-6 py-4 text-left">Nama Sekolah</th>
+                                <th class="px-6 py-4 text-left">NPSN</th>
                                 <th class="px-6 py-4 text-center">Mentor</th>
                                 <th class="px-6 py-4 text-center">Status</th>
                                 <th class="px-6 py-4 text-center">Aksi</th>
@@ -391,20 +405,22 @@ onMounted(() => {
                         </thead>
                         <tbody>
                             <tr
-                                v-for="school in schools"
+                                v-for="(school, index) in completeSchools"
                                 :key="school.id"
                                 class="border-b hover:bg-gray-50 transition"
                             >
-                                <td class="px-6 py-4">{{ school.name }}</td>
+                                <td class="px-6 py-4">{{ index + 1 }}</td>
+                                <td class="px-6 py-4 font-medium">{{ school.nama_sekolah }}</td>
+                                <td class="px-6 py-4 text-gray-600">{{ school.npsn }}</td>
+                                
+                                <!-- ✅ KOLOM MENTOR -->
                                 <td class="px-6 py-4 text-center">
                                     <select
-                                        v-model="school.mentor"
+                                        v-model="school.selectedMentor"
                                         class="border rounded px-3 py-2 w-40 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                        :disabled="school.mentor !== null"
+                                        :disabled="school.savedMentor !== null"
                                     >
-                                        <option :value="null">
-                                            Pilih Mentor
-                                        </option>
+                                        <option :value="null">Pilih Mentor</option>
                                         <option
                                             v-for="mentor in availableMentors"
                                             :key="mentor"
@@ -413,27 +429,41 @@ onMounted(() => {
                                             {{ mentor }}
                                         </option>
                                     </select>
+                                    <p v-if="school.savedMentor" class="text-xs text-gray-500 mt-1">
+                                        Tersimpan: {{ school.savedMentor }}
+                                    </p>
                                 </td>
+                                
+                                <!-- ✅ KOLOM STATUS -->
                                 <td class="px-6 py-4 text-center">
                                     <span
-                                        class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800"
+                                        class="px-3 py-1 text-sm rounded-full"
+                                        :class="school.savedMentor ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'"
                                     >
-                                        Belum Dievaluasi
+                                        {{ school.savedMentor ? 'Sudah Ada Mentor' : 'Belum Dievaluasi' }}
                                     </span>
                                 </td>
+                                
+                                <!-- ✅ KOLOM AKSI -->
                                 <td class="px-6 py-4 text-center">
-                                    <button
-                                        @click="
-                                            assignMentor(
-                                                school.id,
-                                                school.mentor
-                                            )
-                                        "
-                                        :disabled="!school.mentor"
-                                        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
-                                    >
-                                        Simpan Mentor
-                                    </button>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button
+                                            v-if="!school.savedMentor"
+                                            @click="assignMentor(school)"
+                                            :disabled="!school.selectedMentor"
+                                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                                        >
+                                            Simpan Mentor
+                                        </button>
+                                        
+                                        <button
+                                            v-else
+                                            @click="removeMentor(school)"
+                                            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                                        >
+                                            Lepas Mentor
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -441,70 +471,52 @@ onMounted(() => {
                 </div>
             </div>
 
-            <!-- Daftar Sekolah Sudah Evaluasi -->
+            <!-- ✅ DAFTAR SEKOLAH SUDAH EVALUASI -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-                <h2 class="text-2xl font-bold mb-6">
-                    Daftar Sekolah Sudah Evaluasi PPEPP
-                </h2>
+                <h2 class="text-2xl font-bold mb-6">Daftar Sekolah Sudah Evaluasi</h2>
+                
+                <!-- Empty State -->
+                <div v-if="evaluatedSchools.length === 0" class="text-center py-12">
+                    <div class="text-gray-400 mb-4">
+                        <CheckCircle class="w-16 h-16 mx-auto" />
+                    </div>
+                    <p class="text-gray-600 font-semibold">Belum ada sekolah yang sudah dievaluasi</p>
+                    <p class="text-sm text-gray-500 mt-2">
+                        Sekolah akan muncul di sini setelah proses evaluasi selesai
+                    </p>
+                </div>
 
-                <div class="overflow-x-auto">
+                <div v-else class="overflow-x-auto">
                     <table class="w-full">
-                        <thead class="bg-gray-50 text-gray-500 text-left text-xs font-medium uppercase tracking-wider">
+                        <thead class="bg-blue-500 text-white">
                             <tr>
-                                <th class="px-6 py-4 text-left">
-                                    Nama Sekolah
-                                </th>
+                                <th class="px-6 py-4 text-left">No</th>
+                                <th class="px-6 py-4 text-left">Nama Sekolah</th>
+                                <th class="px-6 py-4 text-left">NPSN</th>
                                 <th class="px-6 py-4 text-center">Mentor</th>
-                                <th class="px-6 py-4 text-center">
-                                    File Bukti
-                                </th>
-                                <th class="px-6 py-4 text-center">Status</th>
+                                <th class="px-6 py-4 text-center">Status Evaluasi</th>
+                                <th class="px-6 py-4 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr
-                                v-for="school in evaluatedSchools"
+                                v-for="(school, index) in evaluatedSchools"
                                 :key="school.id"
                                 class="border-b hover:bg-gray-50 transition"
                             >
-                                <td class="px-6 py-4">{{ school.name }}</td>
+                                <td class="px-6 py-4">{{ index + 1 }}</td>
+                                <td class="px-6 py-4 font-medium">{{ school.nama_sekolah }}</td>
+                                <td class="px-6 py-4 text-gray-600">{{ school.npsn }}</td>
+                                <td class="px-6 py-4 text-center">{{ school.mentor }}</td>
                                 <td class="px-6 py-4 text-center">
-                                    {{ school.mentor }}
+                                    <span class="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800">
+                                        Selesai
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <button
-                                        @click="downloadBukti(school.id)"
-                                        :class="
-                                            school.hasFile
-                                                ? 'bg-green-500 hover:bg-green-600'
-                                                : 'bg-gray-400 cursor-not-allowed'
-                                        "
-                                        class="text-white px-4 py-2 rounded transition"
-                                        :disabled="!school.hasFile"
-                                    >
-                                        Download Bukti
+                                    <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+                                        Lihat Hasil
                                     </button>
-                                    <span
-                                        class="block text-xs mt-1"
-                                        :class="
-                                            school.hasFile
-                                                ? 'text-green-600'
-                                                : 'text-gray-500'
-                                        "
-                                    >
-                                        {{
-                                            school.hasFile
-                                                ? "File tersedia"
-                                                : "Belum ada file bukti"
-                                        }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span
-                                        class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800"
-                                    >
-                                        Sudah Dievaluasi
-                                    </span>
                                 </td>
                             </tr>
                         </tbody>
@@ -512,8 +524,89 @@ onMounted(() => {
                 </div>
             </div>
 
-            <!-- Pemantauan Administrasi Sekolah Section -->
-            
+            <!-- ✅ PEMANTAUAN ADMINISTRASI SEKOLAH -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-6">Pemantauan Administrasi Sekolah</h2>
+                
+                <div v-if="administrasiSekolah.length === 0" class="text-center py-12">
+                    <p class="text-gray-600">Belum ada data administrasi sekolah</p>
+                </div>
+
+                <div v-else class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-purple-500 text-white">
+                            <tr>
+                                <th class="px-4 py-3 text-left">No</th>
+                                <th class="px-4 py-3 text-left">Nama Sekolah</th>
+                                <th class="px-4 py-3 text-left">NPSN</th>
+                                <th class="px-4 py-3 text-center">Rencana Evaluasi</th>
+                                <th class="px-4 py-3 text-center">Self Assessment</th>
+                                <th class="px-4 py-3 text-center">Kebutuhan Pendampingan</th>
+                                <th class="px-4 py-3 text-center">Pernyataan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="(adm, index) in administrasiSekolah"
+                                :key="adm.id"
+                                class="border-b hover:bg-gray-50 transition"
+                            >
+                                <td class="px-4 py-3">{{ index + 1 }}</td>
+                                <td class="px-4 py-3 font-medium">{{ adm.nama_sekolah }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ adm.npsn }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <button
+                                        @click="openPreviewModal(adm.user_id, 'rencana')"
+                                        class="inline-flex items-center gap-1"
+                                        :class="adm.rencana_evaluasi ? 'text-green-600 hover:text-green-800' : 'text-gray-400 cursor-not-allowed'"
+                                        :disabled="!adm.rencana_evaluasi"
+                                    >
+                                        <Eye v-if="adm.rencana_evaluasi" :size="18" />
+                                        <EyeOff v-else :size="18" />
+                                        <span class="text-sm">{{ adm.rencana_evaluasi ? 'Lihat' : 'Belum' }}</span>
+                                    </button>
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <button
+                                        @click="openPreviewModal(adm.user_id, 'self_assessment')"
+                                        class="inline-flex items-center gap-1"
+                                        :class="adm.self_assessment ? 'text-green-600 hover:text-green-800' : 'text-gray-400 cursor-not-allowed'"
+                                        :disabled="!adm.self_assessment"
+                                    >
+                                        <Eye v-if="adm.self_assessment" :size="18" />
+                                        <EyeOff v-else :size="18" />
+                                        <span class="text-sm">{{ adm.self_assessment ? 'Lihat' : 'Belum' }}</span>
+                                    </button>
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <button
+                                        @click="openPreviewModal(adm.user_id, 'kebutuhan_pendampingan')"
+                                        class="inline-flex items-center gap-1"
+                                        :class="adm.kebutuhan_pendampingan ? 'text-green-600 hover:text-green-800' : 'text-gray-400 cursor-not-allowed'"
+                                        :disabled="!adm.kebutuhan_pendampingan"
+                                    >
+                                        <Eye v-if="adm.kebutuhan_pendampingan" :size="18" />
+                                        <EyeOff v-else :size="18" />
+                                        <span class="text-sm">{{ adm.kebutuhan_pendampingan ? 'Lihat' : 'Belum' }}</span>
+                                    </button>
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <button
+                                        @click="openPreviewModal(adm.user_id, 'pernyataan')"
+                                        class="inline-flex items-center gap-1"
+                                        :class="adm.pernyataan ? 'text-green-600 hover:text-green-800' : 'text-gray-400 cursor-not-allowed'"
+                                        :disabled="!adm.pernyataan"
+                                    >
+                                        <Eye v-if="adm.pernyataan" :size="18" />
+                                        <EyeOff v-else :size="18" />
+                                        <span class="text-sm">{{ adm.pernyataan ? 'Lihat' : 'Belum' }}</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             <!-- Status Pengisian Form Section -->
             <div class="py-12">
@@ -662,79 +755,87 @@ onMounted(() => {
             </div>
         </main>
 
-        <!-- Preview Modal -->
-        <Teleport to="body">
-            <Transition name="modal">
-                <div
-                    v-if="showPreviewModal"
-                    class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4"
-                    @click.self="closePreviewModal"
-                >
-                    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <div class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
-                            <div>
-                                <h2 class="text-xl font-bold text-gray-900">{{ previewDocTitle }}</h2>
-                                <p class="text-sm text-gray-600">{{ previewSchoolName }}</p>
-                            </div>
-                            <button @click="closePreviewModal" class="text-gray-400 hover:text-gray-600 transition">
-                                <X :size="24" />
-                            </button>
+        <!-- ✅ PREVIEW MODAL -->
+        <Transition name="modal">
+            <div
+                v-if="showPreviewModal"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                @click.self="closePreviewModal"
+            >
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+                    <!-- Modal Header -->
+                    <div class="flex items-center justify-between p-4 border-b bg-gray-50">
+                        <div>
+                            <h3 class="text-lg font-bold">{{ previewDocTitle }}</h3>
+                            <p v-if="previewSchoolName" class="text-sm text-gray-600">
+                                {{ previewSchoolName }}
+                            </p>
+                        </div>
+                        <button
+                            @click="closePreviewModal"
+                            class="text-gray-500 hover:text-gray-700 transition"
+                        >
+                            <X :size="24" />
+                        </button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="p-6 overflow-y-auto max-h-[70vh]">
+                        <!-- Loading State -->
+                        <div v-if="previewLoading" class="flex items-center justify-center py-12">
+                            <Loader class="animate-spin text-green-500" :size="40" />
+                            <span class="ml-3 text-gray-600">Memuat data...</span>
                         </div>
 
-                        <div class="p-6">
-                            <div v-if="previewLoading" class="flex flex-col items-center justify-center py-12">
-                                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-                                <p class="mt-4 text-gray-600">Memuat dokumen...</p>
-                            </div>
+                        <!-- Error State -->
+                        <div v-else-if="previewError" class="text-center py-12">
+                            <XCircle class="mx-auto text-red-500 mb-4" :size="48" />
+                            <p class="text-red-600">{{ previewError }}</p>
+                        </div>
 
-                            <div v-else-if="previewError" class="flex flex-col items-center justify-center py-12">
-                                <div class="text-red-500 mb-4"><X :size="48" /></div>
-                                <p class="text-gray-900 font-semibold">{{ previewError }}</p>
-                                <button @click="closePreviewModal" class="mt-4 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
-                                    Tutup
-                                </button>
-                            </div>
+                        <!-- Empty State -->
+                        <div v-else-if="!previewData || previewData.length === 0" class="text-center py-12">
+                            <EyeOff class="mx-auto text-gray-400 mb-4" :size="48" />
+                            <p class="text-gray-600">Tidak ada data untuk ditampilkan</p>
+                        </div>
 
-                            <div v-else-if="Array.isArray(previewData) && previewData.length > 0" class="space-y-4">
-                                <div v-for="(doc, index) in previewData" :key="index" class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-green-300 hover:bg-green-50 transition">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex-1">
-                                            <h4 class="font-semibold text-gray-900">{{ doc.title || doc.indikator || `Dokumen ${index + 1}` }}</h4>
-                                            <p class="text-sm text-gray-600 mt-1">{{ doc.description || "File dokumen" }}</p>
-                                            <p class="text-xs text-gray-500 mt-2">
-                                                Diupload: {{ doc.created_at ? new Date(doc.created_at).toLocaleDateString("id-ID") : "N/A" }}
-                                            </p>
-                                        </div>
-                                        <a
-                                            v-if="doc.path_file"
-                                            :href="`/administrasi-sekolah/${previewUserId}/file?path=${encodeURIComponent(doc.path_file)}`"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-sm ml-4 flex-shrink-0"
-                                        >
-                                            <Eye :size="16" />
-                                            Buka
-                                        </a>
+                        <!-- Content -->
+                        <div v-else class="space-y-4">
+                            <div
+                                v-for="(doc, index) in previewData"
+                                :key="index"
+                                class="border rounded-lg p-4"
+                            >
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h4 class="font-semibold">{{ doc.title || `Dokumen ${index + 1}` }}</h4>
+                                        <p class="text-sm text-gray-600">{{ doc.description }}</p>
                                     </div>
+                                    <a
+                                        v-if="doc.file_path"
+                                        :href="doc.file_path"
+                                        target="_blank"
+                                        class="text-blue-500 hover:text-blue-700"
+                                    >
+                                        <Eye :size="20" />
+                                    </a>
                                 </div>
                             </div>
-
-                            <div v-else class="flex flex-col items-center justify-center py-12">
-                                <div class="text-gray-400 mb-4"><X :size="48" /></div>
-                                <p class="text-gray-900 font-semibold">Tidak ada dokumen</p>
-                                <p class="text-gray-600 text-sm mt-1">Belum ada file yang diunggah untuk bagian ini.</p>
-                            </div>
-                        </div>
-
-                        <div class="sticky bottom-0 bg-gray-50 border-t px-6 py-4 flex justify-end">
-                            <button @click="closePreviewModal" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium">
-                                Tutup
-                            </button>
                         </div>
                     </div>
+
+                    <!-- Modal Footer -->
+                    <div class="flex justify-end p-4 border-t bg-gray-50">
+                        <button
+                            @click="closePreviewModal"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                        >
+                            Tutup
+                        </button>
+                    </div>
                 </div>
-            </Transition>
-        </Teleport>
+            </div>
+        </Transition>
     </MainLayout>
 </template>
 

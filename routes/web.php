@@ -1,25 +1,27 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AdministrationController;
-use App\Http\Controllers\AdministrasiAdminController;
-use App\Http\Controllers\FileAdministrasiController;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 use App\Models\File;
+use Inertia\Inertia;
 use App\Models\Rencana;
 use App\Models\Pernyataan;
+use App\Models\AssignMentor;
 use App\Models\Pendampingan;
 use Illuminate\Support\Facades\DB;
 use App\Models\BuktiSelfAssessment;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FormAdminController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\FileEvidenceController;
+use App\Http\Controllers\AdministrationController;
 use App\Http\Controllers\FormSubmissionController;
-use App\Http\Controllers\AdministrasiSekolahController;
+use App\Http\Controllers\FileAdministrasiController;
+use App\Http\Controllers\AdministrasiAdminController;
 use App\Http\Controllers\AdministrasiMentorController;
+use App\Http\Controllers\AdministrasiSekolahController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 
 // CSRF Token Refresh Route (untuk SPA)
@@ -52,23 +54,19 @@ Route::get('/informasi', function () {
 Route::get('/dashboard', function () {
     $user = Auth::user();
 
-    // Redirect mentor ke DashboardMentor
+    // MENTOR DASHBOARD
     if ($user->role === 'mentor') {
-        // Get assigned school
-        $assignedSchool = DB::table('assign_mentor')
+        // ✅ Gunakan Model untuk mendapatkan assigned school
+        $assignedSchool = AssignMentor::with(['sekolah', 'administrasiSekolah'])
             ->where('user_id_mentor', $user->id)
-            ->whereNull('assign_time_finished')
+            ->active()
             ->first();
         
         $schoolProfile = null;
         if ($assignedSchool) {
-            $schoolProfile = \App\Models\AdministrasiSekolah::where('user_id', $assignedSchool->user_id_sekolah)
-                ->first();
-            
-            // Add school user info
-            $schoolUser = \App\Models\User::find($assignedSchool->user_id_sekolah);
-            $assignedSchool->school_name = $schoolUser->name ?? null;
-            $assignedSchool->school_email = $schoolUser->email ?? null;
+            $schoolProfile = $assignedSchool->administrasiSekolah;
+            $assignedSchool->school_name = $assignedSchool->sekolah->name ?? null;
+            $assignedSchool->school_email = $assignedSchool->sekolah->email ?? null;
         }
         
         return Inertia::render('Features/Mentor/DashboardMentor', [
@@ -78,9 +76,91 @@ Route::get('/dashboard', function () {
         ]);
     }
 
-    // Redirect berdasarkan role
+    // ADMIN DASHBOARD
     if ($user->role === 'admin') {
+        Log::info('========== [DashboardAdmin] LOADING DASHBOARD ==========');
+
         $users = \App\Models\User::all()->groupBy('role');
+
+        $admins = $users->get('admin', collect())->values();
+        $mentors = $users->get('mentor', collect())->values();
+
+        Log::info('[DashboardAdmin] Admins: ' . $admins->count());
+        Log::info('[DashboardAdmin] Mentors: ' . $mentors->count());
+
+        // ✅ Get all users dengan status submission untuk table "Status Pengisian Form"
+        $usersWithStatus = \App\Models\User::where('role', 'user')
+            ->get()
+            ->map(function ($user) {
+                $a5 = \App\Models\Rencana::where('user_id', $user->id)->exists();
+                $a6 = \App\Models\BuktiSelfAssessment::where('user_id', $user->id)->exists();
+                $a7_pendampingan = \App\Models\Pendampingan::where('user_id', $user->id)->exists();
+                $a7_permintaan = \App\Models\Permintaan::where('user_id', $user->id)->exists();
+                $a7 = $a7_pendampingan || $a7_permintaan;
+                $a8 = \App\Models\Pernyataan::where('user_id', $user->id)->exists();
+
+                Log::info("[DashboardAdmin] User: {$user->name} (ID: {$user->id})", [
+                    'A5' => $a5 ? 'YES' : 'NO',
+                    'A6' => $a6 ? 'YES' : 'NO',
+                    'A7_pendampingan' => $a7_pendampingan ? 'YES' : 'NO',
+                    'A7_permintaan' => $a7_permintaan ? 'YES' : 'NO',
+                    'A7_combined' => $a7 ? 'YES' : 'NO',
+                    'A8' => $a8 ? 'YES' : 'NO',
+                ]);
+
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'a5_status' => $a5,
+                    'a6_status' => $a6,
+                    'a7_status' => $a7,
+                    'a8_status' => $a8,
+                ];
+            });
+
+        Log::info('[DashboardAdmin] Total users with status: ' . $usersWithStatus->count());
+
+        // ✅ Filter users yang sudah complete semua form (A5, A6, A7, A8)
+        $allUsers = \App\Models\User::where('role', 'user')->get();
+        Log::info('[DashboardAdmin] Processing ' . $allUsers->count() . ' users for complete check');
+
+        $completeSchools = collect();
+
+        foreach ($allUsers as $user) {
+            $a5_status = \App\Models\Rencana::where('user_id', $user->id)->exists();
+            $a6_status = \App\Models\BuktiSelfAssessment::where('user_id', $user->id)->exists();
+            $a7_status = \App\Models\Pendampingan::where('user_id', $user->id)->exists() || 
+                         \App\Models\Permintaan::where('user_id', $user->id)->exists();
+            $a8_status = \App\Models\Pernyataan::where('user_id', $user->id)->exists();
+
+            if ($a5_status && $a6_status && $a7_status && $a8_status) {
+                $sekolah = \App\Models\AdministrasiSekolah::where('user_id', $user->id)->first();
+                
+                // ✅ Gunakan Model untuk cek mentor
+                $assignment = AssignMentor::with('mentor')
+                    ->where('user_id_sekolah', $user->id)
+                    ->active()
+                    ->first();
+
+                $completeSchools->push([
+                    'id' => $user->id,
+                    'user_id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'sekolah_id' => $sekolah?->id,
+                    'nama_sekolah' => $sekolah?->nama_sekolah ?? 'N/A',
+                    'npsn' => $sekolah?->npsn ?? 'N/A',
+                    'mentor' => $assignment?->mentor->name, // ✅ Dari relationship
+                    'mentor_id' => $assignment?->user_id_mentor,
+                    'assignment_id' => $assignment?->id,
+                    'assign_time_start' => $assignment?->assign_time_start?->format('Y-m-d H:i:s'),
+                    'status' => 'complete',
+                ]);
+            }
+        }
+
+        Log::info('[DashboardAdmin] ✅ COMPLETE SCHOOLS COUNT: ' . $completeSchools->count());
 
         // Fetch administrasi sekolah data with user relationship
         $administrasiSekolah = \App\Models\AdministrasiSekolah::with('user')
@@ -92,21 +172,24 @@ Route::get('/dashboard', function () {
                     'name' => $adm->user->name ?? 'Unknown',
                     'npsn' => $adm->npsn ?? '-',
                     'nama_sekolah' => $adm->nama_sekolah ?? '-',
-                    'rencana_evaluasi' => $adm->rencana_evaluasi ?? '-',
-                    'self_assessment' => $adm->self_assessment ?? '-',
-                    'kebutuhan_pendampingan' => $adm->kebutuhan_pendampingan ?? '-',
-                    'pernyataan' => $adm->pernyataan ?? '-',
+                    'rencana_evaluasi' => \App\Models\Rencana::where('user_id', $adm->user_id)->exists(),
+                    'self_assessment' => \App\Models\BuktiSelfAssessment::where('user_id', $adm->user_id)->exists(),
+                    'kebutuhan_pendampingan' => \App\Models\Pendampingan::where('user_id', $adm->user_id)->exists() || 
+                                                \App\Models\Permintaan::where('user_id', $adm->user_id)->exists(),
+                    'pernyataan' => \App\Models\Pernyataan::where('user_id', $adm->user_id)->exists(),
                 ];
             });
 
         return Inertia::render('Profile/DashboardAdmin', [
-            'admins' => $users->get('admin', collect())->values(),
-            'users' => $users->get('user', collect())->values(),
-            'mentors' => $users->get('mentor', collect())->values(),
+            'admins' => $admins,
+            'users' => $usersWithStatus,
+            'mentors' => $mentors,
+            'completeSchools' => $completeSchools->values(),
             'administrasiSekolah' => $administrasiSekolah,
         ]);
     }
 
+    // USER DASHBOARD
     return Inertia::render('Profile/DashboardUser', [
         'user' => $user,
     ]);
@@ -812,6 +895,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/register/{role}', [RegisteredUserController::class, 'storeByAdmin'])
         ->name('register.store-by-admin')
         ->where('role', 'admin|user|mentor');
+
+    // Route untuk assign mentor to school
+    Route::post('/admin/assign-mentor', [ProfileController::class, 'assignMentor'])
+        ->name('admin.assign-mentor');
+    
+    Route::post('/admin/finish-mentor-assignment', [ProfileController::class, 'finishMentorAssignment'])
+        ->name('admin.finish-mentor-assignment');
 });
 
 // ❌ HAPUS bagian ini dari guest middleware:
