@@ -194,27 +194,14 @@ let navigationItems = [
     //     description: 'Hasil Evaluasi PPEPP',
     //     color: 'text-green-400'
     // },
-    {
-        name: 'Admin Test',
-        route: 'admin.test',
-        icon: FileText,
-        description: 'File Preview PDF',
-        color: 'text-green-400'
-    },
-    {
-        name: 'Contoh Komponen Card',
-        route: 'component-card',
-        icon: Info,
-        description: 'Contoh Pemakaian Komponen',
-        color: 'text-green-400'
-    },
-    {
-        name: 'Contoh Komponen Header',
-        route: 'component-header',
-        icon: Info,
-        description: 'Contoh Pemakaian Komponen',
-        color: 'text-green-400'
-    },
+    // {
+    //     name: 'Admin Test',
+    //     route: 'admin.test',
+    //     icon: FileText,
+    //     description: 'File Preview PDF',
+    //     color: 'text-green-400'
+    // },
+    
     // {
     //     name: 'Evaluasi',
     //     route: 'evaluasi.index',
